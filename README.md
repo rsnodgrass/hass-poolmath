@@ -30,7 +30,7 @@ Under Settings of the Pool Math iOS or Android application, find the Sharing sec
 
 ```yaml
 sensor:
-  - type: poolmath
+  - platform: poolmath
     url: https://troublefreepool.com/mypool/6WPG8yL
 ```
 
