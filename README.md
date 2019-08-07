@@ -22,6 +22,10 @@ Creates sensors for pools being managed with Trouble Free Pools's [Pool Math](ht
 
 Note: this **requires a PoolMath Premium subscription** for cloud access to your pools data.
 
+### Installation
+
+This can be easily installed with the [Home Assistant Community Store (HACS)](https://github.com/custom-components/hacs) using the repository: rsnodgrass/hass-poolmath
+
 ### Configuration
 
 Under Settings of the Pool Math iOS or Android application, find the Sharing section.  Turn this on, which allows anyone with access to the unique URL to be able to view data about your pool. Your pool's URL will be displayed, use that in the YAML configuration for the poolmath sensor.
@@ -33,10 +37,6 @@ sensor:
 ```
 
 ### Example Lovelace UI
-
-## Automatic Updates (optional)
-
-This supports [HACS](https://github.com/custom-components/hacs) with the repository: rsnodgrass/hass-poolmath
 
 ## See Also
 
