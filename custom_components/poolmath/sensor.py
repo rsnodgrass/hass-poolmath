@@ -15,7 +15,7 @@ import homeassistant.helpers.config_validation as cv
 
 from bs4 import BeautifulSoup
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 DEFAULT_NAME = 'Pool Math'
 
@@ -70,9 +70,9 @@ class PoolMathClient():
             pool_name = raw_data.select('body.h1').string
             if pool_name != None:
                 self._name += " " + pool_name
-                log.info(f"Loaded Pool Math data for '{pool_name}'")
+                LOG.info(f"Loaded Pool Math data for '{pool_name}'")
 
-        log.info(f"Created Pool Math sensor: {self._name}")
+        LOG.info(f"Created Pool Math sensor: {self._name}")
         self._sensors = {}
         self._update_sensors()
 
@@ -81,7 +81,7 @@ class PoolMathClient():
     def update():
         self._rest.update()
         if self._rest.data is None:
-            log.warning(f"Failed to update Pool Math data for '{self._name}' from {self._url}")
+            LOG.warning(f"Failed to update Pool Math data for '{self._name}' from {self._url}")
             return
 
         self._raw_data = BeautifulSoup(self._rest.data, 'html.parser')
@@ -94,7 +94,7 @@ class PoolMathClient():
 
         config = POOL_MATH_SENSOR_SETTINGS[sensor_type]
         if config is None:
-            log.info(f"Unknown Pool Math sensor '{sensor_type}' discovered at {self._url}")
+            LOG.info(f"Unknown Pool Math sensor '{sensor_type}' discovered at {self._url}")
             return None
 
         name = self._name + " " + config['name']
@@ -108,15 +108,15 @@ class PoolMathClient():
 
     def _update_sensors():
         most_recent_test_log = raw_data.find('div', class_='testLogCard')
-        log.info(f"Most recent test log entry: {most_recent_test_log}")
+        LOG.info(f"Most recent test log entry: {most_recent_test_log}")
 
         if most_recent_test_log == None:
-            log.info(f"Couldn't find any test logs at {url}")
+            LOG.info(f"Couldn't find any test logs at {url}")
             raise PlatformNotReady
 
         # capture the time the most recent Pool Math data was collected
         self._timestamp = most_recent_test_log.find('time', class_='timestamp timereal')
-        log.info(f"Timestamp for most recent test log: {self._timestamp}")
+        LOG.info(f"Timestamp for most recent test log: {self._timestamp}")
 
         # iterate through all the data chiclets and dynamically create/update sensors
         data_entries = most_recent_test_log.find(class_='chiclet')
@@ -130,7 +130,7 @@ class PoolMathClient():
                 else:
                     sensor_type = div['class']
             
-            log.warn(f"Found sensor type '{sensor_type}' = {state}")
+            LOG.warn(f"Found sensor type '{sensor_type}' = {state}")
             sensor = get_sensor(sensor_type)
             if sensor:
                 sensor.inject_state(state)
