@@ -2,6 +2,7 @@ import logging
 
 import voluptuous as vol
 from requests.auth import HTTPBasicAuth, HTTPDigestAuth
+from bs4 import BeautifulSoup
 
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.components.rest.sensor import RestData
@@ -12,8 +13,6 @@ from homeassistant.const import (
 from homeassistant.helpers.entity import Entity
 from homeassistant.exceptions import PlatformNotReady
 import homeassistant.helpers.config_validation as cv
-
-from bs4 import BeautifulSoup
 
 LOG = logging.getLogger(__name__)
 
@@ -69,7 +68,7 @@ class PoolMathClient():
         if self._name == None:
             self._name = DEFAULT_NAME
 
-            pool_name = raw_data.select('body.h1').string
+            pool_name = self._raw_data.select('body.h1').string
             if pool_name != None:
                 self._name += " " + pool_name
                 LOG.info(f"Loaded Pool Math data for '{pool_name}'")
@@ -109,7 +108,7 @@ class PoolMathClient():
         return sensor
 
     def _update_sensors(self):
-        most_recent_test_log = raw_data.find('div', class_='testLogCard')
+        most_recent_test_log = self._raw_data.find('div', class_='testLogCard')
         LOG.info(f"Most recent test log entry: {most_recent_test_log}")
 
         if most_recent_test_log == None:
@@ -133,7 +132,7 @@ class PoolMathClient():
                     sensor_type = div['class']
             
             LOG.warn(f"Found sensor type '{sensor_type}' = {state}")
-            sensor = get_sensor(sensor_type)
+            sensor = self.get_sensor(sensor_type)
             if sensor:
                 sensor.inject_state(state)
 
