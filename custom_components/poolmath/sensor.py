@@ -7,7 +7,6 @@ from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.components.rest.sensor import RestData
 from homeassistant.const import (
     CONF_NAME,
-    CONF_RESOURCE,
     CONF_URL
 )
 from homeassistant.helpers.entity import Entity
@@ -22,7 +21,7 @@ DEFAULT_NAME = 'Pool Math'
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
-        vol.Required(CONF_RESOURCE): cv.string
+        vol.Required(CONF_URL): cv.string
     }
 )
 
