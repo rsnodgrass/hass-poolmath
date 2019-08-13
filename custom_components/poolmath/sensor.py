@@ -7,6 +7,7 @@ from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.components.rest.sensor import RestData
 from homeassistant.const import (
     CONF_NAME,
+    CONF_RESOURCE,
     CONF_URL
 )
 from homeassistant.helpers.entity import Entity
@@ -48,11 +49,13 @@ TFP_RECOMMENDED_TARGET_LEVELS = {
 
 def setup_platform(hass, config, add_entities, discovery_info=None):
     """Set up the Web scrape sensor."""
-    client = PoolMathClient(config)
-
+    client = PoolMathClient(config, add_entities)
+    
 class PoolMathClient():
-    def __init__(self, config):
+    def __init__(self, config, add_entities):
         verify_ssl = True
+
+        self._add_entities_callback = add_entities
 
         self._url = config.get(CONF_URL)
         self._rest = RestData('GET', self._url, '', '', '', verify_ssl)
@@ -78,7 +81,7 @@ class PoolMathClient():
 
     # FIXME: don't update more frequently than a configured interval
 
-    def update():
+    def update(self):
         self._rest.update()
         if self._rest.data is None:
             LOG.warning(f"Failed to update Pool Math data for '{self._name}' from {self._url}")
@@ -98,15 +101,15 @@ class PoolMathClient():
             return None
 
         name = self._name + " " + config['name']
-        sensor = PoolMathSensor(self, name, config['units'])
+        sensor = UpdatableSensor(self, name, config['units'])
         self._sensors[sensor_type] = sensor
 
         # register sensor with Home Assistant
         # FIXME: is there a way to specify the update interval (or disable it!?)
-        add_entities([sensor], True)
+        self._add_entities_callback([sensor], True)
         return sensor
 
-    def _update_sensors():
+    def _update_sensors(self):
         most_recent_test_log = raw_data.find('div', class_='testLogCard')
         LOG.info(f"Most recent test log entry: {most_recent_test_log}")
 
