@@ -63,12 +63,13 @@ class PoolMathClient():
             raise PlatformNotReady
 
         self._raw_data = BeautifulSoup(self._rest.data, 'html.parser')
+        LOG.info(f"Raw data from {self._url}: {self._raw_data}")
 
         self._name = config.get(CONF_NAME)
         if self._name == None:
             self._name = DEFAULT_NAME
 
-            pool_name = self._raw_data.select('body.h1').string
+            pool_name = self._raw_data.select('h1')[0].string
             if pool_name != None:
                 self._name += " " + pool_name
                 LOG.info(f"Loaded Pool Math data for '{pool_name}'")
