@@ -126,7 +126,10 @@ class PoolMathClient():
             sensor_type = 'unknown'
             state = 'unknown'
 
-            for div in entry.find_all('div'):
+            # FIXME: there must be a better way to traverse the sub-trees than 
+            # creating a new parsed soup.
+            soup = BeautifulSoup(entry, 'html.parser')
+            for div in soup.find_all('div'):
                 if div['class'] == 'bold':
                     state = div.string
                 else:
