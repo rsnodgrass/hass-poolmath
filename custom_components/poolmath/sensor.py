@@ -125,7 +125,10 @@ class PoolMathClient():
         for entry in data_entries:
             sensor_type = 'unknown'
             state = 'unknown'
-            
+
+            LOG.warning(entry)
+            LOG.warning(type(entry))
+
             for div in entry.children:
                 LOG.warning(div)
                 LOG.warning(type(div))
