@@ -126,10 +126,8 @@ class PoolMathClient():
             sensor_type = 'unknown'
             state = 'unknown'
 
-            LOG.warning(entry)
-            LOG.warning(type(entry))
-
-            for div in entry.children:
+            soup = BeautifulSoup(entry.contents, 'html.parser')
+            for div in soup.find_all('div'):
                 LOG.warning(div)
                 LOG.warning(type(div))
                 if div['class'] == 'bold':
