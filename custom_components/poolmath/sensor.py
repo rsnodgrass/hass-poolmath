@@ -90,11 +90,11 @@ class PoolMathClient():
         self._update_sensors()
 
     def get_sensor(self, sensor_type):
-        sensor = self._sensors[sensor_type]
+        sensor = self._sensors.get(sensor_type, None)
         if sensor:
             return sensor
 
-        config = POOL_MATH_SENSOR_SETTINGS[sensor_type]
+        config = POOL_MATH_SENSOR_SETTINGS.get(sensor_type, None)
         if config is None:
             LOG.info(f"Unknown Pool Math sensor '{sensor_type}' discovered at {self._url}")
             return None
@@ -109,12 +109,13 @@ class PoolMathClient():
         return sensor
 
     def _update_sensors(self):
+        # find only the most recent test log card, we can ignore old data
         most_recent_test_log = self._raw_data.find('div', class_='testLogCard')
-        LOG.info(f"Most recent test log entry: {most_recent_test_log}")
-
         if most_recent_test_log == None:
-            LOG.info(f"Couldn't find any test logs at {url}")
+            LOG.info(f"Couldn't find any test logs at {self._url}")
             raise PlatformNotReady
+
+        LOG.info(f"Most recent test log entry: {most_recent_test_log}")
 
         # capture the time the most recent Pool Math data was collected
         self._timestamp = most_recent_test_log.find('time', class_='timestamp timereal')
