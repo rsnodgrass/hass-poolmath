@@ -129,9 +129,11 @@ class PoolMathClient():
             sensor_type = 'unknown'
             state = 'unknown'
             
+            LOG.warning(f"type = {type(entry)}")
+
             # FIXME: there must be a better way to traverse the sub-trees than 
             # creating a new parsed soup.
-            soup = BeautifulSoup(f"{entry}", 'html.parser')
+            soup = BeautifulSoup(f" {entry}", 'html.parser')
             for div in soup.find('div'):
                 LOG.warning(f"Div {div} ({div['class']}) {div.string}")
                 if div['class'] == 'bold':
