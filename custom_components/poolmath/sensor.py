@@ -112,31 +112,28 @@ class PoolMathClient():
         # find only the most recent test log card, we can ignore old data
         most_recent_test_log = self._raw_data.find('div', class_='testLogCard')
         if most_recent_test_log == None:
-            LOG.info(f"Couldn't find any test logs at {self._url}")
+            LOG.warn(f"Couldn't find any test logs at {self._url}")
             raise PlatformNotReady
-
-        LOG.info(f"Most recent test log entry: {most_recent_test_log}")
 
         # capture the time the most recent Pool Math data was collected
         self._timestamp = most_recent_test_log.find('time', class_='timestamp timereal')
-        LOG.info(f"Timestamp for most recent test log: {self._timestamp}")
-
+        
         # iterate through all the data chiclets and dynamically create/update sensors
         data_entries = most_recent_test_log.select('.chiclet')
-        LOG.info(f"Data entries={data_entries}")
+        LOG.warn(f"Data entries={data_entries}")
 
         for entry in data_entries:
             sensor_type = 'unknown'
             state = 'unknown'
             
-            for div in entry.children: 
+            for div in entry.children:
                 LOG.warning(div)
                 LOG.warning(type(div))
                 if div['class'] == 'bold':
                     state = div.contents
                 else:
                     sensor_type = div['class']
-            
+
             LOG.warn(f"Found sensor type '{sensor_type}' = {state}")
             sensor = self.get_sensor(sensor_type)
             if sensor:
