@@ -124,7 +124,7 @@ class PoolMathClient():
         # iterate through all the data chiclets and dynamically create/update sensors
         data_entries = most_recent_test_log.select('.chiclet')
         LOG.info(f"Data entries={data_entries}")
-        
+
         for entry in data_entries:
             sensor_type = 'unknown'
             state = 'unknown'
@@ -134,6 +134,8 @@ class PoolMathClient():
             # FIXME: there must be a better way to traverse the sub-trees than 
             # creating a new parsed soup.
             soup = BeautifulSoup(entry, 'html.parser')
+            LOG.warning(soup)
+            LOG.warning(f"Soup {soup}")
             for div in soup.find('div'):
                 LOG.warning(f"Div {div} ({div['class']}) {div.string}")
                 if div['class'] == 'bold':
