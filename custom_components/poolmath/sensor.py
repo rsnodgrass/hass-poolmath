@@ -126,6 +126,7 @@ class PoolMathClient():
             sensor_type = 'unknown'
             state = 'unknown'
 
+            LOG.warn(entry.contents)
             soup = BeautifulSoup(entry.contents, 'html.parser')
             for div in soup.find_all('div'):
                 LOG.warning(div)
