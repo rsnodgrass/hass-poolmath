@@ -136,7 +136,8 @@ class PoolMathClient():
             # creating a new parsed soup.
 #            soup = BeautifulSoup(entry.contents, 'html.parser')
             for div in entry.children: 
-                LOG.warning(f"Div {div} ({div['class']}) {div.string}")
+                LOG.warning(div)
+                LOG.warning(type(div)
                 if div['class'] == 'bold':
                     state = div.contents
                 else:
