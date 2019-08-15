@@ -129,6 +129,9 @@ class PoolMathClient():
             LOG.warn(entry.contents)
             soup = BeautifulSoup(entry.contents, 'html.parser')
             for div in soup.find_all('div'):
+                if div == "\n":
+                    continue
+                
                 LOG.warning(div)
                 LOG.warning(type(div))
                 if div['class'] == 'bold':
