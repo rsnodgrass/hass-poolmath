@@ -126,13 +126,10 @@ class PoolMathClient():
             sensor_type = 'unknown'
             state = 'unknown'
 
-            LOG.warn(entry.contents)
-            soup = BeautifulSoup(entry.contents, 'html.parser')
+            html = entry.contents.replace('\n', ' ').replace('\r', '')
+            LOG.warn(html)
+            soup = BeautifulSoup(html, 'html.parser')
             for div in soup.find_all('div'):
-                # not sure why this instance of find_all() returns newlines, but it does!?
-                if div == "\n":
-                    continue
-
                 LOG.warning(div)
                 LOG.warning(type(div))
                 if div['class'] == 'bold':
