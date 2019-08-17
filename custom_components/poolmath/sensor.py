@@ -126,7 +126,7 @@ class PoolMathClient():
             sensor_type = 'unknown'
             state = 'unknown'
 
-            html = entry.contents.replace('\n', ' ').replace('\r', '')
+            html = entry.contents.join('').replace('\n', ' ').replace('\r', '')
             LOG.warn(html)
             soup = BeautifulSoup(html, 'html.parser')
             for div in soup.find_all('div'):
