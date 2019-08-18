@@ -83,7 +83,7 @@ class PoolMathClient():
     def update(self):
         self._rest.update()
         if self._rest.data is None:
-            LOG.warning(f"Failed to update Pool Math data for '{self._name}' from {self._url}")
+            LOG.warn(f"Failed to update Pool Math data for '{self._name}' from {self._url}")
             return
 
         self._raw_data = BeautifulSoup(self._rest.data, 'html.parser')
@@ -96,7 +96,7 @@ class PoolMathClient():
 
         config = POOL_MATH_SENSOR_SETTINGS.get(sensor_type, None)
         if config is None:
-            LOG.info(f"Unknown Pool Math sensor '{sensor_type}' discovered at {self._url}")
+            LOG.warning(f"Unknown Pool Math sensor '{sensor_type}' discovered at {self._url}")
             return None
 
         name = self._name + " " + config['name']
@@ -125,7 +125,7 @@ class PoolMathClient():
         for entry in data_entries:
             # TODO: make this parsing more robust to pool math changes
             state = entry.contents[1].string
-            sensor_type = entry.contents[3].string.unicode.lower
+            sensor_type = str(entry.contents[3].string.encode('utf-8')).lower
 
             LOG.warn(f"Found sensor type '{sensor_type}' = {state}")
             sensor = self.get_sensor(sensor_type)
