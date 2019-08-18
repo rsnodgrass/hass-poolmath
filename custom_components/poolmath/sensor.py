@@ -129,7 +129,7 @@ class PoolMathClient():
             # FIXME: test alternative
             test = ''
             for str_val in entry.contents:
-                test += str_val
+                test += str_val.string
             html = test.replace('\n', ' ').replace('\r', '')
 
             LOG.warn(html)
