@@ -123,24 +123,8 @@ class PoolMathClient():
         LOG.warn(f"Data entries={data_entries}")
 
         for entry in data_entries:
-            sensor_type = 'unknown'
-            state = 'unknown'
-
-            # FIXME: test alternative
-            test = ''
-            for str_val in entry.contents:
-                test += str_val.string
-            html = test.replace('\n', ' ').replace('\r', '')
-
-            LOG.warn(html)
-            soup = BeautifulSoup(html, 'html.parser')
-            for div in soup.find_all('div'):
-                LOG.warning(div)
-                LOG.warning(type(div))
-                if div['class'] == 'bold':
-                    state = div.contents
-                else:
-                    sensor_type = div['class']
+            state = entry.contents[1].string
+            sensor_type = entry.contents[3].string.lower
 
             LOG.warn(f"Found sensor type '{sensor_type}' = {state}")
             sensor = self.get_sensor(sensor_type)
