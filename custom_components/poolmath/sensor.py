@@ -123,8 +123,9 @@ class PoolMathClient():
         LOG.warn(f"Data entries={data_entries}")
 
         for entry in data_entries:
+            # TODO: make this parsing more robust to pool math changes
             state = entry.contents[1].string
-            sensor_type = entry.contents[3].string.lower
+            sensor_type = entry.contents[3].string.unicode.lower
 
             LOG.warn(f"Found sensor type '{sensor_type}' = {state}")
             sensor = self.get_sensor(sensor_type)
