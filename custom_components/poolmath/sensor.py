@@ -108,7 +108,7 @@ class PoolMathClient():
         self._add_entities_callback([sensor], True)
         return sensor
 
-    def log_test(value):
+    def log_test(self, value):
         LOG.warn(f"{type(value)}: {value}")
 
     def _update_sensors(self):
@@ -129,10 +129,10 @@ class PoolMathClient():
             # TODO: make this parsing more robust to pool math changes
             state = entry.contents[1].string
 
-            log_test(entry.contents[3])
-            log_test(entry.contents[3].string)
-            log_test(entry.contents[3].string.encode('utf-8'))
-            log_test(entry.contents[3].string.encode('utf-8').lower)
+            self.log_test(entry.contents[3])
+            self.log_test(entry.contents[3].string)
+            self.log_test(entry.contents[3].string.encode('utf-8'))
+            self.log_test(entry.contents[3].string.encode('utf-8').lower)
             
             sensor_type = str(entry.contents[3].string.encode('utf-8')).lower
 
