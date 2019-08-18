@@ -108,6 +108,9 @@ class PoolMathClient():
         self._add_entities_callback([sensor], True)
         return sensor
 
+    def log_test(value):
+        LOG.warn(f"{type(value)}: {value}")
+
     def _update_sensors(self):
         # find only the most recent test log card, we can ignore old data
         most_recent_test_log = self._raw_data.find('div', class_='testLogCard')
@@ -125,6 +128,12 @@ class PoolMathClient():
         for entry in data_entries:
             # TODO: make this parsing more robust to pool math changes
             state = entry.contents[1].string
+
+            log_test(entry.contents[3])
+            log_test(entry.contents[3].string)
+            log_test(entry.contents[3].string.encode('utf-8'))
+            log_test(entry.contents[3].string.encode('utf-8').lower)
+            
             sensor_type = str(entry.contents[3].string.encode('utf-8')).lower
 
             LOG.warn(f"Found sensor type '{sensor_type}' = {state}")
