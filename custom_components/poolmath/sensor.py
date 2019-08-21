@@ -149,7 +149,6 @@ class UpdatableSensor(Entity):
         self._unit_of_measurement = config['units']
         self._icon = config['icon']
         self._state = None
-#        gauge
 
     @property
     def name(self):
