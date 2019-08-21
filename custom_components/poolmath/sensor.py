@@ -127,15 +127,8 @@ class PoolMathClient():
 
         for entry in data_entries:
             # TODO: make this parsing more robust to pool math changes
-            state = entry.contents[1].string
-
-            self.log_test(entry.contents[3])
-            self.log_test(entry.contents[3].text)
-#            self.log_test(entry.contents[3].text.decode('utf-8'))
-#            self.log_test(entry.contents[3].string.decode('utf-8').lower)
-            
- #           sensor_type = entry.contents[3].string.decode('utf-8').lower
-            sensor_type = entry.contents[3].text
+            state = entry.contents[1].text
+            sensor_type = entry.contents[3].text.lower
 
             LOG.warn(f"Found sensor type '{sensor_type}' = {state}")
             sensor = self.get_sensor(sensor_type)
