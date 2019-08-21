@@ -26,13 +26,13 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 
 # see https://www.troublefreepool.com/blog/2018/12/12/abcs-of-pool-water-chemistry/
 POOL_MATH_SENSOR_SETTINGS = {
-    'fc':     { 'name': 'FC',     'units': 'mg/L', 'description': 'Free Chlorine'    },
-    'ph':     { 'name': 'pH',     'units': 'pH',   'description': 'Acidity/Basicity' },
-    'ta':     { 'name': 'TA',     'units': 'ppm',  'description': 'Total Alkalinity' },
-    'ch':     { 'name': 'CH',     'units': 'ppm',  'description': 'Calcium Hardness' },
-    'cya':    { 'name': 'CYA',    'units': 'ppm',  'description': 'Cyanuric Acid'    },
-    'salt':   { 'name': 'Salt',   'units': 'ppm',  'description': 'Salt'             },
-    'borate': { 'name': 'Borate', 'units': 'ppm',  'description': 'Borate'           }
+    'fc':     { 'name': 'FC',     'units': 'mg/L', 'description': 'Free Chlorine'    , 'icon': 'mdi:gauge' },
+    'ph':     { 'name': 'pH',     'units': 'pH',   'description': 'Acidity/Basicity' , 'icon': 'mdi:gauge' },
+    'ta':     { 'name': 'TA',     'units': 'ppm',  'description': 'Total Alkalinity' , 'icon': 'mdi:gauge' },
+    'ch':     { 'name': 'CH',     'units': 'ppm',  'description': 'Calcium Hardness' , 'icon': 'mdi:gauge' },
+    'cya':    { 'name': 'CYA',    'units': 'ppm',  'description': 'Cyanuric Acid'    , 'icon': 'mdi:gauge' },
+    'salt':   { 'name': 'Salt',   'units': 'ppm',  'description': 'Salt'             , 'icon': 'mdi:gauge' },
+    'borate': { 'name': 'Borate', 'units': 'ppm',  'description': 'Borate'           , 'icon': 'mdi:gauge' }
 }
 
 TFP_RECOMMENDED_TARGET_LEVELS = {
@@ -100,7 +100,7 @@ class PoolMathClient():
             return None
 
         name = self._name + ' ' + config['name']
-        sensor = UpdatableSensor(self, name, config['units'])
+        sensor = UpdatableSensor(self, name, config)
         self._sensors[sensor_type] = sensor
 
         # register sensor with Home Assistant
@@ -141,13 +141,15 @@ class PoolMathClient():
 class UpdatableSensor(Entity):
     """Representation of a sensor whose state is kept up-to-date by an external data source."""
 
-    def __init__(self, data_source, name, unit_of_measurement):
+    def __init__(self, data_source, name, config):
         """Initialize the sensor."""
         self._data_source = data_source
 
         self._name = name
-        self._unit_of_measurement = unit_of_measurement
+        self._unit_of_measurement = config['units']
+        self._icon = config['icon']
         self._state = None
+#        gauge
 
     @property
     def name(self):
@@ -163,6 +165,10 @@ class UpdatableSensor(Entity):
     def state(self):
         """Return the state of the device."""
         return self._state
+
+    @property
+    def icon(self):
+        return self._icon
 
     def inject_state(self, state):
         self._state = state
