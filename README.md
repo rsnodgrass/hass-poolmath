@@ -38,6 +38,23 @@ sensor:
 
 ### Example Lovelace UI
 
+```yaml
+entities:
+  - entity: sensor.your_pool_fc
+    name: Pool Free Chlorine
+  - entity: sensor.your_pool_ph
+    name: Pool pH
+  - entity: sensor.your_pool_ta
+    name: Pool Total Alkalinity
+  - entity: sensor.your_pool_cya
+    name: Pool CYA
+  - entity: sensor.your_pool_ch
+    name: Pool Hardness
+type: entities
+```
+
+![Lovelace Example](https://github.com/rsnodgrass/hass-poolmath/blob/master/img/example.png?raw=true)
+
 ## Community Support
 
 * [How to use the Pool Math app?](https://www.troublefreepool.com/threads/how-to-use-the-pool-math-app.179282/)
