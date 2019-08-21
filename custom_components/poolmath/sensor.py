@@ -137,7 +137,7 @@ class PoolMathClient():
  #           sensor_type = entry.contents[3].string.decode('utf-8').lower
             sensor_type = entry.contents[3].text
             self.log_test(sensor_type)
-            sensor_type = sensor_type.lower
+            sensor_type = sensor_type.lower()
             self.log_test(sensor_type)
 
             LOG.warn(f"Found sensor type '{sensor_type}' = {state}")
