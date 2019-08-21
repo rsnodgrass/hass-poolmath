@@ -1,0 +1,54 @@
+cards:
+  - color_thresholds:
+      - color: '#47EBA1'
+        value: 0
+      - color: '#ffA300'
+        value: 5
+      - color: '#ff0000'
+        value: 15
+    decimals: 1
+    entities:
+      - entity: sensor.camano_pool_fc
+        name: Free Chlorine
+    font_size: 75
+    hours_to_show: 12
+    line_color: '#00FF00'
+    line_width: 8
+    points_per_hour: 4
+    show:
+      icon: false
+    type: 'custom:mini-graph-card'
+  - color_thresholds:
+      - color: '#ff0000'
+        value: 7
+      - color: '#47EBA1'
+        value: 7.2
+      - color: '#ffA300'
+        value: 7.4
+      - color: '#ff0000'
+        value: 7.8
+    decimals: 1
+    entities:
+      - entity: sensor.camano_pool_ph
+        name: pH
+    font_size: 75
+    hours_to_show: 12
+    line_color: '#47EBA1'
+    line_width: 8
+    points_per_hour: 1
+    show:
+      icon: false
+    type: 'custom:mini-graph-card'
+  - decimals: 0
+    entities:
+      - entity: sensor.camano_pool_ta
+        name: TA
+    font_size: 75
+    hours_to_show: 12
+    line_color: '#47EBA1'
+    line_width: 8
+    points_per_hour: 2
+    show:
+      icon: false
+    type: 'custom:mini-graph-card'
+type: horizontal-stack

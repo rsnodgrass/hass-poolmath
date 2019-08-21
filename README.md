@@ -1,7 +1,5 @@
 # Pool Math for Home Assistant
 
-***PRE-BETA - NOT GUARANTEED TO WORK YET***
-
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 Creates sensors for pools being managed with Trouble Free Pools's [Pool Math](https://www.troublefreepool.com/blog/poolmath/) apps including [Pool Math iOS](https://apps.apple.com/us/app/pool-math-by-troublefreepool/id1228819359) and [Pool Math Android](https://play.google.com/store/apps/details?id=com.troublefreepool.poolmath&hl=en_US). From the [Trouble Free Pool](https://troublefreepool.com/) website:
