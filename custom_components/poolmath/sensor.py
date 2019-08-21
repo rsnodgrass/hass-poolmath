@@ -16,7 +16,7 @@ import homeassistant.helpers.config_validation as cv
 
 LOG = logging.getLogger(__name__)
 
-DEFAULT_NAME = 'Pool Math'
+DEFAULT_NAME = 'Pool'
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
@@ -71,7 +71,7 @@ class PoolMathClient():
 
             pool_name = self._raw_data.select('h1')[0].string
             if pool_name != None:
-                self._name += " " + pool_name
+                self._name = f"{pool_name} {DEFAULT_NAME}"
                 LOG.info(f"Loaded Pool Math data for '{pool_name}'")
 
         LOG.info(f"Created Pool Math sensor: {self._name}")
@@ -99,7 +99,7 @@ class PoolMathClient():
             LOG.warning(f"Unknown Pool Math sensor '{sensor_type}' discovered at {self._url}")
             return None
 
-        name = self._name + " " + config['name']
+        name = self._name + ' ' + config['name']
         sensor = UpdatableSensor(self, name, config['units'])
         self._sensors[sensor_type] = sensor
 
@@ -123,14 +123,14 @@ class PoolMathClient():
         
         # iterate through all the data chiclets and dynamically create/update sensors
         data_entries = most_recent_test_log.select('.chiclet')
-        LOG.warn(f"Data entries={data_entries}")
+        LOG.info(f"Data entries={data_entries}")
 
         for entry in data_entries:
             # TODO: make this parsing more robust to pool math changes
             state = entry.contents[1].text
             sensor_type = entry.contents[3].text.lower()
 
-            LOG.warn(f"Found sensor type '{sensor_type}' = {state}")
+            LOG.info(f"Found sensor type '{sensor_type}' = {state}")
             sensor = self.get_sensor(sensor_type)
             if sensor:
                 sensor.inject_state(state)
