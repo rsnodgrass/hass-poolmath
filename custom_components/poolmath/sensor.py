@@ -138,6 +138,7 @@ class PoolMathClient():
     def get_name(self):
         return self._name 
 
+# FIXME: add timestamp for when the sensor/sample was taken
 class UpdatableSensor(Entity):
     """Representation of a sensor whose state is kept up-to-date by an external data source."""
 

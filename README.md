@@ -38,17 +38,19 @@ sensor:
 
 ```yaml
 entities:
-  - entity: sensor.your_pool_fc
-    name: Pool Free Chlorine
-  - entity: sensor.your_pool_ph
-    name: Pool pH
-  - entity: sensor.your_pool_ta
-    name: Pool Total Alkalinity
-  - entity: sensor.your_pool_cya
-    name: Pool CYA
-  - entity: sensor.your_pool_ch
-    name: Pool Hardness
+  - entity: sensor.camano_pool_fc
+    name: Free Chlorine
+  - entity: sensor.camano_pool_ph
+    name: pH
+  - entity: sensor.camano_pool_ta
+    name: Total Alkalinity
+  - entity: sensor.camano_pool_cya
+    name: CYA
+  - entity: sensor.camano_pool_ch
+    name: Hardness
 type: entities
+title: Pool
+show_header_toggle: false
 ```
 
 ![Lovelace Example](https://github.com/rsnodgrass/hass-poolmath/blob/master/img/example.png?raw=true)
