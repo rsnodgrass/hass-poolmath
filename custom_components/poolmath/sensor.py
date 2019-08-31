@@ -63,7 +63,7 @@ class PoolMathClient():
             raise PlatformNotReady
 
         self._raw_data = BeautifulSoup(self._rest.data, 'html.parser')
-        LOG.info(f"Raw data from {self._url}: {self._raw_data}")
+        #LOG.debug(f"Raw data from {self._url}: {self._raw_data}")
 
         self._name = config.get(CONF_NAME)
         if self._name == None:
@@ -123,14 +123,14 @@ class PoolMathClient():
         
         # iterate through all the data chiclets and dynamically create/update sensors
         data_entries = most_recent_test_log.select('.chiclet')
-        LOG.info(f"Data entries={data_entries}")
+        LOG.debug(f"Data entries={data_entries}")
 
         for entry in data_entries:
             # TODO: make this parsing more robust to pool math changes
             state = entry.contents[1].text
             sensor_type = entry.contents[3].text.lower()
 
-            LOG.info(f"Found sensor type '{sensor_type}' = {state}")
+            LOG.debug(f"Found sensor type '{sensor_type}' = {state}")
             sensor = self.get_sensor(sensor_type)
             if sensor:
                 sensor.inject_state(state)
