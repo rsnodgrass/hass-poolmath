@@ -46,7 +46,7 @@ TFP_RECOMMENDED_TARGET_LEVELS = {
 }
 
 def setup_platform(hass, config, add_entities, discovery_info=None):
-    """Set up the Web scrape sensor."""
+    """Set up the Pool Math sensor integration."""
     client = PoolMathClient(config, add_entities)
     
 class PoolMathClient():

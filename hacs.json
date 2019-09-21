@@ -1,5 +1,5 @@
 {
   "name": "Pool Math by Trouble Free Pool",
   "domains": ["sensor"],
-  "render_readme": True
+  "render_readme": true
 }
