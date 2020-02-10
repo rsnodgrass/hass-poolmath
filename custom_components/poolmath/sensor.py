@@ -26,6 +26,8 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 
 # see https://www.troublefreepool.com/blog/2018/12/12/abcs-of-pool-water-chemistry/
 POOL_MATH_SENSOR_SETTINGS = {
+    'cc':     { 'name': 'CC',     'units': 'mg/L', 'description': 'Combined Chlorine', 'icon': 'mdi:gauge' },
+    'temp':   { 'name': 'Temp',   'units': 'F°',   'description': 'Temperature'      , 'icon': 'mdi:coolant-temperature' },
     'fc':     { 'name': 'FC',     'units': 'mg/L', 'description': 'Free Chlorine'    , 'icon': 'mdi:gauge' },
     'ph':     { 'name': 'pH',     'units': 'pH',   'description': 'Acidity/Basicity' , 'icon': 'mdi:gauge' },
     'ta':     { 'name': 'TA',     'units': 'ppm',  'description': 'Total Alkalinity' , 'icon': 'mdi:gauge' },
@@ -36,7 +38,9 @@ POOL_MATH_SENSOR_SETTINGS = {
 }
 
 TFP_RECOMMENDED_TARGET_LEVELS = {
+    'temp':   { 'min': 32,   'max': 104  },
     'fc':     { 'min': 0,    'max': 0    }, # depends on CYA
+    'cc':     { 'min': 0,    'max': 0    },
     'ph':     { 'min': 7.2,  'max': 7.8, 'target': 7.7 },
     'ta':     { 'min': 0,    'max': 0    },
     'ch':     { 'min': 250,  'max': 350  }, # with salt: 350-450 ppm
