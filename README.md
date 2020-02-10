@@ -13,11 +13,14 @@ Creates sensors for pools being managed with Trouble Free Pools's [Pool Math](ht
 
 * pH
 * Free Chlorine (FC)
+* Combined Chlorine (CC)
 * Total Alkalinity (TA)
 * Calcium Hardness (CH)
 * Cyanuric Acid (CYA)
 * Salt
 * Borates
+* Calcite Saturation Index (CSI)
+* Temperature
 
 Note: this **requires a PoolMath Premium subscription** for cloud access to your pools data.
 
