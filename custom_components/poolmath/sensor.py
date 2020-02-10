@@ -34,7 +34,8 @@ POOL_MATH_SENSOR_SETTINGS = {
     'ch':     { 'name': 'CH',     'units': 'ppm',  'description': 'Calcium Hardness' , 'icon': 'mdi:gauge' },
     'cya':    { 'name': 'CYA',    'units': 'ppm',  'description': 'Cyanuric Acid'    , 'icon': 'mdi:gauge' },
     'salt':   { 'name': 'Salt',   'units': 'ppm',  'description': 'Salt'             , 'icon': 'mdi:gauge' },
-    'borate': { 'name': 'Borate', 'units': 'ppm',  'description': 'Borate'           , 'icon': 'mdi:gauge' }
+    'borate': { 'name': 'Borate', 'units': 'ppm',  'description': 'Borate'           , 'icon': 'mdi:gauge' },
+    'csi':    { 'name': 'CSI',    'units': 'CSI',  'description': 'Calcite Saturation Index', 'icon': 'mdi:gauge' }
 }
 
 TFP_RECOMMENDED_TARGET_LEVELS = {
@@ -47,6 +48,7 @@ TFP_RECOMMENDED_TARGET_LEVELS = {
     'cya':    { 'min': 30,   'max': 50   }, # with salt: 70-80 ppm
     'salt':   { 'min': 2000, 'max': 3000 },
     'borate': { 'min': 30,   'max': 50   },
+    'csi':    { 'min': 0,    'max': 0    }
 }
 
 def setup_platform(hass, config, add_entities, discovery_info=None):
