@@ -47,15 +47,15 @@ NOTE: This updates the state from PoolMath every 15 minutes to keep from overwhe
 
 ```yaml
 entities:
-  - entity: sensor.camano_pool_fc
+  - entity: sensor.swimming_pool_fc
     name: Free Chlorine
-  - entity: sensor.camano_pool_ph
+  - entity: sensor.swimming_pool_ph
     name: pH
-  - entity: sensor.camano_pool_ta
+  - entity: sensor.swimming_pool_ta
     name: Total Alkalinity
-  - entity: sensor.camano_pool_cya
+  - entity: sensor.swimming_pool_cya
     name: CYA
-  - entity: sensor.camano_pool_ch
+  - entity: sensor.swimming_pool_ch
     name: Hardness
 type: entities
 title: Pool
