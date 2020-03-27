@@ -3,6 +3,7 @@ import logging
 import voluptuous as vol
 from requests.auth import HTTPBasicAuth, HTTPDigestAuth
 from bs4 import BeautifulSoup
+from datetime import timedelta
 
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.components.rest.sensor import RestData
@@ -17,6 +18,8 @@ import homeassistant.helpers.config_validation as cv
 LOG = logging.getLogger(__name__)
 
 DEFAULT_NAME = 'Pool'
+
+SCAN_INTERVAL = timedelta(minutes=15)
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
