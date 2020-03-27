@@ -78,10 +78,13 @@ class PoolMathClient():
         if self._name == None:
             self._name = DEFAULT_NAME
 
-            pool_name = self._raw_data.select('h1')[0].string
-            if pool_name != None:
-                self._name = f"{pool_name} {DEFAULT_NAME}"
-                LOG.info(f"Loaded Pool Math data for '{pool_name}'")
+            # extract the pool name, if defined
+            h1_span = self._raw_data.select('h1')
+            if h1_span and h1_span[0]:
+                pool_name = h1_span[0].string
+                if pool_name != None:
+                    self._name = f"{pool_name} {DEFAULT_NAME}"
+                    LOG.info(f"Loaded Pool Math data for '{pool_name}'")
 
         LOG.info(f"Created Pool Math sensor: {self._name}")
         self._sensors = {}
