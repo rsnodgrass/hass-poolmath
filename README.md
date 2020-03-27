@@ -41,6 +41,8 @@ sensor:
     url: https://troublefreepool.com/mypool/6WPG8yL
 ```
 
+NOTE: This updates the state from PoolMath every 15 minutes to keep from overwhelming their service, as the majority of Pool Math users update their data manual after testing rather than automated. The check interval can be changed by specifying a 'scan_interval' for the sensor.
+
 ### Example Lovelace UI
 
 ```yaml
