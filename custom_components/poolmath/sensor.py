@@ -54,15 +54,16 @@ TFP_RECOMMENDED_TARGET_LEVELS = {
     'csi':    { 'min': 0,    'max': 0    }
 }
 
-def setup_platform(hass, config, add_entities, discovery_info=None):
+def setup_platform(hass, config, add_entities_callback, discovery_info=None):
     """Set up the Pool Math sensor integration."""
-    client = PoolMathClient(config, add_entities)
+    client = PoolMathClient(config, add_entities_callback)
     
 class PoolMathClient():
-    def __init__(self, config, add_entities):
+    def __init__(self, config, add_entities_callback):
         verify_ssl = True
 
-        self._add_entities_callback = add_entities
+        self._sensors = {}
+        self._add_sensors_callback = add_sensors_callback
 
         self._url = config.get(CONF_URL)
         self._rest = RestData('GET', self._url, '', '', '', verify_ssl)
@@ -70,9 +71,9 @@ class PoolMathClient():
         self._rest.update()
         if self._rest.data is None:
             raise PlatformNotReady
-
+        
         self._raw_data = BeautifulSoup(self._rest.data, 'html.parser')
-        #LOG.debug(f"Raw data from {self._url}: {self._raw_data}")
+        LOG.debug("Raw data from %s: %s", self._url, self._raw_data)
 
         self._name = config.get(CONF_NAME)
         if self._name == None:
@@ -87,19 +88,18 @@ class PoolMathClient():
                     LOG.info(f"Loaded Pool Math data for '{pool_name}'")
 
         LOG.info(f"Created Pool Math sensor: {self._name}")
-        self._sensors = {}
         self._update_sensors()
-
-    # FIXME: don't update more frequently than a configured interval
 
     def update(self):
         self._rest.update()
         if self._rest.data is None:
-            LOG.warn(f"Failed to update Pool Math data for '{self._name}' from {self._url}")
-            return
+            LOG.warn(f"Failed updating Pool Math data from {self._url}")
+            return None
 
         self._raw_data = BeautifulSoup(self._rest.data, 'html.parser')
+        LOG.debug("Raw data from %s: %s", self._url, self._raw_data)
         self._update_sensors()
+        return self._raw_data
 
     def get_sensor(self, sensor_type):
         sensor = self._sensors.get(sensor_type, None)
@@ -117,7 +117,7 @@ class PoolMathClient():
 
         # register sensor with Home Assistant
         # FIXME: is there a way to specify the update interval (or disable it!?)
-        self._add_entities_callback([sensor], True)
+        self._add_sensors_callback([sensor], True)
         return sensor
 
     def log_test(self, value):
@@ -146,9 +146,6 @@ class PoolMathClient():
             sensor = self.get_sensor(sensor_type)
             if sensor:
                 sensor.inject_state(state)
-
-    def get_name(self):
-        return self._name 
 
 # FIXME: add timestamp for when the sensor/sample was taken
 class UpdatableSensor(Entity):
