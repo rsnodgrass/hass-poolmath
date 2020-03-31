@@ -57,9 +57,13 @@ TFP_RECOMMENDED_TARGET_LEVELS = {
 def setup_platform(hass, config, add_entities_callback, discovery_info=None):
     """Set up the Pool Math sensor integration."""
     client = PoolMathClient(config, add_entities_callback)
-    
+
+    # create the Pool Math service sensor, which is responsible for updating all other sensors
+    sensor = PoolMathServiceSensor(client, "Pool Math Service", config)
+    add_entities_callback([sensor], True)
+
 class PoolMathClient():
-    def __init__(self, config, add_entities_callback):
+    def __init__(self, config, add_sensors_callback):
         verify_ssl = True
 
         self._sensors = {}
@@ -101,8 +105,9 @@ class PoolMathClient():
 
     def update(self):
         soup = self._fetch_latest_data()
-        if soup:
-            self._update_from_log_entries(raw_data)
+        if not soup:
+            return None
+        return self._update_from_log_entries(soup)
 
     def get_sensor(self, sensor_type):
         sensor = self._sensors.get(sensor_type, None)
@@ -115,7 +120,7 @@ class PoolMathClient():
             return None
 
         name = self._name + ' ' + config['name']
-        sensor = UpdatableSensor(self, name, config)
+        sensor = UpdatableSensor(name, config)
         self._sensors[sensor_type] = sensor
 
         # register sensor with Home Assistant
@@ -154,16 +159,46 @@ class PoolMathClient():
 
         # record the most recent log entry's timestamp as the service's last updated timestamp
         self._timestamp = latest_timestamp
+        return latest_timestamp
+
+
+class PoolMathServiceSensor(Entity):
+    """Sensor the monitors the Pool Math cloud service and manages updates to sensors"""
+
+    def __init__(self, poolmath_client, name, config):
+        """Initialize the sensor."""
+        self._poolmath_client = poolmath_client
+        self._name = name
+        self._state = None
+
+    @property
+    def name(self):
+        """Return the name of the sensor."""
+        return self._name
+
+    @property
+    def state(self):
+        """Return the state of the device."""
+        return self._state
+
+    @property
+    def icon(self):
+        return "mdi:pool"
+
+    def update(self):
+        """Get the latest data from the source and updates the state."""
+        # trigger an update of this sensor (and all related sensors)
+        result = self._poolmath_client.update()
+        if result:
+            self._state = result
 
  
 # FIXME: add timestamp for when the sensor/sample was taken
 class UpdatableSensor(Entity):
     """Representation of a sensor whose state is kept up-to-date by an external data source."""
 
-    def __init__(self, data_source, name, config):
+    def __init__(self, name, config):
         """Initialize the sensor."""
-        self._data_source = data_source
-
         self._name = name
         self._unit_of_measurement = config['units']
         self._icon = config['icon']
@@ -174,6 +209,10 @@ class UpdatableSensor(Entity):
     def name(self):
         """Return the name of the sensor."""
         return self._name
+
+    @property
+    def should_poll(self):
+        return False
 
     @property
     def unit_of_measurement(self):
@@ -195,11 +234,10 @@ class UpdatableSensor(Entity):
         return self._icon
 
     def inject_state(self, state, timestamp):
+        # state_changed = self._state != state:
+
         self._state = state
         self._attrs = {"log_entry": timestamp}
 
-    def update(self):
-        """Get the latest data from the source and updates the state."""
-
-        # asynchronously trigger an update of this sensor (and all related sensors)
-        self._data_source.update()
+        # FIXME: do we need to callback to Home Assistant to let HA know there has been an update
+        # if state_changed:
