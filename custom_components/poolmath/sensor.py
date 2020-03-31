@@ -5,6 +5,7 @@ from requests.auth import HTTPBasicAuth, HTTPDigestAuth
 from bs4 import BeautifulSoup
 from datetime import timedelta
 
+from homeassistant.core import callback
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.components.rest.sensor import RestData
 from homeassistant.const import (
@@ -27,6 +28,8 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Required(CONF_URL): cv.string
     }
 )
+
+ATTR_LOG_TIMESTAMP="Log Timestamp"
 
 # see https://www.troublefreepool.com/blog/2018/12/12/abcs-of-pool-water-chemistry/
 POOL_MATH_SENSOR_SETTINGS = {
@@ -236,7 +239,7 @@ class UpdatableSensor(Entity, RestoreEntity):
 
     def inject_state(self, state, timestamp):
         state_changed = self._state != state
-        self._attrs = {"Log Timestamp": timestamp}
+        self._attrs = {ATTR_LOG_TIMESTAMP: timestamp}
 
         if state_changed:
             self._state = state
@@ -257,9 +260,9 @@ class UpdatableSensor(Entity, RestoreEntity):
         LOG.debug(f"Restored sensor {self._name} previous state {self._state}")
 
         # restore any attributes
-        if 'Log Timestamp' in state.attributes:
+        if ATTR_LOG_TIMESTAMP in state.attributes:
             self._attrs = {
-                "Log Timestamp": state.attributes['Log Timestamp']
+                ATTR_LOG_TIMESTAMP: state.attributes[ATTR_LOG_TIMESTAMP]
             }
 
         async_dispatcher_connect(
