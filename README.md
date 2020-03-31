@@ -74,7 +74,7 @@ show_header_toggle: false
 ### Feature Requests
 
 * move all communication/interfaces to Pool Math into separate pypoolmath package that can be maintained separately
-* OUT OF SCOPE: persist across restarts (requires Home Assistant archiecture to implement a standard mechanism)
+* on HA start, if the Pool Math cloud service is not available, no sensors are created (they get created later when service returns)...but this could do a better job of saving the sensor names in the PoolMathServiceSensor with RestoreEntity so that all the previously discovered sensors are automatically recreated even when Pool Math is down
 * make the HA yaml configuration for this a platform, rather than a sensor config...e.g.:
 
 ```yaml
