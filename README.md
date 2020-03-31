@@ -12,7 +12,7 @@ Creates sensors for pools being managed with Trouble Free Pools's [Pool Math](ht
 * Pool Math performs all the calculations you need to keep your chlorine, pH, calcium, alkalinity, and stabilizer levels balanced.
 * Trouble Free Pool is a registered 501(c)3 non-profit who displays NO advertising on our site nor is our advice compromised by financial incentives.
 
-#### Supported Pool Math Data
+#### Supported Pool Math Values
 
 * pH
 * Free Chlorine (FC)
@@ -25,7 +25,7 @@ Creates sensors for pools being managed with Trouble Free Pools's [Pool Math](ht
 * Calcite Saturation Index (CSI)
 * Temperature
 
-Note: this **requires a PoolMath Premium subscription** for cloud access to your pools data.
+Note: this **requires a PoolMath Premium subscription** tp access your pool or spa's data from the Pool Math cloud service.
 
 ## Installation
 
@@ -41,7 +41,7 @@ sensor:
     url: https://troublefreepool.com/mypool/6WPG8yL
 ```
 
-NOTE: This updates the state from PoolMath every 15 minutes to keep from overwhelming their service, as the majority of Pool Math users update their data manual after testing rather than automated. The check interval can be changed by specifying a 'scan_interval' for the sensor.
+NOTE: This updates the state from PoolMath every 15 minutes to keep from overwhelming their service, as the majority of Pool Math users update their data manual after testing rather than automated. The check interval can be changed in yaml config by adding a 'scan_interval' for the sensor.
 
 ### Example Lovelace UI
 
@@ -64,6 +64,8 @@ show_header_toggle: false
 
 ![Lovelace Example](https://github.com/rsnodgrass/hass-poolmath/blob/master/img/example.png?raw=true)
 
+# Support
+
 ## Community Support
 
 * [How to use the Pool Math app?](https://www.troublefreepool.com/threads/how-to-use-the-pool-math-app.179282/)
@@ -74,3 +76,19 @@ show_header_toggle: false
 * [Trouble Free Pool Pool Math online calculator](https://www.troublefreepool.com/calc.html)
 * [Pool Math apps](https://www.troublefreepool.com/blog/poolmath/) ([iOS](https://apps.apple.com/us/app/pool-math-by-troublefreepool/id1228819359), [Android](https://play.google.com/store/apps/details?id=com.troublefreepool.poolmath&hl=en_US))
 * [ABC's of Pool Water Chemistry by Trouble Free Pool](https://www.troublefreepool.com/blog/2018/12/12/abcs-of-pool-water-chemistry/)
+
+## Feature Requests
+
+* read back through several Pool Math entries to create any sensors that are not in latest log entry
+* move all communication/interfaces to Pool Math into separate pypoolmath package that can be maintained separately
+* OUT OF SCOPE: persist across restarts (requires Home Assistant archiecture to implement a standard mechanism)
+* make this a platform, rather than a sensor config...e.g.:
+
+```yaml
+poolmath:
+  sources:
+    - url: https://troublefreepool.com/mypool/6WPG8yL
+      name: "Swimming Pool"
+    - url: https://troublefreepool.com/mypool/6WPG8yL
+      name: "Spa"
+```
