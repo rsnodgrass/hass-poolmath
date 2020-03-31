@@ -198,6 +198,8 @@ class UpdatableSensor(Entity):
 
     def __init__(self, name, config):
         """Initialize the sensor."""
+        super().__init__()
+
         self._name = name
         self._unit_of_measurement = config['units']
         self._icon = config['icon']
@@ -211,7 +213,7 @@ class UpdatableSensor(Entity):
 
     @property
     def should_poll(self):
-        return False
+        return True # FIXME: get scheduled updates working below
 
     @property
     def unit_of_measurement(self):
@@ -234,10 +236,11 @@ class UpdatableSensor(Entity):
 
     def inject_state(self, state, timestamp):
         state_changed = self._state != state
-        self._attrs = {"log_entry": timestamp}
+        self._attrs = {"Log Timestamp": timestamp}
 
         if state_changed:
             self._state = state
 
             # notify Home Assistant that the sensor has been updated
-            self.schedule_update_ha_state(True)
+            #if (self.hass and self.schedule_update_ha_state):
+            #    self.schedule_update_ha_state(True)
