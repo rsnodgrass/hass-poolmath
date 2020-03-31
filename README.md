@@ -10,7 +10,7 @@ Creates sensors for pools being managed with Trouble Free Pools's [Pool Math](ht
 
 * Pool Math makes swimming pool care, maintenance and management easy by tracking chlorine, pH, alkalinity and other  levels to help calculate how much salt, bleach and other chemicals to add.
 * Pool Math performs all the calculations you need to keep your chlorine, pH, calcium, alkalinity, and stabilizer levels balanced.
-* Trouble Free Pool is a registered 501(c)3 non-profit who displays NO advertising on our site nor is our advice compromised by financial incentives.
+* [Trouble Free Pool](https://www.troublefreepool.com/) is a registered 501(c)3 non-profit who displays NO advertising on our site nor is our advice compromised by financial incentives.
 
 #### Supported Pool Math Values
 
@@ -25,7 +25,7 @@ Creates sensors for pools being managed with Trouble Free Pools's [Pool Math](ht
 * Calcite Saturation Index (CSI)
 * Temperature
 
-Note: this **requires a PoolMath Premium subscription** tp access your pool or spa's data from the Pool Math cloud service.
+Note: this **requires a [Trouble Free Pool](https://www.troublefreepool.com/) Pool Math Premium subscription** to access your pool or spa's data from the Pool Math cloud service.
 
 ## Installation
 
