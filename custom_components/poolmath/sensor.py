@@ -88,7 +88,6 @@ class PoolMathClient():
                 pool_name = h1_span[0].string
                 if pool_name != None:
                     self._name = f"{pool_name} {DEFAULT_NAME}"
-                    LOG.info(f"Loaded Pool Math data for '{pool_name}'")
 
         LOG.info(f"Creating Pool Math sensors for '{self._name}'")
         self._update_from_log_entries(soup)
@@ -153,7 +152,7 @@ class PoolMathClient():
                     if sensor:
                         timestamp = log_entry.find('time', class_='timestamp timereal').text
                         if sensor.state != state:
-                            LOG.info(f"Found Pool Math update {sensor_type}={state} (timestamp={timestamp})")
+                            LOG.info(f"Pool Math returned updated {sensor_type}={state} (timestamp={timestamp})")
                         sensor.inject_state(state, timestamp)
                         updated_sensors[sensor_type] = sensor
 
@@ -242,6 +241,7 @@ class UpdatableSensor(Entity, RestoreEntity):
         if state_changed:
             self._state = state
 
+            # FIXME: see should_poll
             # notify Home Assistant that the sensor has been updated
             #if (self.hass and self.schedule_update_ha_state):
             #    self.schedule_update_ha_state(True)
@@ -254,7 +254,7 @@ class UpdatableSensor(Entity, RestoreEntity):
         if not state:
             return
         self._state = state.state
-        LOG.info(f"Restored sensor {self._name} previous state {self._state}")
+        LOG.debug(f"Restored sensor {self._name} previous state {self._state}")
 
         # restore any attributes
         if 'Log Timestamp' in state.attributes:
