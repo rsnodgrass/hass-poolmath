@@ -87,7 +87,7 @@ show_header_toggle: false
 ```yaml
 poolmath:
   sources:
-    - url: https://troublefreepool.com/mypool/6WPG8yL
+    - url: https://api.poolmathapp.com/share/tfp-168502
       name: "Swimming Pool"
     - url: https://troublefreepool.com/mypool/6WPG8yL
       name: "Spa"

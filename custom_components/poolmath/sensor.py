@@ -68,19 +68,17 @@ class PoolMathClient():
         self._url = config.get(CONF_URL)
         self._rest = RestData('GET', self._url, '', '', '', verify_ssl)
 
-        self._rest.update()
-        if self._rest.data is None:
+        # query the latest data from Pool Math
+        soup = self._fetch_latest_data()
+        if soup is None:
             raise PlatformNotReady
         
-        self._raw_data = BeautifulSoup(self._rest.data, 'html.parser')
-        LOG.debug("Raw data from %s: %s", self._url, self._raw_data)
-
         self._name = config.get(CONF_NAME)
         if self._name == None:
             self._name = DEFAULT_NAME
 
             # extract the pool name, if defined
-            h1_span = self._raw_data.select('h1')
+            h1_span = soup.select('h1')
             if h1_span and h1_span[0]:
                 pool_name = h1_span[0].string
                 if pool_name != None:
@@ -88,18 +86,23 @@ class PoolMathClient():
                     LOG.info(f"Loaded Pool Math data for '{pool_name}'")
 
         LOG.info(f"Created Pool Math sensor: {self._name}")
-        self._update_sensors()
+        self._update_from_log_entries(soup)
 
-    def update(self):
+    def _fetch_latest_data(self):
+        """Fetch the latest log entries from the Pool Math service"""
         self._rest.update()
-        if self._rest.data is None:
+        result = self._rest.data
+        if result is None:
             LOG.warn(f"Failed updating Pool Math data from {self._url}")
             return None
+        soup = BeautifulSoup(result, 'html.parser')
+        LOG.debug("Raw data from %s: %s", self._url, soup)
+        return soup
 
-        self._raw_data = BeautifulSoup(self._rest.data, 'html.parser')
-        LOG.debug("Raw data from %s: %s", self._url, self._raw_data)
-        self._update_sensors()
-        return self._raw_data
+    def update(self):
+        soup = self._fetch_latest_data()
+        if soup:
+            self._update_from_log_entries(raw_data)
 
     def get_sensor(self, sensor_type):
         sensor = self._sensors.get(sensor_type, None)
@@ -120,33 +123,39 @@ class PoolMathClient():
         self._add_sensors_callback([sensor], True)
         return sensor
 
-    def log_test(self, value):
-        LOG.warn(f"{type(value)}: {value}")
+    def _update_from_log_entries(self, poolmath_soup):
+        updated_sensors = {}
+        latest_timestamp = None
 
-    def _update_sensors(self):
-        # find only the most recent test log card, we can ignore old data
-        most_recent_test_log = self._raw_data.find('div', class_='testLogCard')
-        if most_recent_test_log == None:
-            LOG.warn(f"Couldn't find any test logs at {self._url}")
-            raise PlatformNotReady
+        # Read back through all log entries and update any changed sensor states (since a given
+        # log entry may only have a subset of sensor states)
+        log_entries = poolmath_soup.find_all('div', class_='testLogCard')
+        for log_entry in log_entries:
+            log_fields = log_entry.select('.chiclet')
+            LOG.debug("Pool Math log fields=%s", log_fields)
 
-        # capture the time the most recent Pool Math data was collected
-        self._timestamp = most_recent_test_log.find('time', class_='timestamp timereal')
-        
-        # iterate through all the data chiclets and dynamically create/update sensors
-        data_entries = most_recent_test_log.select('.chiclet')
-        LOG.debug(f"Data entries={data_entries}")
+            if not latest_timestamp:
+                # capture the timestamp for the most recent Pool Math log entry
+                latest_timestamp = log_entry.find('time', class_='timestamp timereal')
 
-        for entry in data_entries:
-            # TODO: make this parsing more robust to pool math changes
-            state = entry.contents[1].text
-            sensor_type = entry.contents[3].text.lower()
+            # FIXME: improve parsing to be more robust to Pool Math changes
+            for entry in log_fields:
+                sensor_type = entry.contents[3].text.lower()
+                if not sensor_type in updated_sensors:
+                    state = entry.contents[1].text
 
-            LOG.debug(f"Found sensor type '{sensor_type}' = {state}")
-            sensor = self.get_sensor(sensor_type)
-            if sensor:
-                sensor.inject_state(state)
+                    sensor = self.get_sensor(sensor_type)
+                    if sensor:
+                        timestamp = log_entry.find('time', class_='timestamp timereal')
+                        if sensor.state != state:
+                            LOG.info(f"Found updated Pool Math '{sensor_type}' data = '{state}' (timestamp = {timestamp})")
+                        sensor.inject_state(state, timestamp)
+                        updated_sensors[sensor_type] = sensor
 
+        # record the most recent log entry's timestamp as the service's last updated timestamp
+        self._timestamp = latest_timestamp
+
+ 
 # FIXME: add timestamp for when the sensor/sample was taken
 class UpdatableSensor(Entity):
     """Representation of a sensor whose state is kept up-to-date by an external data source."""
@@ -159,6 +168,7 @@ class UpdatableSensor(Entity):
         self._unit_of_measurement = config['units']
         self._icon = config['icon']
         self._state = None
+        self._attrs = {}
 
     @property
     def name(self):
@@ -176,11 +186,17 @@ class UpdatableSensor(Entity):
         return self._state
 
     @property
+    def device_state_attributes(self):
+        """Return the any state attributes."""
+        return self._attrs
+
+    @property
     def icon(self):
         return self._icon
 
-    def inject_state(self, state):
+    def inject_state(self, state, timestamp):
         self._state = state
+        self._attrs = {"log_entry": timestamp}
 
     def update(self):
         """Get the latest data from the source and updates the state."""
