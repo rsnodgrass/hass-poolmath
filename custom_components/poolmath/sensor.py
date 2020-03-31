@@ -57,19 +57,19 @@ TFP_RECOMMENDED_TARGET_LEVELS = {
 
 def setup_platform(hass, config, add_entities_callback, discovery_info=None):
     """Set up the Pool Math sensor integration."""
-    client = PoolMathClient(config, add_entities_callback)
+    client = PoolMathClient(hass, config, add_entities_callback)
 
     # create the Pool Math service sensor, which is responsible for updating all other sensors
     sensor = PoolMathServiceSensor("Pool Math Service", config, client)
     add_entities_callback([sensor], True)
 
 class PoolMathClient():
-    def __init__(self, config, add_sensors_callback):
-        verify_ssl = True
-
+    def __init__(self, hass, config, add_sensors_callback):
+        self._hass = hass
         self._sensors = {}
         self._add_sensors_callback = add_sensors_callback
 
+        verify_ssl = True
         self._url = config.get(CONF_URL)
         self._rest = RestData('GET', self._url, '', '', '', verify_ssl)
 
@@ -121,7 +121,7 @@ class PoolMathClient():
             return None
 
         name = self._name + ' ' + config['name']
-        sensor = UpdatableSensor(name, config)
+        sensor = UpdatableSensor(self._hass, name, config)
         self._sensors[sensor_type] = sensor
 
         # register sensor with Home Assistant
@@ -197,10 +197,11 @@ class PoolMathServiceSensor(Entity):
 class UpdatableSensor(Entity, RestoreEntity):
     """Representation of a sensor whose state is kept up-to-date by an external data source."""
 
-    def __init__(self, name, config):
+    def __init__(self, hass, name, config):
         """Initialize the sensor."""
         super().__init__()
 
+    self._hass = hass
         self._name = name
         self._config = config
         self._state = None
@@ -244,3 +245,26 @@ class UpdatableSensor(Entity, RestoreEntity):
             # notify Home Assistant that the sensor has been updated
             #if (self.hass and self.schedule_update_ha_state):
             #    self.schedule_update_ha_state(True)
+
+    async def async_added_to_hass(self) -> None:
+        await super().async_added_to_hass()
+        
+        # on restart, attempt to restore previous state (see https://aarongodfrey.dev/programming/restoring-an-entity-in-home-assistant/)
+        state = await self.async_get_last_state()
+        if not state:
+            return
+        self._state = state.state
+
+        # restore any attributes
+        if 'Log Timestamp' in state.attributes:
+            self._attrs = {
+                "Log Timestamp": state.attributes['Log Timestamp']
+            }
+
+        async_dispatcher_connect(
+            self._hass, DATA_UPDATED, self._schedule_immediate_update
+        )
+
+    @callback
+    def _schedule_immediate_update(self):
+        self.async_schedule_update_ha_state(True)
