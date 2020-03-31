@@ -201,7 +201,7 @@ class UpdatableSensor(Entity, RestoreEntity):
         """Initialize the sensor."""
         super().__init__()
 
-    self._hass = hass
+        self._hass = hass
         self._name = name
         self._config = config
         self._state = None
@@ -254,6 +254,7 @@ class UpdatableSensor(Entity, RestoreEntity):
         if not state:
             return
         self._state = state.state
+        LOG.info(f"Restored sensor {self._name} previous state {self._state}")
 
         # restore any attributes
         if 'Log Timestamp' in state.attributes:
