@@ -31,7 +31,7 @@ Note: this **requires a PoolMath Premium subscription** tp access your pool or s
 
 Make sure [Home Assistant Community Store (HACS)](https://github.com/custom-components/hacs) is installed, then add the repository: `rsnodgrass/hass-poolmath`
 
-## Configuration
+### Configuration
 
 Under Settings of the Pool Math iOS or Android application, find the Sharing section.  Turn this on, which allows anyone with access to the unique URL to be able to view data about your pool. Your pool's URL will be displayed, use that in the YAML configuration for the poolmath sensor.
 
@@ -64,7 +64,7 @@ show_header_toggle: false
 
 ![Lovelace Example](https://github.com/rsnodgrass/hass-poolmath/blob/master/img/example.png?raw=true)
 
-# Support
+## Support
 
 ### Community Support
 
