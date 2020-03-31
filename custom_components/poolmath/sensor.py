@@ -196,7 +196,7 @@ class PoolMathServiceSensor(Entity):
 
  
 # FIXME: add timestamp for when the sensor/sample was taken
-class UpdatableSensor(Entity, RestoreEntity):
+class UpdatableSensor(RestoreEntity):
     """Representation of a sensor whose state is kept up-to-date by an external data source."""
 
     def __init__(self, hass, name, config):
