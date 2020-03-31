@@ -150,9 +150,9 @@ class PoolMathClient():
 
                     sensor = self.get_sensor(sensor_type)
                     if sensor:
-                        timestamp = log_entry.find('time', class_='timestamp timereal')
+                        timestamp = log_entry.find('time', class_='timestamp timereal').text
                         if sensor.state != state:
-                            LOG.info(f"Found updated Pool Math '{sensor_type}' data = '{state}' (timestamp = {timestamp})")
+                            LOG.info(f"Found Pool Math update {sensor_type}={state} (timestamp={timestamp})")
                         sensor.inject_state(state, timestamp)
                         updated_sensors[sensor_type] = sensor
 
@@ -201,8 +201,7 @@ class UpdatableSensor(Entity):
         super().__init__()
 
         self._name = name
-        self._unit_of_measurement = config['units']
-        self._icon = config['icon']
+        self._config = config
         self._state = None
         self._attrs = {}
 
@@ -218,7 +217,7 @@ class UpdatableSensor(Entity):
     @property
     def unit_of_measurement(self):
         """Return the unit the value is expressed in."""
-        return self._unit_of_measurement
+        return self._config['units']
 
     @property
     def state(self):
@@ -232,7 +231,7 @@ class UpdatableSensor(Entity):
 
     @property
     def icon(self):
-        return self._icon
+        return self._config['icon']
 
     def inject_state(self, state, timestamp):
         state_changed = self._state != state
