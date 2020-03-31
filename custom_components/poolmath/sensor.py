@@ -165,6 +165,13 @@ class PoolMathClient():
         self._timestamp = latest_timestamp
         return latest_timestamp
 
+    @property
+    def sensor_names(self):
+        return self._sensors.keys()
+
+    @property
+    def latest_log_timestamp(self):
+        return self._timestamp
 
 class PoolMathServiceSensor(Entity):
     """Sensor monitoring the Pool Math cloud service and updating any related sensors"""
@@ -172,8 +179,8 @@ class PoolMathServiceSensor(Entity):
     def __init__(self, name, config, poolmath_client):
         """Initialize the Pool Math service sensor."""
         self._name = name
-        self._state = None
         self._poolmath_client = poolmath_client
+        self._update_state_from_client()
 
     @property
     def name(self):
@@ -182,19 +189,26 @@ class PoolMathServiceSensor(Entity):
 
     @property
     def state(self):
-        """Return the state of the device."""
+        """Return the sensors currently being monitored from Pool Math."""
         return self._state
 
     @property
     def icon(self):
         return "mdi:pool"
 
+    def _update_state_from_client(self):
+        # re-updated the state with list of sensors that are being monitored (in case any new sensors were discovered)
+        self._state = self._poolmath_client.sensor_names
+        self._attr = {
+            ATTR_LOG_TIMESTAMP: self._poolmath_client.latest_log_timestamp
+        }
+
     def update(self):
         """Get the latest data from the source and updates the state."""
         # trigger an update of this sensor (and all related sensors)
         result = self._poolmath_client.update()
         if result:
-            self._state = result
+            self._update_state_from_client()
 
  
 # FIXME: add timestamp for when the sensor/sample was taken
