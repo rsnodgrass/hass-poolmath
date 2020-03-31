@@ -163,7 +163,7 @@ class PoolMathClient():
 
 
 class PoolMathServiceSensor(Entity):
-    """Sensor the monitors the Pool Math cloud service and manages updates to sensors"""
+    """Sensor monitoring the Pool Math cloud service and updating any related sensors"""
 
     def __init__(self, poolmath_client, name, config):
         """Initialize the sensor."""
