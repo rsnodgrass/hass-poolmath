@@ -124,7 +124,6 @@ class PoolMathClient():
         self._sensors[sensor_type] = sensor
 
         # register sensor with Home Assistant
-        # FIXME: is there a way to specify the update interval (or disable it!?)
         self._add_sensors_callback([sensor], True)
         return sensor
 
