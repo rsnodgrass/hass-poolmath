@@ -11,8 +11,9 @@ from homeassistant.const import (
     CONF_NAME,
     CONF_URL
 )
-from homeassistant.helpers.entity import Entity
 from homeassistant.exceptions import PlatformNotReady
+from homeassistant.helpers.entity import Entity
+from homeassistant.helpers.restore_state import RestoreEntity
 import homeassistant.helpers.config_validation as cv
 
 LOG = logging.getLogger(__name__)
@@ -193,7 +194,7 @@ class PoolMathServiceSensor(Entity):
 
  
 # FIXME: add timestamp for when the sensor/sample was taken
-class UpdatableSensor(Entity):
+class UpdatableSensor(Entity, RestoreEntity):
     """Representation of a sensor whose state is kept up-to-date by an external data source."""
 
     def __init__(self, name, config):
