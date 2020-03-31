@@ -100,7 +100,7 @@ class PoolMathClient():
             LOG.warn(f"Failed updating Pool Math data from {self._url}")
             return None
         soup = BeautifulSoup(result, 'html.parser')
-        LOG.debug("Raw data from %s: %s", self._url, soup)
+        #LOG.debug("Raw data from %s: %s", self._url, soup)
         return soup
 
     def update(self):
@@ -240,4 +240,4 @@ class UpdatableSensor(Entity):
             self._state = state
 
             # notify Home Assistant that the sensor has been updated
-            self.async_schedule_update_ha_state(True)
+            self.schedule_update_ha_state(True)
