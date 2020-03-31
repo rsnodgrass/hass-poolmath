@@ -79,10 +79,9 @@ show_header_toggle: false
 
 ## Feature Requests
 
-* read back through several Pool Math entries to create any sensors that are not in latest log entry
 * move all communication/interfaces to Pool Math into separate pypoolmath package that can be maintained separately
 * OUT OF SCOPE: persist across restarts (requires Home Assistant archiecture to implement a standard mechanism)
-* make this a platform, rather than a sensor config...e.g.:
+* make the HA yaml configuration for this a platform, rather than a sensor config...e.g.:
 
 ```yaml
 poolmath:
