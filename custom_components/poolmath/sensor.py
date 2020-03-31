@@ -59,7 +59,7 @@ def setup_platform(hass, config, add_entities_callback, discovery_info=None):
     client = PoolMathClient(config, add_entities_callback)
 
     # create the Pool Math service sensor, which is responsible for updating all other sensors
-    sensor = PoolMathServiceSensor(client, "Pool Math Service", config)
+    sensor = PoolMathServiceSensor("Pool Math Service", config, client)
     add_entities_callback([sensor], True)
 
 class PoolMathClient():
@@ -89,7 +89,7 @@ class PoolMathClient():
                     self._name = f"{pool_name} {DEFAULT_NAME}"
                     LOG.info(f"Loaded Pool Math data for '{pool_name}'")
 
-        LOG.info(f"Created Pool Math sensor: {self._name}")
+        LOG.info(f"Creating Pool Math sensors for '{self._name}'")
         self._update_from_log_entries(soup)
 
     def _fetch_latest_data(self):
@@ -164,11 +164,11 @@ class PoolMathClient():
 class PoolMathServiceSensor(Entity):
     """Sensor monitoring the Pool Math cloud service and updating any related sensors"""
 
-    def __init__(self, poolmath_client, name, config):
-        """Initialize the sensor."""
-        self._poolmath_client = poolmath_client
+    def __init__(self, name, config, poolmath_client):
+        """Initialize the Pool Math service sensor."""
         self._name = name
         self._state = None
+        self._poolmath_client = poolmath_client
 
     @property
     def name(self):
