@@ -233,10 +233,11 @@ class UpdatableSensor(Entity):
         return self._icon
 
     def inject_state(self, state, timestamp):
-        # state_changed = self._state != state:
-
-        self._state = state
+        state_changed = self._state != state
         self._attrs = {"log_entry": timestamp}
 
-        # FIXME: do we need to callback to Home Assistant to let HA know there has been an update
-        # if state_changed:
+        if state_changed:
+            self._state = state
+
+            # notify Home Assistant that the sensor has been updated
+            self.async_schedule_update_ha_state(True)
