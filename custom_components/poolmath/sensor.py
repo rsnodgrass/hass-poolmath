@@ -15,11 +15,13 @@ from homeassistant.const import (
 from homeassistant.exceptions import PlatformNotReady
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.restore_state import RestoreEntity
+from homeassistant.helpers.dispatcher import async_dispatcher_connect
 import homeassistant.helpers.config_validation as cv
 
 LOG = logging.getLogger(__name__)
 
 DEFAULT_NAME = 'Pool'
+DATA_UPDATED = 'poolmath_data_updated'
 
 SCAN_INTERVAL = timedelta(minutes=15)
 
@@ -252,7 +254,14 @@ class UpdatableSensor(RestoreEntity):
     async def async_added_to_hass(self) -> None:
         await super().async_added_to_hass()
         
-        # on restart, attempt to restore previous state (see https://aarongodfrey.dev/programming/restoring-an-entity-in-home-assistant/)
+        # for this integration, restoring state really doesn't matter right now (but leaving code below in place)
+        # Reason: all the sensors are dynamically created based on Pool Math service call, which always returns
+        # the latest state as well!
+        if self._state:
+            return
+
+        # on restart, attempt to restore previous state (SEE COMMENT ABOVE WHY THIS ISN'T USEFUL CURRENTLY)
+        # (see https://aarongodfrey.dev/programming/restoring-an-entity-in-home-assistant/)
         state = await self.async_get_last_state()
         if not state:
             return
