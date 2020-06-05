@@ -1,0 +1,45 @@
+targets:
+  pool_math:
+    fc:
+      min: 8.0
+      max: 13.0
+    ph:
+      min: 7.2
+      max: 8.0
+    ta:
+      min: 50
+      max: 90
+    ch:
+      min: 250
+      max: 650
+    cya:
+      min: 30
+      max: 60
+    salt:
+      min: 0
+      max: 0
+  bio_guard:
+    fc:
+      min: 1.0
+      max: 4.0
+    ph:
+      min: 7.4
+      max: 7.6
+    ta:
+      min: 80
+      max: 125
+    ch:
+      min: 200
+      max: 275
+    cya:
+      min: 60
+      max: 200
+    salt:
+      min: 0
+      max: 0
+    optimizer:
+      min: 30
+      max: 35
+    phosphate:
+      min: 0
+      max: 500
