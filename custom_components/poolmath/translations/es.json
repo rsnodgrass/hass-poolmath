@@ -1,0 +1,23 @@
+
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Conectar a tu Pool Math",
+        "data": {
+          "email": "[%key:common::config_flow::data::username%]",
+          "password": "[%key:common::config_flow::data::password%]"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect, please try again",
+      "invalid_auth": "Autentificaci\u00f3n inv\u00e1lida",
+      "unknown": "Error inesperado"
+    },
+    "abort": {
+      "already_configured": "El dispositivo ya est\u00e1 configurado"
+    }
+  }
+}
+
