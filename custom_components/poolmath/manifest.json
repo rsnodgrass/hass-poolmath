@@ -3,9 +3,9 @@
   "name": "Pool Math by Trouble Free Pool",
   "documentation": "https://github.com/rsnodgrass/hass-poolmath/",
   "requirements": [
-    "beautifulsoup4==4.9.0", 
-    "jsonpath==0.82",
-    "xmltodict==0.12.0"
+    "beautifulsoup4>=4.9.0", 
+    "jsonpath>=0.82",
+    "xmltodict>=0.12.0"
   ],
   "dependencies": [],
   "codeowners": ["@rsnodgrass"]
