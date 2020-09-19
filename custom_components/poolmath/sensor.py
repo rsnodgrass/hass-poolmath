@@ -2,7 +2,7 @@ import logging
 
 import voluptuous as vol
 from requests.auth import HTTPBasicAuth, HTTPDigestAuth
-from beautifulsoup4 import BeautifulSoup
+from bs4 import BeautifulSoup
 from datetime import timedelta
 
 from homeassistant.core import callback
