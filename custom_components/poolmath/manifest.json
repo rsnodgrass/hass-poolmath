@@ -2,7 +2,7 @@
   "domain": "poolmath",
   "name": "Pool Math by Trouble Free Pool",
   "documentation": "https://github.com/rsnodgrass/hass-poolmath/",
-  "requirements": [],
+  "requirements": ["beautifulsoup4==4.9.0"],
   "dependencies": [],
   "codeowners": ["@rsnodgrass"]
 }
