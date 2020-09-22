@@ -43,10 +43,16 @@ POOL_MATH_SENSOR_SETTINGS = {
     'ch':     { 'name': 'CH',     'units': 'ppm',  'description': 'Calcium Hardness' , 'icon': 'mdi:gauge' },
     'cya':    { 'name': 'CYA',    'units': 'ppm',  'description': 'Cyanuric Acid'    , 'icon': 'mdi:gauge' },
     'salt':   { 'name': 'Salt',   'units': 'ppm',  'description': 'Salt'             , 'icon': 'mdi:gauge' },
+    'bor':    { 'name': 'Borate', 'units': 'ppm',  'description': 'Borate'           , 'icon': 'mdi:gauge' },
     'borate': { 'name': 'Borate', 'units': 'ppm',  'description': 'Borate'           , 'icon': 'mdi:gauge' },
     'csi':    { 'name': 'CSI',    'units': 'CSI',  'description': 'Calcite Saturation Index', 'icon': 'mdi:gauge' }
 }
 
+# FIXME: this should be a profile probably, and allow user to select from
+# a set of different profiles based on their needs (and make these ranges
+# attributes of the sensors).  Profiles should be in YAML, not hardcoded here.
+#
+# FIXME: See targets/
 TFP_RECOMMENDED_TARGET_LEVELS = {
     'temp':   { 'min': 32,   'max': 104  },
     'fc':     { 'min': 0,    'max': 0    }, # depends on CYA
@@ -56,6 +62,7 @@ TFP_RECOMMENDED_TARGET_LEVELS = {
     'ch':     { 'min': 250,  'max': 350  }, # with salt: 350-450 ppm
     'cya':    { 'min': 30,   'max': 50   }, # with salt: 70-80 ppm
     'salt':   { 'min': 2000, 'max': 3000 },
+    'bor':    { 'min': 30,   'max': 50   },
     'borate': { 'min': 30,   'max': 50   },
     'csi':    { 'min': 0,    'max': 0    }
 }
