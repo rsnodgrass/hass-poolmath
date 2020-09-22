@@ -1,0 +1,23 @@
+  tfp:
+    name: "TFP Pool Math"
+    notes: "The default target ranges from Trouble Free Pool Pool Math"
+    links:
+	- https://www.troublefreepool.com/calc.html
+    fc:
+      min: 8.0
+      max: 13.0
+    ph:
+      min: 7.2
+      max: 8.0
+    ta:
+      min: 50
+      max: 90
+    ch:
+      min: 250
+      max: 650
+    cya:
+      min: 30
+      max: 60
+    salt:
+      min: 0
+      max: 0

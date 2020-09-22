@@ -1,0 +1,25 @@
+  hayward_aquarite:
+    name: "Hayward AquaRite SWG"
+    fc:
+      min: 1.0
+      max: 3.0
+    ph:
+      min: 7.2
+      max: 7.8
+    ta:
+      min: 80
+      max: 120
+    ch:
+      min: 200
+      max: 400
+    cya:
+      min: 60
+      max: 80
+      target: 80
+    salt:
+      min: 2700
+      max: 3400
+    si:
+      min: -0.2
+      max: 0.2
+      target: 0

@@ -1,0 +1,24 @@
+  # http://www.lowrycg.com/pool-acid-dose-calculator/
+  # https://www.poolspanews.com/how-to/maintenance/chemical-guru-robert-lowry-explains-recent-changes-to-his-chemistry-method_o
+  robert_lowry:
+    name: "Robert Lowry"
+    ph:
+      target: 7.5
+      min: 7.4
+      max: 7.6
+      max_alarm: 7.8
+    cya:
+      min: 30
+      max: 50
+    borate:
+      target: 50
+    ta:
+      target: 90
+      min: 80
+      max: 120
+    ch:
+      target: 350
+      min: 200
+      max: 400
+    tds:
+      max: 1500 # over baseline
