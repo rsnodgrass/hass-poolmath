@@ -30,6 +30,7 @@ SCAN_INTERVAL = timedelta(minutes=15)
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
         vol.Required(CONF_URL): cv.string,
+        # NOTE: targets are not really implemented, other than tfp
         vol.Optional(CONF_TARGET, default='tfp'): cv.string # targets/*.yaml file with min/max targets
     }
 )

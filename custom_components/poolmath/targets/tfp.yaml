@@ -7,6 +7,7 @@
       target_min: 8.0
       target_max: 13.0
     ph:
+      target_ideal: 7.4
       target_min: 7.2
       target_max: 8.0
     ta:
