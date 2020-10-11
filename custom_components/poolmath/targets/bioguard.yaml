@@ -1,26 +1,26 @@
   bio_guard:
     name: "Bio Guard"
     fc:
-      min: 1.0
-      max: 4.0
+      target_min: 1.0
+      target_max: 4.0
     ph:
-      min: 7.4
-      max: 7.6
+      target_min: 7.4
+      target_max: 7.6
     ta:
-      min: 80
-      max: 125
+      target_min: 80
+      target_max: 125
     ch:
-      min: 200
-      max: 275
+      target_min: 200
+      target_max: 275
     cya:
-      min: 60
-      max: 200
+      target_min: 60
+      target_max: 200
     salt:
-      min: 0
-      max: 0
+      target_min: 0
+      target_max: 0
     optimizer:
-      min: 30
-      max: 35
+      target_min: 30
+      target_max: 35
     phosphate:
-      min: 0
-      max: 500
+      target_min: 0
+      target_max: 500

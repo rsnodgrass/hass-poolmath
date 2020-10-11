@@ -3,17 +3,17 @@
       links:
         - https://www.co.portage.oh.us/sites/portagecountyoh/files/uploads/salt_generator.pdf	
       salt:
-        min: 2800
-        max: 3500
+        target_min: 2800
+        target_max: 3500
       tds:
-        max: 1500
+        target_max: 1500
         max_alarm: 3000
       cya:
-        min: 20
-        max: 50
+        target_min: 20
+        target_max: 50
       ph:
         target: 7.2 # lower for salt water pools
-        min: 7.2
-        max: 7.8
+        target_min: 7.2
+        target_max: 7.8
       # NOTE: Hydrochloric Acid (HCl) is needed
    

@@ -9,7 +9,7 @@ from homeassistant.core import callback
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.components.rest.sensor import RestData
 from homeassistant.const import (
-    CONF_NAME, CONF_URL,
+    CONF_NAME, CONF_URL, TEMP_FAHRENHEIT,
     ATTR_DESCRIPTION, ATTR_ICON, ATTR_NAME, ATTR_UNIT
 )
 from homeassistant.exceptions import PlatformNotReady
@@ -18,7 +18,7 @@ from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 import homeassistant.helpers.config_validation as cv
 
-from .const import DOMAIN, ATTRIBUTION, ATTR_ATTRIBUTION, ATTR_LOG_TIMESTAMP, ICON_POOL, ICON_GAUGE, CONF_TARGET
+from .const import (DOMAIN, ATTRIBUTION, ATTR_ATTRIBUTION, ATTR_LOG_TIMESTAMP, ATTR_TARGET_MIN, ATTR_TARGET_MAX, ICON_POOL, ICON_GAUGE, CONF_TARGET)
 
 LOG = logging.getLogger(__name__)
 
@@ -30,14 +30,13 @@ SCAN_INTERVAL = timedelta(minutes=15)
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
         vol.Required(CONF_URL): cv.string,
-        vol.Optional(CONF_TARGET): cv.string
+        vol.Optional(CONF_TARGET, default='tfp'): cv.string # targets/*.yaml file with min/max targets
     }
 )
 
 # see https://www.troublefreepool.com/blog/2018/12/12/abcs-of-pool-water-chemistry/
 POOL_MATH_SENSOR_SETTINGS = {
     'cc':     { ATTR_NAME: 'CC',     ATTR_UNIT: 'mg/L', ATTR_DESCRIPTION: 'Combined Chlorine'       , ATTR_ICON: ICON_GAUGE },
-    'temp':   { ATTR_NAME: 'Temp',   ATTR_UNIT: 'F°',   ATTR_DESCRIPTION: 'Temperature'             , ATTR_ICON: 'mdi:coolant-temperature' },
     'fc':     { ATTR_NAME: 'FC',     ATTR_UNIT: 'mg/L', ATTR_DESCRIPTION: 'Free Chlorine'           , ATTR_ICON: ICON_GAUGE },
     'ph':     { ATTR_NAME: 'pH',     ATTR_UNIT: 'pH',   ATTR_DESCRIPTION: 'Acidity/Basicity'        , ATTR_ICON: ICON_GAUGE },
     'ta':     { ATTR_NAME: 'TA',     ATTR_UNIT: 'ppm',  ATTR_DESCRIPTION: 'Total Alkalinity'        , ATTR_ICON: ICON_GAUGE },
@@ -47,25 +46,26 @@ POOL_MATH_SENSOR_SETTINGS = {
     'bor':    { ATTR_NAME: 'Borate', ATTR_UNIT: 'ppm',  ATTR_DESCRIPTION: 'Borate'                  , ATTR_ICON: ICON_GAUGE },
     'borate': { ATTR_NAME: 'Borate', ATTR_UNIT: 'ppm',  ATTR_DESCRIPTION: 'Borate'                  , ATTR_ICON: ICON_GAUGE },
     'csi':    { ATTR_NAME: 'CSI',    ATTR_UNIT: 'CSI',  ATTR_DESCRIPTION: 'Calcite Saturation Index', ATTR_ICON: ICON_GAUGE }
+    'temp':   { ATTR_NAME: 'Temp',   ATTR_UNIT: TEMP_FAHRENHEIT,  ATTR_DESCRIPTION: 'Temperature'   , ATTR_ICON: 'mdi:coolant-temperature' },
 }
 
 # FIXME: this should be a profile probably, and allow user to select from
 # a set of different profiles based on their needs (and make these ranges
 # attributes of the sensors).  Profiles should be in YAML, not hardcoded here.
 #
-# FIXME: See targets/
+# FIXME: Load from targets/ based on targets config key
 TFP_RECOMMENDED_TARGET_LEVELS = {
-    'temp':   { 'min': 32,   'max': 104  },
-    'fc':     { 'min': 0,    'max': 0    }, # depends on CYA
-    'cc':     { 'min': 0,    'max': 0    },
-    'ph':     { 'min': 7.2,  'max': 7.8, 'target': 7.7 },
-    'ta':     { 'min': 0,    'max': 0    },
-    'ch':     { 'min': 250,  'max': 350  }, # with salt: 350-450 ppm
-    'cya':    { 'min': 30,   'max': 50   }, # with salt: 70-80 ppm
-    'salt':   { 'min': 2000, 'max': 3000 },
-    'bor':    { 'min': 30,   'max': 50   },
-    'borate': { 'min': 30,   'max': 50   },
-    'csi':    { 'min': 0,    'max': 0    }
+    'temp':   { ATTR_TARGET_MIN: 32,   ATTR_TARGET_MAX: 104  },
+    'fc':     { ATTR_TARGET_MIN: 0,    ATTR_TARGET_MAX: 0    }, # depends on CYA
+    'cc':     { ATTR_TARGET_MIN: 0,    ATTR_TARGET_MAX: 0    },
+    'ph':     { ATTR_TARGET_MIN: 7.2,  ATTR_TARGET_MAX: 7.8, 'target': 7.7 },
+    'ta':     { ATTR_TARGET_MIN: 0,    ATTR_TARGET_MAX: 0    },
+    'ch':     { ATTR_TARGET_MIN: 250,  ATTR_TARGET_MAX: 350  }, # with salt: 350-450 ppm
+    'cya':    { ATTR_TARGET_MIN: 30,   ATTR_TARGET_MAX: 50   }, # with salt: 70-80 ppm
+    'salt':   { ATTR_TARGET_MIN: 2000, ATTR_TARGET_MAX: 3000 },
+    'bor':    { ATTR_TARGET_MIN: 30,   ATTR_TARGET_MAX: 50   },
+    'borate': { ATTR_TARGET_MIN: 30,   ATTR_TARGET_MAX: 50   },
+    'csi':    { ATTR_TARGET_MIN: 0,    ATTR_TARGET_MAX: 0    }
 }
 
 def setup_platform(hass, config, add_entities_callback, discovery_info=None):
@@ -133,7 +133,7 @@ class PoolMathClient():
             return None
 
         name = self._name + ' ' + config[ATTR_NAME]
-        sensor = UpdatableSensor(self._hass, name, config)
+        sensor = UpdatableSensor(self._hass, name, config, sensor_type)
         self._sensors[sensor_type] = sensor
 
         # register sensor with Home Assistant
@@ -223,17 +223,25 @@ class PoolMathServiceSensor(Entity):
 class UpdatableSensor(RestoreEntity):
     """Representation of a sensor whose state is kept up-to-date by an external data source."""
 
-    def __init__(self, hass, name, config):
+    def __init__(self, hass, name, config, sensor_type):
         """Initialize the sensor."""
         super().__init__()
 
         self._hass = hass
         self._name = name
         self._config = config
+        self._sensor_type = sensor_type
         self._state = None
         self._attrs = {
             ATTR_ATTRIBUTION = ATTRIBUTION
         }
+
+        # FIXME: use 'targets' configuration value
+
+        self._targets = TFP_RECOMMENDED_TARGET_LEVELS.get(sensor_type)
+        if self._targets:
+            self._attrs[CONF_TARGETS] = 'tfp'
+            self._attrs.update(self._targets)
 
     @property
     def name(self):

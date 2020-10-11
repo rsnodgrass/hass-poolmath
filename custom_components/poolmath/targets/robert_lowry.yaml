@@ -4,21 +4,21 @@
     name: "Robert Lowry"
     ph:
       target: 7.5
-      min: 7.4
-      max: 7.6
+      target_min: 7.4
+      target_max: 7.6
       max_alarm: 7.8
     cya:
-      min: 30
-      max: 50
+      target_min: 30
+      target_max: 50
     borate:
       target: 50
     ta:
       target: 90
-      min: 80
-      max: 120
+      target_min: 80
+      target_max: 120
     ch:
       target: 350
-      min: 200
-      max: 400
+      target_min: 200
+      target_max: 400
     tds:
-      max: 1500 # over baseline
+      target_max: 1500 # over baseline
