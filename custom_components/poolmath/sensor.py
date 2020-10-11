@@ -76,6 +76,13 @@ def setup_platform(hass, config, add_entities_callback, discovery_info=None):
     sensor = PoolMathServiceSensor("Pool Math Service", config, client)
     add_entities_callback([sensor], True)
 
+def get_pool_targets(targets_key):
+    if targets_key = 'tfp':
+        return TFP_RECOMMENDED_TARGET_LEVELS
+    else:
+        LOG.error(f"Only 'tfp' targets currently supported, ignoring targets.")
+        return None
+
 class PoolMathClient():
     def __init__(self, hass, config, add_sensors_callback):
         self._hass = hass
@@ -236,12 +243,14 @@ class UpdatableSensor(RestoreEntity):
             ATTR_ATTRIBUTION = ATTRIBUTION
         }
 
-        # FIXME: use 'targets' configuration value
-
-        self._targets = TFP_RECOMMENDED_TARGET_LEVELS.get(sensor_type)
-        if self._targets:
-            self._attrs[CONF_TARGETS] = 'tfp'
-            self._attrs.update(self._targets)
+        # FIXME: use 'targets' configuration value and load appropriate yaml
+        targets_id = 'tfp'
+        targets_map = get_pool_targets(targets_id)
+        if targets_map:
+            self._targets = targets_map.get(sensor_type)
+            if self._targets:
+                self._attrs[CONF_TARGETS] = targets_id 
+                self._attrs.update(self._targets)
 
     @property
     def name(self):
