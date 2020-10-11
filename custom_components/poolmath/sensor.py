@@ -9,14 +9,16 @@ from homeassistant.core import callback
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.components.rest.sensor import RestData
 from homeassistant.const import (
-    CONF_NAME,
-    CONF_URL
+    CONF_NAME, CONF_URL,
+    ATTR_DESCRIPTION, ATTR_ICON, ATTR_NAME, ATTR_UNIT
 )
 from homeassistant.exceptions import PlatformNotReady
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 import homeassistant.helpers.config_validation as cv
+
+from .const import DOMAIN, ATTRIBUTION, ATTR_ATTRIBUTION, ATTR_LOG_TIMESTAMP, ICON_POOL, ICON_GAUGE, CONF_TARGET
 
 LOG = logging.getLogger(__name__)
 
@@ -27,25 +29,24 @@ SCAN_INTERVAL = timedelta(minutes=15)
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
-        vol.Required(CONF_URL): cv.string
+        vol.Required(CONF_URL): cv.string,
+        vol.Optional(CONF_TARGET): cv.string
     }
 )
 
-ATTR_LOG_TIMESTAMP="Log Timestamp"
-
 # see https://www.troublefreepool.com/blog/2018/12/12/abcs-of-pool-water-chemistry/
 POOL_MATH_SENSOR_SETTINGS = {
-    'cc':     { 'name': 'CC',     'units': 'mg/L', 'description': 'Combined Chlorine', 'icon': 'mdi:gauge' },
-    'temp':   { 'name': 'Temp',   'units': 'F°',   'description': 'Temperature'      , 'icon': 'mdi:coolant-temperature' },
-    'fc':     { 'name': 'FC',     'units': 'mg/L', 'description': 'Free Chlorine'    , 'icon': 'mdi:gauge' },
-    'ph':     { 'name': 'pH',     'units': 'pH',   'description': 'Acidity/Basicity' , 'icon': 'mdi:gauge' },
-    'ta':     { 'name': 'TA',     'units': 'ppm',  'description': 'Total Alkalinity' , 'icon': 'mdi:gauge' },
-    'ch':     { 'name': 'CH',     'units': 'ppm',  'description': 'Calcium Hardness' , 'icon': 'mdi:gauge' },
-    'cya':    { 'name': 'CYA',    'units': 'ppm',  'description': 'Cyanuric Acid'    , 'icon': 'mdi:gauge' },
-    'salt':   { 'name': 'Salt',   'units': 'ppm',  'description': 'Salt'             , 'icon': 'mdi:gauge' },
-    'bor':    { 'name': 'Borate', 'units': 'ppm',  'description': 'Borate'           , 'icon': 'mdi:gauge' },
-    'borate': { 'name': 'Borate', 'units': 'ppm',  'description': 'Borate'           , 'icon': 'mdi:gauge' },
-    'csi':    { 'name': 'CSI',    'units': 'CSI',  'description': 'Calcite Saturation Index', 'icon': 'mdi:gauge' }
+    'cc':     { ATTR_NAME: 'CC',     ATTR_UNIT: 'mg/L', ATTR_DESCRIPTION: 'Combined Chlorine'       , ATTR_ICON: ICON_GAUGE },
+    'temp':   { ATTR_NAME: 'Temp',   ATTR_UNIT: 'F°',   ATTR_DESCRIPTION: 'Temperature'             , ATTR_ICON: 'mdi:coolant-temperature' },
+    'fc':     { ATTR_NAME: 'FC',     ATTR_UNIT: 'mg/L', ATTR_DESCRIPTION: 'Free Chlorine'           , ATTR_ICON: ICON_GAUGE },
+    'ph':     { ATTR_NAME: 'pH',     ATTR_UNIT: 'pH',   ATTR_DESCRIPTION: 'Acidity/Basicity'        , ATTR_ICON: ICON_GAUGE },
+    'ta':     { ATTR_NAME: 'TA',     ATTR_UNIT: 'ppm',  ATTR_DESCRIPTION: 'Total Alkalinity'        , ATTR_ICON: ICON_GAUGE },
+    'ch':     { ATTR_NAME: 'CH',     ATTR_UNIT: 'ppm',  ATTR_DESCRIPTION: 'Calcium Hardness'        , ATTR_ICON: ICON_GAUGE },
+    'cya':    { ATTR_NAME: 'CYA',    ATTR_UNIT: 'ppm',  ATTR_DESCRIPTION: 'Cyanuric Acid'           , ATTR_ICON: ICON_GAUGE },
+    'salt':   { ATTR_NAME: 'Salt',   ATTR_UNIT: 'ppm',  ATTR_DESCRIPTION: 'Salt'                    , ATTR_ICON: ICON_GAUGE },
+    'bor':    { ATTR_NAME: 'Borate', ATTR_UNIT: 'ppm',  ATTR_DESCRIPTION: 'Borate'                  , ATTR_ICON: ICON_GAUGE },
+    'borate': { ATTR_NAME: 'Borate', ATTR_UNIT: 'ppm',  ATTR_DESCRIPTION: 'Borate'                  , ATTR_ICON: ICON_GAUGE },
+    'csi':    { ATTR_NAME: 'CSI',    ATTR_UNIT: 'CSI',  ATTR_DESCRIPTION: 'Calcite Saturation Index', ATTR_ICON: ICON_GAUGE }
 }
 
 # FIXME: this should be a profile probably, and allow user to select from
@@ -131,7 +132,7 @@ class PoolMathClient():
             LOG.warning(f"Unknown Pool Math sensor '{sensor_type}' discovered at {self._url}")
             return None
 
-        name = self._name + ' ' + config['name']
+        name = self._name + ' ' + config[ATTR_NAME]
         sensor = UpdatableSensor(self._hass, name, config)
         self._sensors[sensor_type] = sensor
 
@@ -201,7 +202,7 @@ class PoolMathServiceSensor(Entity):
 
     @property
     def icon(self):
-        return "mdi:pool"
+        return ICON_POOL
 
     def _update_state_from_client(self):
         # re-updated the state with list of sensors that are being monitored (in case any new sensors were discovered)
@@ -230,7 +231,9 @@ class UpdatableSensor(RestoreEntity):
         self._name = name
         self._config = config
         self._state = None
-        self._attrs = {}
+        self._attrs = {
+            ATTR_ATTRIBUTION = ATTRIBUTION
+        }
 
     @property
     def name(self):
@@ -244,7 +247,7 @@ class UpdatableSensor(RestoreEntity):
     @property
     def unit_of_measurement(self):
         """Return the unit the value is expressed in."""
-        return self._config['units']
+        return self._config[ATTR_UNIT]
 
     @property
     def state(self):
