@@ -302,9 +302,7 @@ class UpdatableSensor(RestoreEntity):
 
         # restore any attributes
         if ATTR_LOG_TIMESTAMP in state.attributes:
-            self._attrs = {
-                ATTR_LOG_TIMESTAMP: state.attributes[ATTR_LOG_TIMESTAMP]
-            }
+            self._attrs[ATTR_LOG_TIMESTAMP] = state.attributes[ATTR_LOG_TIMESTAMP]
 
         async_dispatcher_connect(
             self._hass, DATA_UPDATED, self._schedule_immediate_update
