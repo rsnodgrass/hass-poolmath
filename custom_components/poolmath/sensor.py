@@ -9,7 +9,7 @@ from homeassistant.core import callback
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.components.rest.sensor import RestData
 from homeassistant.const import (
-    CONF_NAME, CONF_URL, TEMP_FAHRENHEIT, ATTR_ICON, ATTR_NAME, ATTR_UNIT
+    CONF_NAME, CONF_URL, TEMP_FAHRENHEIT, ATTR_ICON, ATTR_NAME, ATTR_UNIT_OF_MEASUREMENT
 )
 from homeassistant.exceptions import PlatformNotReady
 from homeassistant.helpers.entity import Entity
@@ -36,17 +36,17 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 
 # see https://www.troublefreepool.com/blog/2018/12/12/abcs-of-pool-water-chemistry/
 POOL_MATH_SENSOR_SETTINGS = {
-    'cc':     { ATTR_NAME: 'CC',     ATTR_UNIT: 'mg/L', ATTR_DESCRIPTION: 'Combined Chlorine'       , ATTR_ICON: ICON_GAUGE },
-    'fc':     { ATTR_NAME: 'FC',     ATTR_UNIT: 'mg/L', ATTR_DESCRIPTION: 'Free Chlorine'           , ATTR_ICON: ICON_GAUGE },
-    'ph':     { ATTR_NAME: 'pH',     ATTR_UNIT: 'pH',   ATTR_DESCRIPTION: 'Acidity/Basicity'        , ATTR_ICON: ICON_GAUGE },
-    'ta':     { ATTR_NAME: 'TA',     ATTR_UNIT: 'ppm',  ATTR_DESCRIPTION: 'Total Alkalinity'        , ATTR_ICON: ICON_GAUGE },
-    'ch':     { ATTR_NAME: 'CH',     ATTR_UNIT: 'ppm',  ATTR_DESCRIPTION: 'Calcium Hardness'        , ATTR_ICON: ICON_GAUGE },
-    'cya':    { ATTR_NAME: 'CYA',    ATTR_UNIT: 'ppm',  ATTR_DESCRIPTION: 'Cyanuric Acid'           , ATTR_ICON: ICON_GAUGE },
-    'salt':   { ATTR_NAME: 'Salt',   ATTR_UNIT: 'ppm',  ATTR_DESCRIPTION: 'Salt'                    , ATTR_ICON: ICON_GAUGE },
-    'bor':    { ATTR_NAME: 'Borate', ATTR_UNIT: 'ppm',  ATTR_DESCRIPTION: 'Borate'                  , ATTR_ICON: ICON_GAUGE },
-    'borate': { ATTR_NAME: 'Borate', ATTR_UNIT: 'ppm',  ATTR_DESCRIPTION: 'Borate'                  , ATTR_ICON: ICON_GAUGE },
-    'csi':    { ATTR_NAME: 'CSI',    ATTR_UNIT: 'CSI',  ATTR_DESCRIPTION: 'Calcite Saturation Index', ATTR_ICON: ICON_GAUGE },
-    'temp':   { ATTR_NAME: 'Temp',   ATTR_UNIT: TEMP_FAHRENHEIT,  ATTR_DESCRIPTION: 'Temperature'   , ATTR_ICON: 'mdi:coolant-temperature' }
+    'cc':     { ATTR_NAME: 'CC',     ATTR_UNIT_OF_MEASUREMENT: 'mg/L', ATTR_DESCRIPTION: 'Combined Chlorine'       , ATTR_ICON: ICON_GAUGE },
+    'fc':     { ATTR_NAME: 'FC',     ATTR_UNIT_OF_MEASUREMENT: 'mg/L', ATTR_DESCRIPTION: 'Free Chlorine'           , ATTR_ICON: ICON_GAUGE },
+    'ph':     { ATTR_NAME: 'pH',     ATTR_UNIT_OF_MEASUREMENT: 'pH',   ATTR_DESCRIPTION: 'Acidity/Basicity'        , ATTR_ICON: ICON_GAUGE },
+    'ta':     { ATTR_NAME: 'TA',     ATTR_UNIT_OF_MEASUREMENT: 'ppm',  ATTR_DESCRIPTION: 'Total Alkalinity'        , ATTR_ICON: ICON_GAUGE },
+    'ch':     { ATTR_NAME: 'CH',     ATTR_UNIT_OF_MEASUREMENT: 'ppm',  ATTR_DESCRIPTION: 'Calcium Hardness'        , ATTR_ICON: ICON_GAUGE },
+    'cya':    { ATTR_NAME: 'CYA',    ATTR_UNIT_OF_MEASUREMENT: 'ppm',  ATTR_DESCRIPTION: 'Cyanuric Acid'           , ATTR_ICON: ICON_GAUGE },
+    'salt':   { ATTR_NAME: 'Salt',   ATTR_UNIT_OF_MEASUREMENT: 'ppm',  ATTR_DESCRIPTION: 'Salt'                    , ATTR_ICON: ICON_GAUGE },
+    'bor':    { ATTR_NAME: 'Borate', ATTR_UNIT_OF_MEASUREMENT: 'ppm',  ATTR_DESCRIPTION: 'Borate'                  , ATTR_ICON: ICON_GAUGE },
+    'borate': { ATTR_NAME: 'Borate', ATTR_UNIT_OF_MEASUREMENT: 'ppm',  ATTR_DESCRIPTION: 'Borate'                  , ATTR_ICON: ICON_GAUGE },
+    'csi':    { ATTR_NAME: 'CSI',    ATTR_UNIT_OF_MEASUREMENT: 'CSI',  ATTR_DESCRIPTION: 'Calcite Saturation Index', ATTR_ICON: ICON_GAUGE },
+    'temp':   { ATTR_NAME: 'Temp',   ATTR_UNIT_OF_MEASUREMENT: TEMP_FAHRENHEIT,  ATTR_DESCRIPTION: 'Temperature'   , ATTR_ICON: 'mdi:coolant-temperature' }
 }
 
 # FIXME: this should be a profile probably, and allow user to select from
@@ -264,7 +264,7 @@ class UpdatableSensor(RestoreEntity):
     @property
     def unit_of_measurement(self):
         """Return the unit the value is expressed in."""
-        return self._config[ATTR_UNIT]
+        return self._config[ATTR_UNIT_OF_MEASUREMENT]
 
     @property
     def state(self):
