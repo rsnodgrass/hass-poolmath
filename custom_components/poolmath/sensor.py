@@ -46,8 +46,8 @@ POOL_MATH_SENSOR_SETTINGS = {
     'salt':   { ATTR_NAME: 'Salt',   ATTR_UNIT: 'ppm',  ATTR_DESCRIPTION: 'Salt'                    , ATTR_ICON: ICON_GAUGE },
     'bor':    { ATTR_NAME: 'Borate', ATTR_UNIT: 'ppm',  ATTR_DESCRIPTION: 'Borate'                  , ATTR_ICON: ICON_GAUGE },
     'borate': { ATTR_NAME: 'Borate', ATTR_UNIT: 'ppm',  ATTR_DESCRIPTION: 'Borate'                  , ATTR_ICON: ICON_GAUGE },
-    'csi':    { ATTR_NAME: 'CSI',    ATTR_UNIT: 'CSI',  ATTR_DESCRIPTION: 'Calcite Saturation Index', ATTR_ICON: ICON_GAUGE }
-    'temp':   { ATTR_NAME: 'Temp',   ATTR_UNIT: TEMP_FAHRENHEIT,  ATTR_DESCRIPTION: 'Temperature'   , ATTR_ICON: 'mdi:coolant-temperature' },
+    'csi':    { ATTR_NAME: 'CSI',    ATTR_UNIT: 'CSI',  ATTR_DESCRIPTION: 'Calcite Saturation Index', ATTR_ICON: ICON_GAUGE },
+    'temp':   { ATTR_NAME: 'Temp',   ATTR_UNIT: TEMP_FAHRENHEIT,  ATTR_DESCRIPTION: 'Temperature'   , ATTR_ICON: 'mdi:coolant-temperature' }
 }
 
 # FIXME: this should be a profile probably, and allow user to select from
