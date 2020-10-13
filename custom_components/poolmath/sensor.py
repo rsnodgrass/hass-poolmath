@@ -9,8 +9,7 @@ from homeassistant.core import callback
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.components.rest.sensor import RestData
 from homeassistant.const import (
-    CONF_NAME, CONF_URL, TEMP_FAHRENHEIT,
-    ATTR_DESCRIPTION, ATTR_ICON, ATTR_NAME, ATTR_UNIT
+    CONF_NAME, CONF_URL, TEMP_FAHRENHEIT, ATTR_ICON, ATTR_NAME, ATTR_UNIT
 )
 from homeassistant.exceptions import PlatformNotReady
 from homeassistant.helpers.entity import Entity
@@ -18,7 +17,7 @@ from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 import homeassistant.helpers.config_validation as cv
 
-from .const import (DOMAIN, ATTRIBUTION, ATTR_ATTRIBUTION, ATTR_LOG_TIMESTAMP, ATTR_TARGET_MIN, ATTR_TARGET_MAX, ICON_POOL, ICON_GAUGE, CONF_TARGET)
+from .const import (DOMAIN, ATTRIBUTION, ATTR_ATTRIBUTION, ATTR_DESCRIPTION, ATTR_LOG_TIMESTAMP, ATTR_TARGET_MIN, ATTR_TARGET_MAX, ICON_POOL, ICON_GAUGE, CONF_TARGET)
 
 LOG = logging.getLogger(__name__)
 
