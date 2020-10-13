@@ -241,7 +241,7 @@ class UpdatableSensor(RestoreEntity):
         self._sensor_type = sensor_type
         self._state = None
         self._attrs = {
-            ATTR_ATTRIBUTION = ATTRIBUTION
+            ATTR_ATTRIBUTION: ATTRIBUTION
         }
 
         # FIXME: use 'targets' configuration value and load appropriate yaml
