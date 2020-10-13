@@ -54,6 +54,7 @@ POOL_MATH_SENSOR_SETTINGS = {
 # attributes of the sensors).  Profiles should be in YAML, not hardcoded here.
 #
 # FIXME: Load from targets/ based on targets config key
+TFP_TARGET = 'tfp'
 TFP_RECOMMENDED_TARGET_LEVELS = {
     'temp':   { ATTR_TARGET_MIN: 32,   ATTR_TARGET_MAX: 104  },
     'fc':     { ATTR_TARGET_MIN: 0,    ATTR_TARGET_MAX: 0    }, # depends on CYA
@@ -77,10 +78,10 @@ def setup_platform(hass, config, add_entities_callback, discovery_info=None):
     add_entities_callback([sensor], True)
 
 def get_pool_targets(targets_key):
-    if targets_key == 'tfp':
+    if targets_key == TFP_TARGET:
         return TFP_RECOMMENDED_TARGET_LEVELS
     else:
-        LOG.error(f"Only 'tfp' targets currently supported, ignoring targets.")
+        LOG.error(f"Only '{TFP_TARGET}' targets currently supported, ignoring targets.")
         return None
 
 class PoolMathClient():
@@ -239,12 +240,16 @@ class UpdatableSensor(RestoreEntity):
         self._config = config
         self._sensor_type = sensor_type
         self._state = None
-        self._attrs = {
-            ATTR_ATTRIBUTION: ATTRIBUTION
-        }
 
         # FIXME: use 'targets' configuration value and load appropriate yaml
-        targets_id = 'tfp'
+        targets_id = TFP_TARGET
+
+        self._attrs = {
+            ATTR_ATTRIBUTION: ATTRIBUTION,
+            'type': sensor_type,
+            'target': targets_id
+        }
+
         targets_map = get_pool_targets(targets_id)
         if targets_map:
             self._targets = targets_map.get(sensor_type)
@@ -282,7 +287,7 @@ class UpdatableSensor(RestoreEntity):
 
     def inject_state(self, state, timestamp):
         state_changed = self._state != state
-        self._attrs = {ATTR_LOG_TIMESTAMP: timestamp}
+        self._attrs[ATTR_LOG_TIMESTAMP] = timestamp
 
         if state_changed:
             self._state = state
