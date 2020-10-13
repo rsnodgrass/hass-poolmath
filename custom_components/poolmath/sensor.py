@@ -78,7 +78,7 @@ def setup_platform(hass, config, add_entities_callback, discovery_info=None):
     add_entities_callback([sensor], True)
 
 def get_pool_targets(targets_key):
-    if targets_key = 'tfp':
+    if targets_key == 'tfp':
         return TFP_RECOMMENDED_TARGET_LEVELS
     else:
         LOG.error(f"Only 'tfp' targets currently supported, ignoring targets.")
