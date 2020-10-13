@@ -249,7 +249,7 @@ class UpdatableSensor(RestoreEntity):
         if targets_map:
             self._targets = targets_map.get(sensor_type)
             if self._targets:
-                self._attrs[CONF_TARGETS] = targets_id 
+                self._attrs[CONF_TARGET] = targets_id 
                 self._attrs.update(self._targets)
 
     @property
