@@ -241,15 +241,13 @@ class UpdatableSensor(RestoreEntity):
         self._sensor_type = sensor_type
         self._state = None
 
-        # FIXME: use 'targets' configuration value and load appropriate yaml
-        targets_id = TFP_TARGET
-
         self._attrs = {
             ATTR_ATTRIBUTION: ATTRIBUTION,
-            'type': sensor_type,
-            'target': targets_id
+            'type': sensor_type
         }
 
+        # FIXME: use 'targets' configuration value and load appropriate yaml
+        targets_id = TFP_TARGET
         targets_map = get_pool_targets(targets_id)
         if targets_map:
             self._targets = targets_map.get(sensor_type)
