@@ -53,20 +53,16 @@ POOL_MATH_SENSOR_SETTINGS = {
 # a set of different profiles based on their needs (and make these ranges
 # attributes of the sensors).  Profiles should be in YAML, not hardcoded here.
 #
-# FIXME: Load from targets/ based on targets config key
+# FIXME: Load from targets/ based on targets config key...
+# FIXME: targets should probably all be in code, since some values are computed based on other values
 TFP_TARGET = 'tfp'
 TFP_RECOMMENDED_TARGET_LEVELS = {
-    'temp':   { ATTR_TARGET_MIN: 32,   ATTR_TARGET_MAX: 104  },
-    'fc':     { ATTR_TARGET_MIN: 0,    ATTR_TARGET_MAX: 0    }, # depends on CYA
-    'cc':     { ATTR_TARGET_MIN: 0,    ATTR_TARGET_MAX: 0    },
-    'ph':     { ATTR_TARGET_MIN: 7.2,  ATTR_TARGET_MAX: 7.8, 'target': 7.7 },
-    'ta':     { ATTR_TARGET_MIN: 0,    ATTR_TARGET_MAX: 0    },
-    'ch':     { ATTR_TARGET_MIN: 250,  ATTR_TARGET_MAX: 350  }, # with salt: 350-450 ppm
-    'cya':    { ATTR_TARGET_MIN: 30,   ATTR_TARGET_MAX: 50   }, # with salt: 70-80 ppm
-    'salt':   { ATTR_TARGET_MIN: 2000, ATTR_TARGET_MAX: 3000 },
-    'bor':    { ATTR_TARGET_MIN: 30,   ATTR_TARGET_MAX: 50   },
-    'borate': { ATTR_TARGET_MIN: 30,   ATTR_TARGET_MAX: 50   },
-    'csi':    { ATTR_TARGET_MIN: 0,    ATTR_TARGET_MAX: 0    }
+    'cc':     { ATTR_TARGET_MIN: 0,    ATTR_TARGET_MAX: 0.1  },
+    'ph':     { ATTR_TARGET_MIN: 7.2,  ATTR_TARGET_MAX: 7.8, 'target': 7.4 },
+    'ta':     { ATTR_TARGET_MIN: 50,   ATTR_TARGET_MAX: 90   },
+#    'ch':     { ATTR_TARGET_MIN: 250,  ATTR_TARGET_MAX: 650  }, # with salt: 350-450 ppm
+#    'cya':    { ATTR_TARGET_MIN: 30,   ATTR_TARGET_MAX: 50   }, # with salt: 70-80 ppm
+    'salt':   { ATTR_TARGET_MIN: 3000, ATTR_TARGET_MAX: 3200, 'target': 3100 },
 }
 
 def setup_platform(hass, config, add_entities_callback, discovery_info=None):
