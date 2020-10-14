@@ -2,13 +2,14 @@
 
 DOMAIN='poolmath'
 
-ATTRIBUTION="Data provided by PoolMath - TFP"
+ATTRIBUTION="Data provided by PoolMath (Trouble Free Pool)"
 
 ATTR_ATTRIBUTION="attribution"
 ATTR_DESCRIPTION="description"
-ATTR_LOG_TIMESTAMP="Log Timestamp"
-ATTR_TARGET_MIN='target_min'
-ATTR_TARGET_MAX='target_max'
+ATTR_LOG_TIMESTAMP="log timestamp"
+ATTR_TARGET_MIN='target min'
+ATTR_TARGET_MAX='target max'
+ATTR_TARGET_SOURCE='target source'
 
 CONF_TARGET='target'
 

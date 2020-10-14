@@ -17,7 +17,7 @@ from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 import homeassistant.helpers.config_validation as cv
 
-from .const import (DOMAIN, ATTRIBUTION, ATTR_ATTRIBUTION, ATTR_DESCRIPTION, ATTR_LOG_TIMESTAMP, ATTR_TARGET_MIN, ATTR_TARGET_MAX, ICON_POOL, ICON_GAUGE, CONF_TARGET)
+from .const import (DOMAIN, ATTRIBUTION, ATTR_ATTRIBUTION, ATTR_DESCRIPTION, ATTR_TARGET_SOURCE, ATTR_LOG_TIMESTAMP, ATTR_TARGET_MIN, ATTR_TARGET_MAX, ICON_POOL, ICON_GAUGE, CONF_TARGET)
 
 LOG = logging.getLogger(__name__)
 
@@ -242,17 +242,16 @@ class UpdatableSensor(RestoreEntity):
         self._state = None
 
         self._attrs = {
-            ATTR_ATTRIBUTION: ATTRIBUTION,
-            'type': sensor_type
+            ATTR_ATTRIBUTION: ATTRIBUTION
         }
 
         # FIXME: use 'targets' configuration value and load appropriate yaml
-        targets_id = TFP_TARGET
-        targets_map = get_pool_targets(targets_id)
+        targets_source = TFP_TARGET
+        targets_map = get_pool_targets(targets_source)
         if targets_map:
             self._targets = targets_map.get(sensor_type)
             if self._targets:
-                self._attrs[CONF_TARGET] = targets_id 
+                self._attrs[ATTR_TARGET_SOURCE] = targets_source
                 self._attrs.update(self._targets)
 
     @property
