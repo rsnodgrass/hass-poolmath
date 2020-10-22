@@ -1,6 +1,6 @@
 {
   "domain": "poolmath",
-  "name": "Pool Math by Trouble Free Pool",
+  "name": "Pool Math (Trouble Free Pool)",
   "documentation": "https://github.com/rsnodgrass/hass-poolmath/",
   "requirements": [
     "beautifulsoup4>=4.9.0", 
