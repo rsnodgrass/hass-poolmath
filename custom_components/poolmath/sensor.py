@@ -1,5 +1,6 @@
 import logging
 
+import asyncio
 import voluptuous as vol
 from requests.auth import HTTPBasicAuth, HTTPDigestAuth
 from bs4 import BeautifulSoup
@@ -7,7 +8,7 @@ from datetime import timedelta
 
 from homeassistant.core import callback
 from homeassistant.components.sensor import PLATFORM_SCHEMA
-from homeassistant.components.rest.sensor import RestData
+from homeassistant.components.rest.data import RestData
 from homeassistant.const import (
     CONF_NAME, CONF_URL, TEMP_FAHRENHEIT, ATTR_ICON, ATTR_NAME, ATTR_UNIT_OF_MEASUREMENT
 )
@@ -111,11 +112,16 @@ class PoolMathClient():
 
     def _fetch_latest_data(self):
         """Fetch the latest log entries from the Pool Math service"""
-        self._rest.update()
+
+        # NOTE: update() has been replaced in 0.117 with async API
+        # self._rest.update()
+        asyncio.run_coroutine_threadsafe( self._rest.async_update(), hass.loop )
+        
         result = self._rest.data
         if result is None:
             LOG.warn(f"Failed updating Pool Math data from {self._url}")
             return None
+        
         soup = BeautifulSoup(result, 'html.parser')
         #LOG.debug("Raw data from %s: %s", self._url, soup)
         return soup
