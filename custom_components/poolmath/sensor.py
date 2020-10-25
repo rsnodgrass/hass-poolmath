@@ -115,7 +115,7 @@ class PoolMathClient():
 
         # NOTE: update() has been replaced in 0.117 with async API
         # self._rest.update()
-        asyncio.run_coroutine_threadsafe( self._rest.async_update(), hass.loop )
+        asyncio.run_coroutine_threadsafe( self._rest.async_update(), self._hass.loop )
         
         result = self._rest.data
         if result is None:
