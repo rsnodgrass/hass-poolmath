@@ -6,6 +6,8 @@ from requests.auth import HTTPBasicAuth, HTTPDigestAuth
 from bs4 import BeautifulSoup
 from datetime import timedelta
 
+import httpx
+
 from homeassistant.core import callback
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.components.rest.data import RestData
@@ -24,6 +26,8 @@ LOG = logging.getLogger(__name__)
 
 DEFAULT_NAME = 'Pool'
 DATA_UPDATED = 'poolmath_data_updated'
+
+DEFAULT_TIMEOUT=2.0
 
 SCAN_INTERVAL = timedelta(minutes=15)
 
@@ -87,12 +91,12 @@ class PoolMathClient():
         self._sensors = {}
         self._add_sensors_callback = add_sensors_callback
 
-        verify_ssl = True
         self._url = config.get(CONF_URL)
-        self._rest = RestData('GET', self._url, '', '', '', verify_ssl)
+        self._async_client = None
+        self._timeout = DEFAULT_TIMEOUT
 
         # query the latest data from Pool Math
-        soup = self._fetch_latest_data()
+        soup = self.update()
         if soup is None:
             raise PlatformNotReady
         
@@ -110,26 +114,30 @@ class PoolMathClient():
         LOG.info(f"Creating Pool Math sensors for '{self._name}'")
         self._update_from_log_entries(soup)
 
-    def _fetch_latest_data(self):
-        """Fetch the latest log entries from the Pool Math service"""
+    async def _async_update(self):
+        try:
+            if not self._async_client:
+                self._async_client = httpx.AsyncClient(verify=True)
 
-        # NOTE: update() has been replaced in 0.117 with async API
-        # self._rest.update()
-        asyncio.run_coroutine_threadsafe( self._rest.async_update(), self._hass.loop )
-        
-        result = self._rest.data
+            response = await self._async_client.request('GET', self._url, timeout=self._timeout)
+            return response.text
+
+        except httpx.RequestError as ex:
+            LOG.error(f"Error fetching data from {self._url}: {ex}")
+            return None
+
+    def update(self):
+        """Fetch the latest log entries from the Pool Math service"""
+        # TODO: Eventually move this all to external async client, and convert this to a HASS async impl
+        future = asyncio.run_coroutine_threadsafe( self._async_update(), self._hass.loop )
+        result = future.result()
+
         if result is None:
-            LOG.warn(f"Failed updating Pool Math data from {self._url}")
+            LOG.warn(f"Failed updating Pool Math data from {self._url}: {result}")
             return None
         
         soup = BeautifulSoup(result, 'html.parser')
         #LOG.debug("Raw data from %s: %s", self._url, soup)
-        return soup
-
-    def update(self):
-        soup = self._fetch_latest_data()
-        if not soup:
-            return None
         return self._update_from_log_entries(soup)
 
     def get_sensor(self, sensor_type):

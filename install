@@ -1,0 +1,1 @@
+scp -r custom_components/* ha-cabin:/config/custom_components/

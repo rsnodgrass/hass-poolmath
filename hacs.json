@@ -1,6 +1,5 @@
 {
   "name": "Pool Math (Trouble Free Pool)",
   "domains": ["sensor"],
-  "render_readme": true,
-  "homeassistant": "0.117.0b0"
+  "render_readme": true
 }
