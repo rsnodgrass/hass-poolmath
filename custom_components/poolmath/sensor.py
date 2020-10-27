@@ -128,9 +128,9 @@ class PoolMathClient():
         """Fetch the latest log entries from the Pool Math service"""
         # TODO: Eventually move this all to external async client, and convert this to a HASS async impl
         future = asyncio.run_coroutine_threadsafe( self._async_update(), self._hass.loop )
-        result = future.result()
+        result = future.result(self._timeout)
 
-        if result is None:
+        if not result:
             LOG.warn(f"Failed updating Pool Math data from {self._url}: {result}")
             return None
         
