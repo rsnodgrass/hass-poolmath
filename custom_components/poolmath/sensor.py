@@ -95,21 +95,19 @@ class PoolMathClient():
         self._async_client = None
         self._timeout = DEFAULT_TIMEOUT
 
+        self._name = config.get(CONF_NAME, DEFAULT_NAME)
+
         # query the latest data from Pool Math
         soup = self.update()
         if soup is None:
             raise PlatformNotReady
-        
-        self._name = config.get(CONF_NAME)
-        if self._name == None:
-            self._name = DEFAULT_NAME
 
-            # extract the pool name, if defined
-            h1_span = soup.select('h1')
-            if h1_span and h1_span[0]:
-                pool_name = h1_span[0].string
-                if pool_name != None:
-                    self._name = f"{pool_name} {DEFAULT_NAME}"
+        # extract the pool name, if defined
+        h1_span = soup.select('h1')
+        if h1_span and h1_span[0]:
+            pool_name = h1_span[0].string
+            if pool_name != None:
+                self._name = f"{pool_name} {DEFAULT_NAME}"
 
         LOG.info(f"Creating Pool Math sensors for '{self._name}'")
         self._update_from_log_entries(soup)
@@ -117,7 +115,7 @@ class PoolMathClient():
     async def _async_update(self):
         try:
             if not self._async_client:
-                self._async_client = httpx.AsyncClient(verify=True)
+                self._async_client = httpx.AsyncClient(verify=False)
 
             response = await self._async_client.request('GET', self._url, timeout=self._timeout)
             return response.text
