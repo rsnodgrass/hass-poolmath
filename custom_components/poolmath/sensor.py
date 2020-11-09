@@ -41,11 +41,26 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 
 # see https://www.troublefreepool.com/blog/2018/12/12/abcs-of-pool-water-chemistry/
 POOL_MATH_SENSOR_SETTINGS = {
-    'cc':     { ATTR_NAME: 'CC',     ATTR_UNIT_OF_MEASUREMENT: 'mg/L', ATTR_DESCRIPTION: 'Combined Chlorine'       , ATTR_ICON: ICON_GAUGE },
-    'fc':     { ATTR_NAME: 'FC',     ATTR_UNIT_OF_MEASUREMENT: 'mg/L', ATTR_DESCRIPTION: 'Free Chlorine'           , ATTR_ICON: ICON_GAUGE },
-    'ph':     { ATTR_NAME: 'pH',     ATTR_UNIT_OF_MEASUREMENT: 'pH',   ATTR_DESCRIPTION: 'Acidity/Basicity'        , ATTR_ICON: ICON_GAUGE },
-    'ta':     { ATTR_NAME: 'TA',     ATTR_UNIT_OF_MEASUREMENT: 'ppm',  ATTR_DESCRIPTION: 'Total Alkalinity'        , ATTR_ICON: ICON_GAUGE },
-    'ch':     { ATTR_NAME: 'CH',     ATTR_UNIT_OF_MEASUREMENT: 'ppm',  ATTR_DESCRIPTION: 'Calcium Hardness'        , ATTR_ICON: ICON_GAUGE },
+    'cc': { ATTR_NAME: 'CC',
+            ATTR_UNIT_OF_MEASUREMENT: 'mg/L',
+            ATTR_DESCRIPTION: 'Combined Chlorine',
+            ATTR_ICON: ICON_GAUGE },
+    'fc': { ATTR_NAME: 'FC',
+            ATTR_UNIT_OF_MEASUREMENT: 'mg/L',
+            ATTR_DESCRIPTION: 'Free Chlorine',
+            ATTR_ICON: ICON_GAUGE },
+    'ph': { ATTR_NAME: 'pH',
+            ATTR_UNIT_OF_MEASUREMENT: 'pH',
+            ATTR_DESCRIPTION: 'Acidity/Basicity',
+            ATTR_ICON: ICON_GAUGE },
+    'ta': { ATTR_NAME: 'TA',
+            ATTR_UNIT_OF_MEASUREMENT: 'ppm',
+            ATTR_DESCRIPTION: 'Total Alkalinity',
+            ATTR_ICON: ICON_GAUGE },
+    'ch': { ATTR_NAME: 'CH',
+            ATTR_UNIT_OF_MEASUREMENT: 'ppm',
+            ATTR_DESCRIPTION: 'Calcium Hardness',
+            ATTR_ICON: ICON_GAUGE },
     'cya':    { ATTR_NAME: 'CYA',    ATTR_UNIT_OF_MEASUREMENT: 'ppm',  ATTR_DESCRIPTION: 'Cyanuric Acid'           , ATTR_ICON: ICON_GAUGE },
     'salt':   { ATTR_NAME: 'Salt',   ATTR_UNIT_OF_MEASUREMENT: 'ppm',  ATTR_DESCRIPTION: 'Salt'                    , ATTR_ICON: ICON_GAUGE },
     'bor':    { ATTR_NAME: 'Borate', ATTR_UNIT_OF_MEASUREMENT: 'ppm',  ATTR_DESCRIPTION: 'Borate'                  , ATTR_ICON: ICON_GAUGE },
@@ -95,19 +110,21 @@ class PoolMathClient():
         self._async_client = None
         self._timeout = DEFAULT_TIMEOUT
 
-        self._name = config.get(CONF_NAME, DEFAULT_NAME)
-
         # query the latest data from Pool Math
         soup = self.update()
         if soup is None:
             raise PlatformNotReady
 
-        # extract the pool name, if defined
+        default_name = DEFAULT_NAME
+
+        # extract the pool name, if defined, and assign as the default pool name
         h1_span = soup.select('h1')
         if h1_span and h1_span[0]:
             pool_name = h1_span[0].string
             if pool_name != None:
-                self._name = f"{pool_name} {DEFAULT_NAME}"
+                default_name = f"{pool_name}"
+
+        self._name = config.get(CONF_NAME, default_name)
 
         LOG.info(f"Creating Pool Math sensors for '{self._name}'")
         self._update_from_log_entries(soup)
@@ -131,7 +148,7 @@ class PoolMathClient():
         result = future.result(self._timeout)
 
         if not result:
-            LOG.warn(f"Failed updating Pool Math data from {self._url}: {result}")
+            LOG.debug(f"Failed updating Pool Math data from {self._url}: {result}")
             return None
         
         soup = BeautifulSoup(result, 'html.parser')
