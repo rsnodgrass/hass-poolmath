@@ -6,6 +6,7 @@ from requests.auth import HTTPBasicAuth, HTTPDigestAuth
 from bs4 import BeautifulSoup
 from datetime import timedelta
 
+import re
 import httpx
 
 from homeassistant.core import callback
