@@ -125,6 +125,13 @@ class PoolMathClient():
         self._add_sensors_callback = add_sensors_callback
 
         self._url = config.get(CONF_URL)
+
+        # parse out the unique id for  the pool
+        https://troublefreepool.com/mypool/6WPG8yL
+        match = re.search(r'/mypool/(.+)', self._url)
+        if match:
+            self._pool_id = match[0]
+
         self._async_client = None
         self._timeout = DEFAULT_TIMEOUT
 
@@ -184,7 +191,7 @@ class PoolMathClient():
             return None
 
         name = self._name + ' ' + config[ATTR_NAME]
-        sensor = UpdatableSensor(self._hass, name, config, sensor_type)
+        sensor = UpdatableSensor(self._hass, self._pool_id, name, config, sensor_type)
         self._sensors[sensor_type] = sensor
 
         # register sensor with Home Assistant
@@ -274,7 +281,7 @@ class PoolMathServiceSensor(Entity):
 class UpdatableSensor(RestoreEntity):
     """Representation of a sensor whose state is kept up-to-date by an external data source."""
 
-    def __init__(self, hass, name, config, sensor_type):
+    def __init__(self, hass, pool_id, name, config, sensor_type):
         """Initialize the sensor."""
         super().__init__()
 
@@ -284,6 +291,11 @@ class UpdatableSensor(RestoreEntity):
         self._sensor_type = sensor_type
         self._state = None
 
+        if pool_id:
+            self._unique_id = f"poolmath_{pool_id}_{sensor_type}"
+        else:
+            self._unique_id = None
+        
         self._attrs = {
             ATTR_ATTRIBUTION: ATTRIBUTION
         }
@@ -301,6 +313,10 @@ class UpdatableSensor(RestoreEntity):
     def name(self):
         """Return the name of the sensor."""
         return self._name
+
+    @property
+    def unique_id(self):
+        return self._unique_id
 
     @property
     def should_poll(self):
