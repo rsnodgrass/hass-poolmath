@@ -126,8 +126,7 @@ class PoolMathClient():
 
         self._url = config.get(CONF_URL)
 
-        # parse out the unique id for  the pool
-        https://troublefreepool.com/mypool/6WPG8yL
+        # parse out the unique pool identifier from the url
         match = re.search(r'/mypool/(.+)', self._url)
         if match:
             self._pool_id = match[0]
