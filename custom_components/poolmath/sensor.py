@@ -159,11 +159,12 @@ class PoolMathClient():
             if not self._async_client:
                 self._async_client = httpx.AsyncClient(verify=False)
 
+            LOG.debug(f"GET {self._url} (timeout={self._timeout})")
             response = await self._async_client.request('GET', self._url, timeout=self._timeout)
             return response.text
 
         except httpx.RequestError as ex:
-            LOG.error(f"Error fetching data from {self._url}: {ex}")
+            LOG.error(f"Error fetching {self._name} data from {self._url}: {ex}")
             return None
 
     def update(self):
