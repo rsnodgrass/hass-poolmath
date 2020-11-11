@@ -36,6 +36,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
         vol.Required(CONF_URL): cv.string,
         vol.Optional(CONF_NAME): cv.string,
+        
         # NOTE: targets are not really implemented, other than tfp
         vol.Optional(CONF_TARGET, default='tfp'): cv.string # targets/*.yaml file with min/max targets
     }
@@ -155,6 +156,7 @@ class PoolMathClient():
         LOG.info(f"Creating Pool Math sensors for '{self._name}'")
         self._update_from_log_entries(soup)
 
+    # TODO: Eventually move this all to external async client, and convert this to a HASS async impl
     async def _async_update(self):
         try:
             if not self._async_client:
@@ -171,17 +173,17 @@ class PoolMathClient():
 
     def update(self):
         """Fetch the latest log entries from the Pool Math service"""
-        # TODO: Eventually move this all to external async client, and convert this to a HASS async impl
-        future = asyncio.run_coroutine_threadsafe( self._async_update(), self._hass.loop )
+        coro = self._async_update()
+        future = asyncio.run_coroutine_threadsafe( coro, self._hass.loop )
 
         LOG.info(f"Awaiting on future result {future}")
-        result = future.result(self._timeout)
+        result = future.result(timeout=self._timeout)
         if not result:
             LOG.debug(f"Timed out from {self._url}: {result}")
             return None
 
         soup = BeautifulSoup(result, 'html.parser')
-        LOG.debug("Raw data from %s: %s", self._url, soup)
+        LOG.debug(f"Updating from raw data: %s", soup)
         return self._update_from_log_entries(soup)
 
     def get_sensor(self, sensor_type):
