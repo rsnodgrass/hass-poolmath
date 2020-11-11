@@ -35,6 +35,7 @@ SCAN_INTERVAL = timedelta(minutes=15)
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
         vol.Required(CONF_URL): cv.string,
+        vol.Optional(CONF_NAME): cv.string,
         # NOTE: targets are not really implemented, other than tfp
         vol.Optional(CONF_TARGET, default='tfp'): cv.string # targets/*.yaml file with min/max targets
     }
@@ -116,7 +117,7 @@ def get_pool_targets(targets_key):
     if targets_key == TFP_TARGET:
         return TFP_RECOMMENDED_TARGET_LEVELS
     else:
-        LOG.error(f"Only '{TFP_TARGET}' targets currently supported, ignoring targets.")
+        LOG.error(f"Only '{TFP_TARGET}' target currently supported, ignoring {CONF_TARGET}.")
         return None
 
 class PoolMathClient():
