@@ -137,20 +137,7 @@ class PoolMathClient():
         self._async_client = None
         self._timeout = DEFAULT_TIMEOUT
 
-        # query the latest data from Pool Math
-        soup = self.update()
-        if soup is None:
-            raise PlatformNotReady
-
         default_name = DEFAULT_NAME
-
-        # extract the pool name, if defined, and assign as the default pool name
-        h1_span = soup.select('h1')
-        if h1_span and h1_span[0]:
-            pool_name = h1_span[0].string
-            if pool_name != None:
-                default_name = f"{pool_name}"
-
         self._name = config.get(CONF_NAME, default_name)
 
         LOG.info(f"Creating Pool Math sensors for '{self._name}'")
