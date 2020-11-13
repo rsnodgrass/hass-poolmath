@@ -106,13 +106,13 @@ TFP_RECOMMENDED_TARGET_LEVELS = {
     'salt':   { ATTR_TARGET_MIN: 3000, ATTR_TARGET_MAX: 3200, 'target': 3100 },
 }
 
-def setup_platform(hass, config, add_entities_callback, discovery_info=None):
+async def async_setup_platform(hass, config, async_add_entities_callback, discovery_info=None):
     """Set up the Pool Math sensor integration."""
-    client = PoolMathClient(hass, config, add_entities_callback)
+    client = PoolMathClient(hass, config, async_add_entities_callback)
 
     # create the Pool Math service sensor, which is responsible for updating all other sensors
     sensor = PoolMathServiceSensor("Pool Math Service", config, client)
-    add_entities_callback([sensor], True)
+    await async_add_entities_callback([sensor], True)
 
 def get_pool_targets(targets_key):
     if targets_key == TFP_TARGET:
@@ -122,10 +122,10 @@ def get_pool_targets(targets_key):
         return None
 
 class PoolMathClient():
-    def __init__(self, hass, config, add_sensors_callback):
+    def __init__(self, hass, config, async_add_sensors_callback):
         self._hass = hass
         self._sensors = {}
-        self._add_sensors_callback = add_sensors_callback
+        self._async_add_sensors_callback = async_add_sensors_callback
 
         self._url = config.get(CONF_URL)
         self._timestamp = None
@@ -174,9 +174,11 @@ class PoolMathClient():
         sensor = UpdatableSensor(self._hass, self._pool_id, name, config, sensor_type)
         self._sensors[sensor_type] = sensor
 
-        # register sensor with Home Assistant
-        self._add_sensors_callback([sensor], True)
+        # register sensor with Home Assistant from a thread
+        await self._async_add_sensors_callback([sensor], True)
+
         return sensor
+
 
     def _update_from_log_entries(self, poolmath_soup):
         updated_sensors = {}
