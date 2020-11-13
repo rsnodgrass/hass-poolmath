@@ -128,6 +128,7 @@ class PoolMathClient():
         self._add_sensors_callback = add_sensors_callback
 
         self._url = config.get(CONF_URL)
+        self._timestamp = None
 
         # parse out the unique pool identifier from the url
         match = re.search(r'/mypool/(.+)', self._url)
