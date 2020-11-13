@@ -151,7 +151,6 @@ class PoolMathClient():
 
             LOG.debug(f"GET {self._url} (timeout={self._timeout})")
             response = await self._async_client.request('GET', self._url, timeout=self._timeout)
-            LOG.debug(f"GET {self._url}: {response}")
 
             soup = BeautifulSoup(response.text, 'html.parser')
             LOG.debug(f"Updating from raw data: %s", soup)
