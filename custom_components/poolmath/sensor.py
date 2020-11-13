@@ -172,12 +172,13 @@ class PoolMathClient():
             return None
 
     def update(self):
-        """Fetch the latest log entries from the Pool Math service"""
+        """Fetch latest log entries from the Pool Math service"""
         coro = self._async_update()
         future = asyncio.run_coroutine_threadsafe( coro, self._hass.loop )
 
-        LOG.info(f"Awaiting on future result {future}")
+        LOG.info(f"Awaiting on future result {future} (timeout={self._timeout})")
         result = future.result(timeout=self._timeout)
+        LOG.info(f"Future result complete: {future}")
         if not result:
             LOG.debug(f"Timed out from {self._url}: {result}")
             return None
