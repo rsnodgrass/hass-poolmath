@@ -157,7 +157,8 @@ class PoolMathClient():
         self._update_from_log_entries(soup)
 
     # TODO: Eventually move this all to external async client, and convert this to a HASS async impl
-    async def _async_update(self):
+    async def async_update(self):
+        """Fetch latest log entries from the Pool Math service"""
         try:
             if not self._async_client:
                 self._async_client = httpx.AsyncClient(verify=False)
@@ -165,27 +166,13 @@ class PoolMathClient():
             LOG.debug(f"GET {self._url} (timeout={self._timeout})")
             response = await self._async_client.request('GET', self._url, timeout=self._timeout)
             LOG.debug(f"GET {self._url}: {response}")
-            return response.text
+
+            soup = BeautifulSoup(response.text, 'html.parser')
+            LOG.debug(f"Updating from raw data: %s", soup)
+            self._update_from_log_entries(soup)
 
         except httpx.RequestError as ex:
             LOG.error(f"Error fetching {self._name} data from {self._url}: {ex}")
-            return None
-
-    def update(self):
-        """Fetch latest log entries from the Pool Math service"""
-        coro = self._async_update()
-        future = asyncio.run_coroutine_threadsafe( coro, self._hass.loop )
-
-        LOG.info(f"Awaiting on future result {future} (timeout={self._timeout})")
-        result = future.result(timeout=self._timeout)
-        LOG.info(f"Future result complete: {future}")
-        if not result:
-            LOG.debug(f"Timed out from {self._url}: {result}")
-            return None
-
-        soup = BeautifulSoup(result, 'html.parser')
-        LOG.debug(f"Updating from raw data: %s", soup)
-        return self._update_from_log_entries(soup)
 
     def get_sensor(self, sensor_type):
         sensor = self._sensors.get(sensor_type, None)
@@ -276,12 +263,12 @@ class PoolMathServiceSensor(Entity):
             ATTR_LOG_TIMESTAMP: self._poolmath_client.latest_log_timestamp
         }
 
-    def update(self):
+    async def async_update(self):
         """Get the latest data from the source and updates the state."""
+
         # trigger an update of this sensor (and all related sensors)
-        result = self._poolmath_client.update()
-        if result:
-            self._update_state_from_client()
+        await self._poolmath_client.async_update()
+        self._update_state_from_client()
 
  
 # FIXME: add timestamp for when the sensor/sample was taken
