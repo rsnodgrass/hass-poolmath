@@ -174,8 +174,10 @@ class PoolMathClient():
         sensor = UpdatableSensor(self._hass, self._pool_id, name, config, sensor_type)
         self._sensors[sensor_type] = sensor
 
-        # register sensor with Home Assistant from a thread
-        await self._async_add_sensors_callback([sensor], True)
+        # register sensor with Home Assistant
+        asyncio.run_coroutine_threadsafe(
+            self._async_add_sensors_callback([sensor], True),
+            self._hass.loop)
 
         return sensor
 
