@@ -141,7 +141,6 @@ class PoolMathClient():
         self._name = config.get(CONF_NAME, default_name)
 
         LOG.info(f"Creating Pool Math sensors for '{self._name}'")
-        self._update_from_log_entries(soup)
 
     # TODO: Eventually move this all to external async client, and convert this to a HASS async impl
     async def async_update(self):
