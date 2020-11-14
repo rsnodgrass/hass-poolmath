@@ -13,7 +13,7 @@ from homeassistant.core import callback
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.components.rest.data import RestData
 from homeassistant.const import (
-    CONF_NAME, CONF_URL, TEMP_FAHRENHEIT, ATTR_ICON, ATTR_NAME, ATTR_UNIT_OF_MEASUREMENT
+    CONF_NAME, CONF_URL, TEMP_FAHRENHEIT, ATTR_ICON, ATTR_NAME, ATTR_URL, ATTR_UNIT_OF_MEASUREMENT
 )
 from homeassistant.exceptions import PlatformNotReady
 from homeassistant.helpers.entity import Entity
@@ -111,8 +111,9 @@ async def async_setup_platform(hass, config, async_add_entities_callback, discov
     client = PoolMathClient(hass, config, async_add_entities_callback)
 
     # create the Pool Math service sensor, which is responsible for updating all other sensors
-    sensor = PoolMathServiceSensor("Pool Math Service", config, client)
-    await async_add_entities_callback([sensor], True)
+    sensors = [ PoolMathServiceSensor("Pool Math Service", config, client) ]
+    LOG.info(f"Callback {async_add_entities_callback} {sensors}")
+    await async_add_entities_callback(sensors, True)
 
 def get_pool_targets(targets_key):
     if targets_key == TFP_TARGET:
@@ -229,6 +230,10 @@ class PoolMathServiceSensor(Entity):
     def __init__(self, name, config, poolmath_client):
         """Initialize the Pool Math service sensor."""
         self._name = name
+        self._attrs = {
+            CONF_URL: config.get(CONF_URL)
+        }
+
         self._poolmath_client = poolmath_client
         self._update_state_from_client()
 
@@ -249,7 +254,7 @@ class PoolMathServiceSensor(Entity):
     def _update_state_from_client(self):
         # re-updated the state with list of sensors that are being monitored (in case any new sensors were discovered)
         self._state = self._poolmath_client.sensor_names
-        self._attr = {
+        self._attrs = {
             ATTR_LOG_TIMESTAMP: self._poolmath_client.latest_log_timestamp
         }
 
@@ -259,6 +264,11 @@ class PoolMathServiceSensor(Entity):
         # trigger an update of this sensor (and all related sensors)
         await self._poolmath_client.async_update()
         self._update_state_from_client()
+
+    @property
+    def device_state_attributes(self):
+        """Return the any state attributes."""
+        return self._attrs
 
  
 # FIXME: add timestamp for when the sensor/sample was taken
