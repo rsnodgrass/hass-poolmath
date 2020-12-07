@@ -13,7 +13,7 @@ from homeassistant.core import callback
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.components.rest.data import RestData
 from homeassistant.const import (
-    CONF_NAME, CONF_URL, TEMP_FAHRENHEIT, ATTR_ICON, ATTR_NAME, ATTR_URL, ATTR_UNIT_OF_MEASUREMENT
+    CONF_NAME, CONF_URL, TEMP_FAHRENHEIT, ATTR_ICON, ATTR_NAME, ATTR_UNIT_OF_MEASUREMENT
 )
 from homeassistant.exceptions import PlatformNotReady
 from homeassistant.helpers.entity import Entity
@@ -113,7 +113,7 @@ async def async_setup_platform(hass, config, async_add_entities_callback, discov
     # create the Pool Math service sensor, which is responsible for updating all other sensors
     sensors = [ PoolMathServiceSensor("Pool Math Service", config, client) ]
     LOG.info(f"Callback {async_add_entities_callback} {sensors}")
-    await async_add_entities_callback(sensors, True)
+    async_add_entities_callback(sensors, True)
 
 def get_pool_targets(targets_key):
     if targets_key == TFP_TARGET:
@@ -132,34 +132,34 @@ class PoolMathClient():
         self._timestamp = None
 
         # parse out the unique pool identifier from the url
-        match = re.search(r'/mypool/(.+)', self._url)
+        self._pool_id = 'unknown'
+        match = re.search(r'/(mypool|share)/(.+)', self._url)
         if match:
-            self._pool_id = match[0]
+            self._pool_id = match[2]
 
-        self._async_client = None
         self._timeout = DEFAULT_TIMEOUT
 
         default_name = DEFAULT_NAME
         self._name = config.get(CONF_NAME, default_name)
 
-        LOG.info(f"Creating Pool Math sensors for '{self._name}'")
+        LOG.info(f"Creating Pool Math sensors for '{self._name}' (id={self._pool_id})")
 
     # TODO: Eventually move this all to external async client, and convert this to a HASS async impl
     async def async_update(self):
         """Fetch latest log entries from the Pool Math service"""
-        try:
-            if not self._async_client:
-                self._async_client = httpx.AsyncClient(verify=False)
 
+        async with httpx.AsyncClient() as client:
             LOG.debug(f"GET {self._url} (timeout={self._timeout})")
-            response = await self._async_client.request('GET', self._url, timeout=self._timeout)
+            response = await client.request('GET', self._url, timeout=self._timeout)
 
-            soup = BeautifulSoup(response.text, 'html.parser')
-            LOG.debug(f"Updating from raw data: %s", soup)
-            self._update_from_log_entries(soup)
+            LOG.debug(f"Response completed: {response.status_code}")
+            if response.status_code == httpx.codes.OK:
+                soup = BeautifulSoup(response.text, 'html.parser')
+                LOG.debug(f"Updating from raw data: %s", soup)
+                self._update_from_log_entries(soup)
 
-        except httpx.RequestError as ex:
-            LOG.error(f"Error fetching {self._name} data from {self._url}: {ex}")
+    async def _register_sensor(self, sensor):
+        self._async_add_sensors_callback([sensor], True)
 
     def get_sensor(self, sensor_type):
         sensor = self._sensors.get(sensor_type, None)
@@ -176,12 +176,9 @@ class PoolMathClient():
         self._sensors[sensor_type] = sensor
 
         # register sensor with Home Assistant
-        asyncio.run_coroutine_threadsafe(
-            self._async_add_sensors_callback([sensor], True),
-            self._hass.loop)
+        asyncio.run_coroutine_threadsafe(self._register_sensor(sensor), self._hass.loop)
 
         return sensor
-
 
     def _update_from_log_entries(self, poolmath_soup):
         updated_sensors = {}
@@ -189,10 +186,11 @@ class PoolMathClient():
 
         # Read back through all log entries and update any changed sensor states (since a given
         # log entry may only have a subset of sensor states)
-        log_entries = poolmath_soup.find_all('div', class_='testLogCard')
+        log_entries = poolmath_soup.find_all('div', class_='logCard')
+        LOG.debug(f"{self._name} log entries: %s", log_entries)
+
         for log_entry in log_entries:
             log_fields = log_entry.select('.chiclet')
-            LOG.debug("Pool Math log fields=%s", log_fields)
 
             if not latest_timestamp:
                 # capture the timestamp for the most recent Pool Math log entry
@@ -201,9 +199,11 @@ class PoolMathClient():
             # FIXME: improve parsing to be more robust to Pool Math changes
             for entry in log_fields:
                 sensor_type = entry.contents[3].text.lower()
-                if not sensor_type in updated_sensors:
-                    state = entry.contents[1].text
+                state = entry.contents[1].text
 
+                LOG.debug(f"{self._name} sensor {sensor_type}={state}")
+
+                if not sensor_type in updated_sensors:
                     sensor = self.get_sensor(sensor_type)
                     if sensor:
                         timestamp = log_entry.find('time', class_='timestamp timereal').text
@@ -231,6 +231,7 @@ class PoolMathServiceSensor(Entity):
         """Initialize the Pool Math service sensor."""
         self._name = name
         self._attrs = {
+            ATTR_ATTRIBUTION: ATTRIBUTION,
             CONF_URL: config.get(CONF_URL)
         }
 
@@ -250,6 +251,10 @@ class PoolMathServiceSensor(Entity):
     @property
     def icon(self):
         return ICON_POOL
+
+    @property
+    def should_poll(self):
+        return True
 
     def _update_state_from_client(self):
         # re-updated the state with list of sensors that are being monitored (in case any new sensors were discovered)
