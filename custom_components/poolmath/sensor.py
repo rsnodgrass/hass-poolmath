@@ -8,7 +8,7 @@ from datetime import timedelta
 from homeassistant.core import callback
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import (
-    CONF_NAME, CONF_URL, TEMP_FAHRENHEIT, ATTR_ICON, ATTR_NAME, ATTR_UNIT_OF_MEASUREMENT
+    CONF_NAME, CONF_URL, ATTR_ICON, ATTR_NAME, ATTR_UNIT_OF_MEASUREMENT
 )
 from homeassistant.exceptions import PlatformNotReady
 from homeassistant.helpers.entity import Entity
@@ -21,6 +21,7 @@ from .const import (DOMAIN, ATTRIBUTION, CONF_TARGET, CONF_TIMEOUT,
                     DEFAULT_NAME, DEFAULT_TIMEOUT, ICON_POOL, ICON_GAUGE,
                     ATTR_ATTRIBUTION, ATTR_DESCRIPTION, ATTR_TARGET_SOURCE,
                     ATTR_LOG_TIMESTAMP, ATTR_TARGET_MIN, ATTR_TARGET_MAX)
+from .targets import get_pool_targets, POOL_MATH_SENSOR_SETTINGS
 
 LOG = logging.getLogger(__name__)
 
@@ -39,70 +40,6 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     }
 )
 
-# FIXME: add strings translation support for names/descriptiongs/units?
-# see https://www.troublefreepool.com/blog/2018/12/12/abcs-of-pool-water-chemistry/
-POOL_MATH_SENSOR_SETTINGS = {
-    'cc': { ATTR_NAME: 'CC',
-            ATTR_UNIT_OF_MEASUREMENT: 'mg/L',
-            ATTR_DESCRIPTION: 'Combined Chlorine',
-            ATTR_ICON: ICON_GAUGE },
-    'fc': { ATTR_NAME: 'FC',
-            ATTR_UNIT_OF_MEASUREMENT: 'mg/L',
-            ATTR_DESCRIPTION: 'Free Chlorine',
-            ATTR_ICON: ICON_GAUGE },
-    'ph': { ATTR_NAME: 'pH',
-            ATTR_UNIT_OF_MEASUREMENT: 'pH',
-            ATTR_DESCRIPTION: 'Acidity/Basicity',
-            ATTR_ICON: ICON_GAUGE },
-    'ta': { ATTR_NAME: 'TA',
-            ATTR_UNIT_OF_MEASUREMENT: 'ppm',
-            ATTR_DESCRIPTION: 'Total Alkalinity',
-            ATTR_ICON: ICON_GAUGE },
-    'ch': { ATTR_NAME: 'CH',
-            ATTR_UNIT_OF_MEASUREMENT: 'ppm',
-            ATTR_DESCRIPTION: 'Calcium Hardness',
-            ATTR_ICON: ICON_GAUGE },
-    'cya': { ATTR_NAME: 'CYA',
-             ATTR_UNIT_OF_MEASUREMENT: 'ppm',
-             ATTR_DESCRIPTION: 'Cyanuric Acid',
-             ATTR_ICON: ICON_GAUGE },
-    'salt': { ATTR_NAME: 'Salt',
-              ATTR_UNIT_OF_MEASUREMENT: 'ppm',
-              ATTR_DESCRIPTION: 'Salt',
-              ATTR_ICON: ICON_GAUGE },
-    'bor':  { ATTR_NAME: 'Borate',
-              ATTR_UNIT_OF_MEASUREMENT: 'ppm',
-              ATTR_DESCRIPTION: 'Borate',
-              ATTR_ICON: ICON_GAUGE },
-    'borate': { ATTR_NAME: 'Borate',
-                ATTR_UNIT_OF_MEASUREMENT: 'ppm',
-                ATTR_DESCRIPTION: 'Borate',
-                ATTR_ICON: ICON_GAUGE },
-    'csi':    { ATTR_NAME: 'CSI',
-                ATTR_UNIT_OF_MEASUREMENT: 'CSI',
-                ATTR_DESCRIPTION: 'Calcite Saturation Index',
-                ATTR_ICON: ICON_GAUGE },
-    'temp':   { ATTR_NAME: 'Temp',
-                ATTR_UNIT_OF_MEASUREMENT: TEMP_FAHRENHEIT,
-                ATTR_DESCRIPTION: 'Temperature',
-                ATTR_ICON: 'mdi:coolant-temperature' }
-}
-
-# FIXME: this should be a profile probably, and allow user to select from
-# a set of different profiles based on their needs (and make these ranges
-# attributes of the sensors).  Profiles should be in YAML, not hardcoded here.
-#
-# FIXME: Load from targets/ based on targets config key...
-# FIXME: targets should probably all be in code, since some values are computed based on other values
-TFP_TARGET = 'tfp'
-TFP_RECOMMENDED_TARGET_LEVELS = {
-    'cc':     { ATTR_TARGET_MIN: 0,    ATTR_TARGET_MAX: 0.1  },
-    'ph':     { ATTR_TARGET_MIN: 7.2,  ATTR_TARGET_MAX: 7.8, 'target': 7.4 },
-    'ta':     { ATTR_TARGET_MIN: 50,   ATTR_TARGET_MAX: 90   },
-#    'ch':     { ATTR_TARGET_MIN: 250,  ATTR_TARGET_MAX: 650  }, # with salt: 350-450 ppm
-#    'cya':    { ATTR_TARGET_MIN: 30,   ATTR_TARGET_MAX: 50   }, # with salt: 70-80 ppm
-    'salt':   { ATTR_TARGET_MIN: 3000, ATTR_TARGET_MAX: 3200, 'target': 3100 },
-}
 
 async def async_setup_platform(hass, config, async_add_entities_callback, discovery_info=None):
     """Set up the Pool Math sensor integration."""
@@ -115,14 +52,6 @@ async def async_setup_platform(hass, config, async_add_entities_callback, discov
     # create the core Pool Math service sensor, which is responsible for updating all other sensors
     sensors = [ PoolMathServiceSensor(hass, config, "Pool Math Service", client, async_add_entities_callback) ]
     async_add_entities_callback(sensors, True)
-
-def get_pool_targets(targets_key):
-    if targets_key == TFP_TARGET:
-        return TFP_RECOMMENDED_TARGET_LEVELS
-    else:
-        LOG.error(f"Only '{TFP_TARGET}' target currently supported, ignoring {CONF_TARGET}.")
-        return None
-
 
 
 class PoolMathServiceSensor(Entity):
@@ -187,21 +116,18 @@ class PoolMathServiceSensor(Entity):
         """Return the any state attributes."""
         return self._attrs
 
-
-    # FIXME: move all the below sensor specific code out of the client
     def get_sensor(self, sensor_type):
         sensor = self._managed_sensors.get(sensor_type, None)
         if sensor:
             return sensor
 
-        pool_id = self._poolmath_client.pool_id
-
         config = POOL_MATH_SENSOR_SETTINGS.get(sensor_type, None)
         if config is None:
-            LOG.warning(f"Unknown Pool Math sensor '{sensor_type}' discovered for {pool_id}")
+            LOG.warning(f"Unknown sensor '{sensor_type}' discovered for {self.name}")
             return None
 
         name = self._name + ' ' + config[ATTR_NAME]
+        pool_id = self._poolmath_client.pool_id
         sensor = UpdatableSensor(self._hass, pool_id, name, config, sensor_type)
         self._managed_sensors[sensor_type] = sensor
 
@@ -221,10 +147,6 @@ class PoolMathServiceSensor(Entity):
         return self._managed_sensors.keys()
 
 
-
-
-
-# FIXME: add timestamp for when the sensor/sample was taken
 class UpdatableSensor(RestoreEntity):
     """Representation of a sensor whose state is kept up-to-date by an external data source."""
 
@@ -317,7 +239,7 @@ class UpdatableSensor(RestoreEntity):
         self._state = state.state
         LOG.debug(f"Restored sensor {self._name} previous state {self._state}")
 
-        # restore any attributes
+        # restore attributes
         if ATTR_LOG_TIMESTAMP in state.attributes:
             self._attrs[ATTR_LOG_TIMESTAMP] = state.attributes[ATTR_LOG_TIMESTAMP]
 
