@@ -28,7 +28,7 @@ LOG = logging.getLogger(__name__)
 DEFAULT_NAME = 'Pool'
 DATA_UPDATED = 'poolmath_data_updated'
 
-DEFAULT_TIMEOUT=2.0
+DEFAULT_TIMEOUT=5.0
 
 SCAN_INTERVAL = timedelta(minutes=15)
 
