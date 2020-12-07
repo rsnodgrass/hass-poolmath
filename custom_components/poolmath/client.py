@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 import re
 import httpx
 
-from .const import (CONF_TIMEOUT, DEFAULT_NAME, DEFAULT_TIMEOUT)
+from .const import CONF_TIMEOUT, DEFAULT_NAME, DEFAULT_TIMEOUT
 
 LOG = logging.getLogger(__name__)
 
@@ -40,15 +40,16 @@ class PoolMathClient():
             return None
 
     async def process_log_entry_callbacks(self, poolmath_soup, async_callback):
-        """Call provide async callback once for each type of log entry"""
-        """ async_callback(log_type, timestamp, ???)"""
-        updated_log_entries = {}
+        """Call provided async callback once for each type of log entry"""
+        """   async_callback(log_type, timestamp, state)"""
+
         last_timestamp = None
+        already_updated_log_entries = {}
 
         # Read back through all log entries and update any changed sensor states (since a given
         # log entry may only have a subset of sensor states)
         log_entries = poolmath_soup.find_all('div', class_='logCard')
-        LOG.debug(f"{self.name} log entries: %s", log_entries)
+        #LOG.debug(f"{self.name} log entries: %s", log_entries)
 
         for log_entry in log_entries:
             log_fields = log_entry.select('.chiclet')
@@ -60,14 +61,14 @@ class PoolMathClient():
             # FIXME: improve parsing to be more robust to Pool Math changes
             for entry in log_fields:
                 log_type = entry.contents[3].text.lower()
-                state = entry.contents[1].text
 
-                # LOG.debug(f"{log_type}={state}")
-
-                if not log_type in updated_log_entries:
+                # only update if we haven't already updated the same log_type yet
+                if not log_type in already_updated_log_entries:
                     timestamp = log_entry.find('time', class_='timestamp timereal').text
+                    state = entry.contents[1].text
+
                     await async_callback(log_type, timestamp, state)
-                    updated_log_entries[log_type] = state
+                    already_updated_log_entries[log_type] = state
 
         return last_timestamp
 
