@@ -54,6 +54,7 @@ async def async_setup_platform(hass, config, async_add_entities_callback, discov
     async_add_entities_callback(sensors, True)
 
 
+
 class PoolMathServiceSensor(Entity):
     """Sensor monitoring the Pool Math cloud service and updating any related sensors"""
 
@@ -170,8 +171,7 @@ class UpdatableSensor(RestoreEntity):
         }
 
         # FIXME: use 'targets' configuration value and load appropriate yaml
-        targets_source = TFP_TARGET
-        targets_map = get_pool_targets(targets_source)
+        targets_map = get_pool_targets()
         if targets_map:
             self._targets = targets_map.get(sensor_type)
             if self._targets:

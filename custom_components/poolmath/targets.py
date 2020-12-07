@@ -64,7 +64,7 @@ POOL_MATH_SENSOR_SETTINGS = {
 #
 # FIXME: Load from targets/ based on targets config key...
 # FIXME: targets should probably all be in code, since some values are computed based on other values
-TFP_TARGET = 'tfp'
+TFP_TARGET_NAME = 'tfp'
 TFP_RECOMMENDED_TARGET_LEVELS = {
     'cc':     { ATTR_TARGET_MIN: 0,    ATTR_TARGET_MAX: 0.1  },
     'ph':     { ATTR_TARGET_MIN: 7.2,  ATTR_TARGET_MAX: 7.8, 'target': 7.4 },
@@ -74,9 +74,11 @@ TFP_RECOMMENDED_TARGET_LEVELS = {
     'salt':   { ATTR_TARGET_MIN: 3000, ATTR_TARGET_MAX: 3200, 'target': 3100 },
 }
 
-def get_pool_targets(targets_key):
-    if targets_key == TFP_TARGET:
+DEFAULT_TARGETS = TFP_TARGET_NAME
+
+def get_pool_targets(target_name=DEFAULT_TARGETS):
+    if target_name == TFP_TARGET_NAME:
         return TFP_RECOMMENDED_TARGET_LEVELS
     else:
-        LOG.error(f"Only '{TFP_TARGET}' target currently supported, ignoring {CONF_TARGET}.")
+        LOG.error(f"Only '{TFP_TARGET_NAME}' target currently supported, ignoring '{target_name}'.")
         return None
