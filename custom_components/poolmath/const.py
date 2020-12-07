@@ -12,6 +12,10 @@ ATTR_TARGET_MAX='target max'
 ATTR_TARGET_SOURCE='target source'
 
 CONF_TARGET='target'
+CONF_TIMEOUT = 'timeout'
+
+DEFAULT_NAME = 'Pool'
+DEFAULT_TIMEOUT=5.0
 
 ICON_GAUGE='mdi:gauge'
 ICON_POOL='mdi:pool'

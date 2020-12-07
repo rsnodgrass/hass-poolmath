@@ -2,12 +2,8 @@ import logging
 
 import asyncio
 import voluptuous as vol
-from requests.auth import HTTPBasicAuth, HTTPDigestAuth
-from bs4 import BeautifulSoup
-from datetime import timedelta
 
-import re
-import httpx
+from datetime import timedelta
 
 from homeassistant.core import callback
 from homeassistant.components.sensor import PLATFORM_SCHEMA
@@ -20,17 +16,15 @@ from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 import homeassistant.helpers.config_validation as cv
 
-from .const import (DOMAIN, ATTRIBUTION, CONF_TARGET, ICON_POOL, ICON_GAUGE,
+from .client import PoolMathClient
+from .const import (DOMAIN, ATTRIBUTION, CONF_TARGET, CONF_TIMEOUT, 
+                    DEFAULT_NAME, DEFAULT_TIMEOUT, ICON_POOL, ICON_GAUGE,
                     ATTR_ATTRIBUTION, ATTR_DESCRIPTION, ATTR_TARGET_SOURCE,
                     ATTR_LOG_TIMESTAMP, ATTR_TARGET_MIN, ATTR_TARGET_MAX)
 
 LOG = logging.getLogger(__name__)
 
-DEFAULT_NAME = 'Pool'
 DATA_UPDATED = 'poolmath_data_updated'
-
-CONF_TIMEOUT = 'timeout'
-DEFAULT_TIMEOUT=5.0
 
 SCAN_INTERVAL = timedelta(minutes=15)
 
@@ -128,76 +122,6 @@ def get_pool_targets(targets_key):
     else:
         LOG.error(f"Only '{TFP_TARGET}' target currently supported, ignoring {CONF_TARGET}.")
         return None
-
-
-# FIXME: separate into client.py
-class PoolMathClient():
-    def __init__(self, url, name=DEFAULT_NAME, timeout=DEFAULT_TIMEOUT):
-        self._url = url
-        self._name = name
-        self._timeout = timeout
-
-        # parse out the unique pool identifier from the url
-        self._pool_id = 'unknown'
-        match = re.search(r'/(mypool|share)/(.+)', self._url)
-        if match:
-            self._pool_id = match[2]
-        else:
-            self._pool_id = None
-
-    async def async_update(self):
-        """Fetch latest data from the Pool Math service as parsed HTML soup"""
-
-        async with httpx.AsyncClient() as client:
-            LOG.debug(f"GET {self._url} (timeout={self._timeout}; name={self.name}; id={self.pool_id})")
-            response = await client.request('GET', self._url, timeout=self._timeout)
-            LOG.debug(f"GET {self._url} response: {response.status_code}")
-
-            if response.status_code == httpx.codes.OK:
-                soup = BeautifulSoup(response.text, 'html.parser')
-                return soup
-
-            return None
-
-    async def process_log_entry_callbacks(self, poolmath_soup, async_callback):
-        """Call provide async callback once for each type of log entry"""
-        """ async_callback(log_type, timestamp, ???)"""
-        updated_log_entries = {}
-        last_timestamp = None
-
-        # Read back through all log entries and update any changed sensor states (since a given
-        # log entry may only have a subset of sensor states)
-        log_entries = poolmath_soup.find_all('div', class_='logCard')
-        LOG.debug(f"{self.name} log entries: %s", log_entries)
-
-        for log_entry in log_entries:
-            log_fields = log_entry.select('.chiclet')
-
-            # extract timestamp for the most recent Pool Math log entry
-            if not last_timestamp:
-                last_timestamp = log_entry.find('time', class_='timestamp timereal')
-
-            # FIXME: improve parsing to be more robust to Pool Math changes
-            for entry in log_fields:
-                log_type = entry.contents[3].text.lower()
-                state = entry.contents[1].text
-
-                # LOG.debug(f"{log_type}={state}")
-
-                if not log_type in updated_log_entries:
-                    timestamp = log_entry.find('time', class_='timestamp timereal').text
-                    await async_callback(log_type, timestamp, state)
-                    updated_log_entries[log_type] = state
-
-        return last_timestamp
-
-    @property
-    def pool_id(self):
-        return self._pool_id
-
-    @property
-    def name(self):
-        return self._name
 
 
 
