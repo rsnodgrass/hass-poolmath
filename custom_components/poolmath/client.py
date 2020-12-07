@@ -43,7 +43,7 @@ class PoolMathClient():
         """   async_callback(log_type, timestamp, state)"""
 
         latest_timestamp = None
-        already_updated_log_entries = {}
+        already_processed_log_types = {}
 
         # Read back through all log entries and update any changed sensor states (since a given
         # log entry may only have a subset of sensor states)
@@ -53,7 +53,7 @@ class PoolMathClient():
         for log_entry in log_entries:
             log_fields = log_entry.select('.chiclet')
 
-            # extract timestamp for the most recent Pool Math log entry
+            # find timestamp for the most recent PoolMath log entry
             if not latest_timestamp:
                 latest_timestamp = PoolMathClient._entry_timestamp(log_entry)
 
@@ -62,12 +62,12 @@ class PoolMathClient():
                 log_type = entry.contents[3].text.lower()
 
                 # only update if we haven't already updated the same log_type yet
-                if not log_type in already_updated_log_entries:
+                if not log_type in already_processed_log_types:
                     timestamp = PoolMathClient._entry_timestamp(log_entry)
                     state = entry.contents[1].text
 
                     await async_callback(log_type, timestamp, state)
-                    already_updated_log_entries[log_type] = state
+                    already_processed_log_types[log_type] = state
 
         return latest_timestamp
 
