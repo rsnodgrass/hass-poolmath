@@ -29,13 +29,12 @@ class PoolMathClient():
         """Fetch latest data from the Pool Math service as parsed HTML soup"""
 
         async with httpx.AsyncClient() as client:
-            LOG.debug(f"GET {self._url} (timeout={self._timeout}; name={self.name}; id={self.pool_id})")
+            LOG.info(f"GET {self._url} (timeout={self._timeout}; name={self.name}; id={self.pool_id})")
             response = await client.request('GET', self._url, timeout=self._timeout)
             LOG.debug(f"GET {self._url} response: {response.status_code}")
 
             if response.status_code == httpx.codes.OK:
-                soup = BeautifulSoup(response.text, 'html.parser')
-                return soup
+                return BeautifulSoup(response.text, 'html.parser')
 
             return None
 
@@ -43,7 +42,7 @@ class PoolMathClient():
         """Call provided async callback once for each type of log entry"""
         """   async_callback(log_type, timestamp, state)"""
 
-        last_timestamp = None
+        latest_timestamp = None
         already_updated_log_entries = {}
 
         # Read back through all log entries and update any changed sensor states (since a given
@@ -55,8 +54,8 @@ class PoolMathClient():
             log_fields = log_entry.select('.chiclet')
 
             # extract timestamp for the most recent Pool Math log entry
-            if not last_timestamp:
-                last_timestamp = log_entry.find('time', class_='timestamp timereal')
+            if not latest_timestamp:
+                latest_timestamp = PoolMathClient._entry_timestamp(log_entry)
 
             # FIXME: improve parsing to be more robust to Pool Math changes
             for entry in log_fields:
@@ -64,13 +63,13 @@ class PoolMathClient():
 
                 # only update if we haven't already updated the same log_type yet
                 if not log_type in already_updated_log_entries:
-                    timestamp = log_entry.find('time', class_='timestamp timereal').text
+                    timestamp = PoolMathClient._entry_timestamp(log_entry)
                     state = entry.contents[1].text
 
                     await async_callback(log_type, timestamp, state)
                     already_updated_log_entries[log_type] = state
 
-        return last_timestamp
+        return latest_timestamp
 
     @property
     def pool_id(self):
@@ -79,3 +78,7 @@ class PoolMathClient():
     @property
     def name(self):
         return self._name
+
+    @staticmethod
+    def _entry_timestamp(entry):
+        return entry.find('time', class_='timestamp timereal').text
