@@ -133,7 +133,7 @@ class PoolMathServiceSensor(Entity):
         """Update the sensor with the details from the log entry"""
         sensor = await self.get_sensor_entity(log_type)
         if sensor and sensor.state != state:
-            LOG.info(f"Pool Math {self._name} {log_type}={state} (timestamp={timestamp})")
+            LOG.info(f"{self._name} {log_type}={state} (timestamp={timestamp})")
             sensor.inject_state(state, timestamp)
 
     @property
