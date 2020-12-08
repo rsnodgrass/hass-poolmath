@@ -38,7 +38,7 @@ Under Settings of the Pool Math iOS or Android application, find the Sharing sec
 ```yaml
 sensor:
   - platform: poolmath
-    url: https://troublefreepool.com/mypool/6WPG8yL
+    url: https://troublefreepool.com/mypool/7WPG8yL
 ```
 
 NOTE: This updates the state from PoolMath every 15 minutes to keep from overwhelming their service, as the majority of Pool Math users update their data manual after testing rather than automated. The check interval can be changed in yaml config by adding a 'scan_interval' for the sensor.
@@ -84,7 +84,7 @@ poolmath:
   sources:
     - url: https://api.poolmathapp.com/share/tfp-168502
       name: "Swimming Pool"
-    - url: https://troublefreepool.com/mypool/6WPG8yL
+    - url: https://troublefreepool.com/mypool/7WPG8yL
       name: "Spa"
 ```
 
