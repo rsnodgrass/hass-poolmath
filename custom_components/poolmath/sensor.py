@@ -53,9 +53,8 @@ async def async_setup_platform(hass, config, async_add_entities_callback, discov
     client = PoolMathClient(url, name=name, timeout=timeout)
 
     # create the core Pool Math service sensor, which is responsible for updating all other sensors
-    sensors = [ PoolMathServiceSensor(hass, config, "Pool Math Service", client, async_add_entities_callback) ]
-    async_add_entities_callback(sensors, True)
-
+    sensor = PoolMathServiceSensor(hass, config, "Pool Math Service", client, async_add_entities_callback)
+    async_add_entities_callback([ sensor ], True)
 
 
 class PoolMathServiceSensor(Entity):
@@ -74,7 +73,6 @@ class PoolMathServiceSensor(Entity):
 
         self._poolmath_client = poolmath_client
         self._async_add_entities_callback = async_add_entities_callback
-
 
     @property
     def name(self):
@@ -102,7 +100,7 @@ class PoolMathServiceSensor(Entity):
         soup = await client.async_update()
 
         # iterate through all the log entries and update sensor states
-        timestamp = await client.process_log_entry_callbacks(soup, client._update_sensors_callback)
+        timestamp = await client.process_log_entry_callbacks(soup, self._update_sensor_callback)
         self._attrs[ATTR_LOG_TIMESTAMP] = timestamp
 
     @property
@@ -110,7 +108,7 @@ class PoolMathServiceSensor(Entity):
         """Return the any state attributes."""
         return self._attrs
 
-    def get_sensor(self, sensor_type):
+    async def get_sensor_entity(self, sensor_type):
         sensor = self._managed_sensors.get(sensor_type, None)
         if sensor:
             return sensor
@@ -122,18 +120,22 @@ class PoolMathServiceSensor(Entity):
 
         name = self._name + ' ' + config[ATTR_NAME]
         pool_id = self._poolmath_client.pool_id
+        
         sensor = UpdatableSensor(self._hass, pool_id, name, config, sensor_type)
         self._managed_sensors[sensor_type] = sensor
 
-        # register sensor with Home Assistant
-        asyncio.run_coroutine_threadsafe(self._async_add_entities_callback([sensor], True), self._hass.loop)
+        # register sensor with Home Assistant (async callback requires passing to loop)
+        # asyncio.run_coroutine_threadsafe(self._async_add_entities_callback([sensor], True), self._hass.loop)
 
+        self._async_add_entities_callback([sensor], True)
+        
         return sensor
 
-    async def _update_sensors_callback(self, log_type, timestamp, state):
-        sensor = self.get_sensor(log_type)
+    async def _update_sensor_callback(self, log_type, timestamp, state):
+        """Update the sensor with the details from the log entry"""
+        sensor = await self.get_sensor_entity(log_type)
         if sensor and sensor.state != state:
-            LOG.info(f"Pool Math returned updated {log_type}={state} (timestamp={timestamp})")
+            LOG.info(f"Pool Math {self._name} {log_type}={state} (timestamp={timestamp})")
             sensor.inject_state(state, timestamp)
 
     @property
