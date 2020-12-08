@@ -81,8 +81,8 @@ class PoolMathServiceSensor(Entity):
 
     @property
     def state(self):
-        """Return the sensors currently being monitored from Pool Math."""
-        return self._state
+        """Return the log types being tracked in Pool Math."""
+        return self._managed_sensors.keys()
 
     @property
     def icon(self):
@@ -91,14 +91,7 @@ class PoolMathServiceSensor(Entity):
     @property
     def should_poll(self):
         return True
-
-    def _update_state_from_client(self):
-        # re-updated the state with list of sensors that are being monitored (in case any new sensors were discovered)
-        self._state = self._poolmath_client.sensor_names
-        self._attrs = {
-            ATTR_LOG_TIMESTAMP: self._poolmath_client.latest_log_timestamp
-        }
-
+ 
     async def async_update(self):
         """Get the latest data from the source and updates the state."""
 
@@ -109,8 +102,6 @@ class PoolMathServiceSensor(Entity):
         # iterate through all the log entries and update sensor states
         timestamp = await client.process_log_entry_callbacks(soup, client._update_sensors_callback)
         self._attrs[ATTR_LOG_TIMESTAMP] = timestamp
-
-        self._update_state_from_client()
 
     @property
     def device_state_attributes(self):
@@ -175,7 +166,7 @@ class UpdatableSensor(RestoreEntity):
         if targets_map:
             self._targets = targets_map.get(sensor_type)
             if self._targets:
-                self._attrs[ATTR_TARGET_SOURCE] = targets_source
+                self._attrs[ATTR_TARGET_SOURCE] = 'tfp'
                 self._attrs.update(self._targets)
 
     @property
