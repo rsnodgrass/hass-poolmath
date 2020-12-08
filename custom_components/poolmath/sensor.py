@@ -125,10 +125,8 @@ class PoolMathServiceSensor(Entity):
         self._managed_sensors[sensor_type] = sensor
 
         # register sensor with Home Assistant (async callback requires passing to loop)
-        # asyncio.run_coroutine_threadsafe(self._async_add_entities_callback([sensor], True), self._hass.loop)
-
         self._async_add_entities_callback([sensor], True)
-        
+
         return sensor
 
     async def _update_sensor_callback(self, log_type, timestamp, state):
