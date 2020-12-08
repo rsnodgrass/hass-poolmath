@@ -37,6 +37,9 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         
         # NOTE: targets are not really implemented, other than tfp
         vol.Optional(CONF_TARGET, default='tfp'): cv.string # targets/*.yaml file with min/max targets
+
+        # FIXME: allow specifying EXACTLY which log types to monitor, always create the sensors
+        #vol.Optional(CONF_LOG_TYPES, default=None): 
     }
 )
 
@@ -62,6 +65,8 @@ class PoolMathServiceSensor(Entity):
         """Initialize the Pool Math service sensor."""
         self._hass = hass
         self._name = name
+
+        self._managed_sensors = {}
         self._attrs = {
             ATTR_ATTRIBUTION: ATTRIBUTION,
             CONF_URL: config.get(CONF_URL)
@@ -69,10 +74,7 @@ class PoolMathServiceSensor(Entity):
 
         self._poolmath_client = poolmath_client
         self._async_add_entities_callback = async_add_entities_callback
-        
-        self._managed_sensors = {}
 
-        self._update_state_from_client()
 
     @property
     def name(self):
