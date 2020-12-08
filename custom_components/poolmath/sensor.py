@@ -53,7 +53,7 @@ async def async_setup_platform(hass, config, async_add_entities_callback, discov
     client = PoolMathClient(url, name=name, timeout=timeout)
 
     # create the core Pool Math service sensor, which is responsible for updating all other sensors
-    sensor = PoolMathServiceSensor(hass, config, "Pool Math Service", client, async_add_entities_callback)
+    sensor = PoolMathServiceSensor(hass, config, name, client, async_add_entities_callback)
     async_add_entities_callback([ sensor ], True)
 
 
@@ -77,7 +77,7 @@ class PoolMathServiceSensor(Entity):
     @property
     def name(self):
         """Return the name of the sensor."""
-        return self._name
+        return "Pool Math Service: " + self._name
 
     @property
     def state(self):
