@@ -62,7 +62,7 @@ class PoolMathServiceSensor(Entity):
 
     def __init__(self, hass, config, name, poolmath_client, async_add_entities_callback):
         """Initialize the Pool Math service sensor."""
-        self._hass = hass
+        self.hass = hass
         self._name = name
 
         self._managed_sensors = {}
@@ -121,7 +121,7 @@ class PoolMathServiceSensor(Entity):
         name = self._name + ' ' + config[ATTR_NAME]
         pool_id = self._poolmath_client.pool_id
         
-        sensor = UpdatableSensor(self._hass, pool_id, name, config, sensor_type)
+        sensor = UpdatableSensor(self.hass, pool_id, name, config, sensor_type)
         self._managed_sensors[sensor_type] = sensor
 
         # register sensor with Home Assistant (async callback requires passing to loop)
@@ -148,7 +148,7 @@ class UpdatableSensor(RestoreEntity):
         """Initialize the sensor."""
         super().__init__()
 
-        self._hass = hass
+        self.hass = hass
         self._name = name
         self._config = config
         self._sensor_type = sensor_type
@@ -237,7 +237,7 @@ class UpdatableSensor(RestoreEntity):
             self._attrs[ATTR_LOG_TIMESTAMP] = state.attributes[ATTR_LOG_TIMESTAMP]
 
         async_dispatcher_connect(
-            self._hass, DATA_UPDATED, self._schedule_immediate_update
+            self.hass, DATA_UPDATED, self._schedule_immediate_update
         )
 
     @callback
