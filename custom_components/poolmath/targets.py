@@ -65,8 +65,10 @@ TFP_TARGET_NAME = 'tfp'
 
 # FIXME: targets should probably all be in code, since some values are computed based on other values
 TFP_RECOMMENDED_TARGET_LEVELS = {
-    'cc':     { ATTR_TARGET_MIN: 0,    ATTR_TARGET_MAX: 0.1  },
-    'ph':     { ATTR_TARGET_MIN: 7.2,  ATTR_TARGET_MAX: 7.8, 'target': 7.4 },
+    'cc':     { ATTR_TARGET_MIN: 0,    
+                ATTR_TARGET_MAX: 0.1  },
+    'ph':     { ATTR_TARGET_MIN: 7.2,  
+                ATTR_TARGET_MAX: 7.8, 'target': 7.4 },
     'ta':     { ATTR_TARGET_MIN: 50,   ATTR_TARGET_MAX: 90   },
 #    'ch':     { ATTR_TARGET_MIN: 250,  ATTR_TARGET_MAX: 650  }, # with salt: 350-450 ppm
 #    'cya':    { ATTR_TARGET_MIN: 30,   ATTR_TARGET_MAX: 50   }, # with salt: 70-80 ppm
