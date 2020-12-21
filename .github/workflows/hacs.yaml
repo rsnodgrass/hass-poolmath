@@ -28,6 +28,4 @@ jobs:
         name: CI
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-	  ignore:
-            - brands
-            - wheels
+          ignore: brands wheels
