@@ -2,7 +2,7 @@
   "domain": "poolmath",
   "name": "Pool Math (Trouble Free Pool)",
   "documentation": "https://github.com/rsnodgrass/hass-poolmath/",
-  "issue_tracker": "https://github.com/rsnodgrass/hass-lunos/issues",
+  "issue_tracker": "https://github.com/rsnodgrass/hass-poolmath/issues",
   "requirements": [
     "beautifulsoup4>=4.9.0",
     "jsonpath>=0.82",
