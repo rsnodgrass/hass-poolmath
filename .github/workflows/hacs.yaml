@@ -24,8 +24,10 @@ jobs:
       - uses: hacs/action@main
         with:
           CATEGORY: integration
+          ignore: brands wheels
       - uses: KTibow/ha-blueprint@stable
         name: CI
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ignore: brands wheels
+
