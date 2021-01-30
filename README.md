@@ -64,6 +64,30 @@ show_header_toggle: false
 
 ![Lovelace Example](https://github.com/rsnodgrass/hass-poolmath/blob/master/img/example.png?raw=true)
 
+Another single line Lovelace example using multiple-entity-row:
+
+```yaml
+entities:
+  - entity: sensor.pool_ph
+    type: 'custom:multiple-entity-row'
+    name: Pool
+    secondary_info: last-changed
+    entities:
+      - entity: sensor.pool_ph
+        name: pH
+      - entity: sensor.pool_fc
+        name: FC
+      - entity: sensor.pool_cc
+        name: CC
+      - entity: sensor.pool_ta
+        name: TA
+      - entity: sensor.pool_ch
+        name: Hardness
+      - entity: sensor.pool_cya
+        name: CYA
+type: entities
+```
+
 ## Support
 
 ### Community Support
