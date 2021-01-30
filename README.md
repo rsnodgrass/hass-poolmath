@@ -71,22 +71,32 @@ entities:
   - entity: sensor.pool_ph
     type: 'custom:multiple-entity-row'
     name: Pool
+    state_header: pH
     secondary_info: last-changed
     entities:
-      - entity: sensor.pool_ph
-        name: pH
       - entity: sensor.pool_fc
         name: FC
       - entity: sensor.pool_cc
         name: CC
       - entity: sensor.pool_ta
         name: TA
-      - entity: sensor.pool_ch
-        name: Hardness
-      - entity: sensor.pool_cya
-        name: CYA
+  - entity: sensor.hot_tub_ph
+    type: 'custom:multiple-entity-row'
+    name: Hot Tub
+    state_header: pH
+    secondary_info: last-changed
+    entities:
+      - entity: sensor.hot_tub_fc
+        name: FC
+      - entity: sensor.hot_tub_cc
+        name: CC
+      - entity: sensor.hot_tub_ta
+        name: TA
 type: entities
 ```
+
+![Lovelace Example](https://github.com/rsnodgrass/hass-poolmath/blob/master/img/example-multiple.png?raw=true)
+
 
 ## Support
 
