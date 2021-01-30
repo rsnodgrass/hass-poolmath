@@ -1,31 +1,45 @@
-import logging
-
 import asyncio
-import voluptuous as vol
-
+import logging
 from datetime import timedelta
 
-from homeassistant.core import callback
+import homeassistant.helpers.config_validation as cv
+import voluptuous as vol
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import (
-    CONF_NAME, CONF_URL, ATTR_ICON, ATTR_NAME, ATTR_UNIT_OF_MEASUREMENT
+    ATTR_ICON,
+    ATTR_NAME,
+    ATTR_UNIT_OF_MEASUREMENT,
+    CONF_NAME,
+    CONF_URL,
 )
+from homeassistant.core import callback
 from homeassistant.exceptions import PlatformNotReady
+from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.restore_state import RestoreEntity
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
-import homeassistant.helpers.config_validation as cv
 
 from .client import PoolMathClient
-from .const import (DOMAIN, ATTRIBUTION, CONF_TARGET, CONF_TIMEOUT, 
-                    DEFAULT_NAME, DEFAULT_TIMEOUT, ICON_POOL, ICON_GAUGE,
-                    ATTR_ATTRIBUTION, ATTR_DESCRIPTION, ATTR_TARGET_SOURCE,
-                    ATTR_LOG_TIMESTAMP, ATTR_TARGET_MIN, ATTR_TARGET_MAX)
-from .targets import get_pool_targets, POOL_MATH_SENSOR_SETTINGS
+from .const import (
+    ATTR_ATTRIBUTION,
+    ATTR_DESCRIPTION,
+    ATTR_LOG_TIMESTAMP,
+    ATTR_TARGET_MAX,
+    ATTR_TARGET_MIN,
+    ATTR_TARGET_SOURCE,
+    ATTRIBUTION,
+    CONF_TARGET,
+    CONF_TIMEOUT,
+    DEFAULT_NAME,
+    DEFAULT_TIMEOUT,
+    DOMAIN,
+    ICON_GAUGE,
+    ICON_POOL,
+)
+from .targets import POOL_MATH_SENSOR_SETTINGS, get_pool_targets
 
 LOG = logging.getLogger(__name__)
 
-DATA_UPDATED = 'poolmath_data_updated'
+DATA_UPDATED = "poolmath_data_updated"
 
 SCAN_INTERVAL = timedelta(minutes=15)
 
@@ -34,17 +48,19 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Required(CONF_URL): cv.string,
         vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
         vol.Optional(CONF_TIMEOUT, default=DEFAULT_TIMEOUT): cv.positive_int,
-        
         # NOTE: targets are not really implemented, other than tfp
-        vol.Optional(CONF_TARGET, default='tfp'): cv.string # targets/*.yaml file with min/max targets
-
+        vol.Optional(
+            CONF_TARGET, default="tfp"
+        ): cv.string  # targets/*.yaml file with min/max targets
         # FIXME: allow specifying EXACTLY which log types to monitor, always create the sensors
-        #vol.Optional(CONF_LOG_TYPES, default=None): 
+        # vol.Optional(CONF_LOG_TYPES, default=None):
     }
 )
 
 
-async def async_setup_platform(hass, config, async_add_entities_callback, discovery_info=None):
+async def async_setup_platform(
+    hass, config, async_add_entities_callback, discovery_info=None
+):
     """Set up the Pool Math sensor integration."""
     url = config.get(CONF_URL)
     name = config.get(CONF_NAME)
@@ -53,23 +69,24 @@ async def async_setup_platform(hass, config, async_add_entities_callback, discov
     client = PoolMathClient(url, name=name, timeout=timeout)
 
     # create the core Pool Math service sensor, which is responsible for updating all other sensors
-    sensor = PoolMathServiceSensor(hass, config, name, client, async_add_entities_callback)
-    async_add_entities_callback([ sensor ], True)
+    sensor = PoolMathServiceSensor(
+        hass, config, name, client, async_add_entities_callback
+    )
+    async_add_entities_callback([sensor], True)
 
 
 class PoolMathServiceSensor(Entity):
     """Sensor monitoring the Pool Math cloud service and updating any related sensors"""
 
-    def __init__(self, hass, config, name, poolmath_client, async_add_entities_callback):
+    def __init__(
+        self, hass, config, name, poolmath_client, async_add_entities_callback
+    ):
         """Initialize the Pool Math service sensor."""
         self.hass = hass
         self._name = name
 
         self._managed_sensors = {}
-        self._attrs = {
-            ATTR_ATTRIBUTION: ATTRIBUTION,
-            CONF_URL: config.get(CONF_URL)
-        }
+        self._attrs = {ATTR_ATTRIBUTION: ATTRIBUTION, CONF_URL: config.get(CONF_URL)}
 
         self._poolmath_client = poolmath_client
         self._async_add_entities_callback = async_add_entities_callback
@@ -91,7 +108,7 @@ class PoolMathServiceSensor(Entity):
     @property
     def should_poll(self):
         return True
- 
+
     async def async_update(self):
         """Get the latest data from the source and updates the state."""
 
@@ -100,7 +117,9 @@ class PoolMathServiceSensor(Entity):
         soup = await client.async_update()
 
         # iterate through all the log entries and update sensor states
-        timestamp = await client.process_log_entry_callbacks(soup, self._update_sensor_callback)
+        timestamp = await client.process_log_entry_callbacks(
+            soup, self._update_sensor_callback
+        )
         self._attrs[ATTR_LOG_TIMESTAMP] = timestamp
 
     @property
@@ -118,9 +137,9 @@ class PoolMathServiceSensor(Entity):
             LOG.warning(f"Unknown sensor '{sensor_type}' discovered for {self.name}")
             return None
 
-        name = self._name + ' ' + config[ATTR_NAME]
+        name = self._name + " " + config[ATTR_NAME]
         pool_id = self._poolmath_client.pool_id
-        
+
         sensor = UpdatableSensor(self.hass, pool_id, name, config, sensor_type)
         self._managed_sensors[sensor_type] = sensor
 
@@ -158,17 +177,15 @@ class UpdatableSensor(RestoreEntity):
             self._unique_id = f"poolmath_{pool_id}_{sensor_type}"
         else:
             self._unique_id = None
-        
-        self._attrs = {
-            ATTR_ATTRIBUTION: ATTRIBUTION
-        }
+
+        self._attrs = {ATTR_ATTRIBUTION: ATTRIBUTION}
 
         # FIXME: use 'targets' configuration value and load appropriate yaml
         targets_map = get_pool_targets()
         if targets_map:
             self._targets = targets_map.get(sensor_type)
             if self._targets:
-                self._attrs[ATTR_TARGET_SOURCE] = 'tfp'
+                self._attrs[ATTR_TARGET_SOURCE] = "tfp"
                 self._attrs.update(self._targets)
 
     @property
@@ -182,7 +199,7 @@ class UpdatableSensor(RestoreEntity):
 
     @property
     def should_poll(self):
-        return True # FIXME: get scheduled updates working below
+        return True  # FIXME: get scheduled updates working below
 
     @property
     def unit_of_measurement(self):
@@ -201,7 +218,7 @@ class UpdatableSensor(RestoreEntity):
 
     @property
     def icon(self):
-        return self._config['icon']
+        return self._config["icon"]
 
     def inject_state(self, state, timestamp):
         state_changed = self._state != state
@@ -212,12 +229,12 @@ class UpdatableSensor(RestoreEntity):
 
             # FIXME: see should_poll
             # notify Home Assistant that the sensor has been updated
-            #if (self.hass and self.schedule_update_ha_state):
+            # if (self.hass and self.schedule_update_ha_state):
             #    self.schedule_update_ha_state(True)
 
     async def async_added_to_hass(self) -> None:
         await super().async_added_to_hass()
-        
+
         # for this integration, restoring state really doesn't matter right now (but leaving code below in place)
         # Reason: all the sensors are dynamically created based on Pool Math service call, which always returns
         # the latest state as well!
