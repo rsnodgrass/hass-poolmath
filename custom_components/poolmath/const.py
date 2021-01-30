@@ -2,7 +2,7 @@
 
 DOMAIN = "poolmath"
 
-ATTRIBUTION = "Data provided by PoolMath (Trouble Free Pool)"
+ATTRIBUTION = "Data by PoolMath (Trouble Free Pool)"
 
 ATTR_ATTRIBUTION = "attribution"
 ATTR_DESCRIPTION = "description"
