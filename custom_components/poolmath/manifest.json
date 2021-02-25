@@ -3,6 +3,7 @@
   "name": "Pool Math (Trouble Free Pool)",
   "documentation": "https://github.com/rsnodgrass/hass-poolmath/",
   "issue_tracker": "https://github.com/rsnodgrass/hass-poolmath/issues",
+  "version": "0.1.2",
   "requirements": [
     "beautifulsoup4>=4.9.0",
     "jsonpath>=0.82",
