@@ -2,3 +2,5 @@
 *.pyc
 *.log
 __pycache__
+install
+
