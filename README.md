@@ -38,7 +38,7 @@ Note: this **requires a [Trouble Free Pool](https://www.troublefreepool.com/) Po
 
 ## Installation
 
-Make sure [Home Assistant Community Store (HACS)](https://github.com/custom-components/hacs) is installed, then add the repository: `rsnodgrass/hass-poolmath`
+Make sure [Home Assistant Community Store (HACS)][hacs] is installed, then add the repository: `rsnodgrass/hass-poolmath`
 
 ### Configuration
 
