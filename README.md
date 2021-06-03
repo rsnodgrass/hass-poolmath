@@ -1,11 +1,11 @@
 # Pool Math for Home Assistant
 
 ![beta_badge](https://img.shields.io/badge/maturity-Beta-yellow.png)
-[![GitHub Release][releases-shield]][releases]
+![GitHub Release][releases-shield][releases]
 ![release_date](https://img.shields.io/github/release-date/rsnodgrass/hass-poolmath.svg)
 
-[![hacs][hacs-shield]][hacs]
-[![License][license-shield]][license]
+![hacs][hacs-shield][hacs]
+![License][license-shield][license]
 
 [![Buy Me A Coffee](https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg)](https://buymeacoffee.com/DYks67r)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=WREP29UDAMB6G)
