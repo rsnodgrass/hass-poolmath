@@ -1,23 +1,12 @@
 # Pool Math for Home Assistant
 
-
-
-[![GitHub Release][releases-shield]][releases]
-[![GitHub Activity][commits-shield]][commits]
-[![License][license-shield]][license]
-
-[![release_date](https://img.shields.io/github/release-date/rsnodgrass/hass-poolmath.svg)]
-
-[![hacs][hacs-shield]][hacs]
-![License][license-shield][license]
+![release_badge](https://img.shields.io/github/release/rsnodgrass/hass-poolmath.svg)
+![release_date](https://img.shields.io/github/release-date/rsnodgrass/hass-poolmath.svg)
+[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 [![Buy Me A Coffee](https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg)](https://buymeacoffee.com/DYks67r)
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=WREP29UDAMB6G)
-
-[![Support Me On Patreon][patreon-shield]][patreon]
-
-[![Community Forum][forum-shield]][forum]
-
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=WREP29UDAMB6G)  
 
 Creates sensors for pools being managed with Trouble Free Pools's [Pool Math](https://www.troublefreepool.com/blog/poolmath/) apps including [Pool Math iOS](https://apps.apple.com/us/app/pool-math-by-troublefreepool/id1228819359) and [Pool Math Android](https://play.google.com/store/apps/details?id=com.troublefreepool.poolmath&hl=en_US). From the [Trouble Free Pool](https://troublefreepool.com/) website:
 
@@ -42,7 +31,7 @@ Note: this **requires a [Trouble Free Pool](https://www.troublefreepool.com/) Po
 
 ## Installation
 
-Make sure [Home Assistant Community Store (HACS)][hacs] is installed, then add the repository: `rsnodgrass/hass-poolmath`
+Make sure [Home Assistant Community Store (HACS)](https://github.com/custom-components/hacs) is installed, then add the repository: `rsnodgrass/hass-poolmath`
 
 ### Configuration
 
@@ -143,18 +132,3 @@ poolmath:
 * [ABC's of Pool Water Chemistry by Trouble Free Pool](https://www.troublefreepool.com/blog/2018/12/12/abcs-of-pool-water-chemistry/)
 * [PookMath calculator](https://www.troublefreepool.com/calc.html)
 * [PoolLab 1.0 Pool Chemical Tester with Bluetooth](https://www.amazon.com/Pool-Lab-1-0/dp/B0722ZD4G3?tag=rynoshark-20)
-
-
-***
-
-[patreon]: https://www.patreon.com/join/limych
-[patreon-shield]: https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fshieldsio-patreon.vercel.app%2Fapi%3Fusername%3Drynoshark%26type%3Dpatrons&style=popout
-[hacs]: https://hacs.xyz
-[hacs-shield]: https://img.shields.io/badge/HACS-Default-orange.svg)
-[license]: https://opensource.org/licenses/Apache-2.0
-[license-shield]: https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=popout
-[releases]: https://github.com/rsnodgrass/hass-poolmath/releases
-[release-shield]: https://img.shields.io/github/release/rsnodgrass/hass-poolmath.svg
-[forum-shield]: https://img.shields.io/badge/community-forum-brightgreen.svg?style=popout
-[forum]: http://troublefreepool.com/
-
