@@ -121,7 +121,7 @@ poolmath:
   sources:
     - url: https://api.poolmathapp.com/share/tfp-168502
       name: "Swimming Pool"
-    - url: https://troublefreepool.com/mypool/7WPG8yL
+    - url: https://api.poolmathapp.com/share/7WPG8yL
       name: "Spa"
 ```
 
