@@ -1,7 +1,7 @@
 {
     "domain": "poolmath",
     "name": "Pool Math (Trouble Free Pool)",
-    "version": "0.1.3",
+    "version": "0.1.4",
     "documentation": "https://github.com/rsnodgrass/hass-poolmath/",
     "issue_tracker": "https://github.com/rsnodgrass/hass-poolmath/issues",
     "requirements": [
