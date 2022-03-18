@@ -31,7 +31,7 @@ class PoolMathClient:
             LOG.info(
                 f"GET {self._url} (timeout={self._timeout}; name={self.name}; id={self.pool_id})"
             )
-            response = await client.request("GET", self._url, timeout=self._timeout)
+            response = await client.request("GET", self._url, timeout=self._timeout, allow_redirects=True)
             LOG.debug(f"GET {self._url} response: {response.status_code}")
 
             if response.status_code == httpx.codes.OK:
