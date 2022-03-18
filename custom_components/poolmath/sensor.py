@@ -123,7 +123,7 @@ class PoolMathServiceSensor(Entity):
         self._attrs[ATTR_LOG_TIMESTAMP] = timestamp
 
     @property
-    def device_state_attributes(self):
+    def extra_state_attributes(self):
         """Return the any state attributes."""
         return self._attrs
 
@@ -212,7 +212,7 @@ class UpdatableSensor(RestoreEntity):
         return self._state
 
     @property
-    def device_state_attributes(self):
+    def extra_state_attributes(self):
         """Return the any state attributes."""
         return self._attrs
 
