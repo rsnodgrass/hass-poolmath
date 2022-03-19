@@ -116,6 +116,10 @@ class PoolMathServiceSensor(Entity):
         client = self._poolmath_client
         soup = await client.async_update()
 
+        if not soup:
+            LOG.warning(f"No PoolMath response, is your YAML configuration using the updated https://api prefix URLs?")
+            return
+
         # iterate through all the log entries and update sensor states
         timestamp = await client.process_log_entry_callbacks(
             soup, self._update_sensor_callback

@@ -43,6 +43,9 @@ class PoolMathClient:
         """Call provided async callback once for each type of log entry"""
         """   async_callback(log_type, timestamp, state)"""
 
+        if not poolmath_soup:
+            return
+        
         latest_timestamp = None
         already_processed_log_types = {}
 
