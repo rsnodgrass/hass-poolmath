@@ -163,8 +163,7 @@ class PoolMathServiceSensor(Entity):
     def sensor_names(self):
         return self._managed_sensors.keys()
 
-
-class UpdatableSensor(RestoreEntity):
+class UpdatableSensor(RestoreEntity, SensorEntity):
     """Representation of a sensor whose state is kept up-to-date by an external data source."""
 
     def __init__(self, hass, pool_id, name, config, sensor_type):
