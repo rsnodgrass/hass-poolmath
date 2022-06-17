@@ -102,8 +102,7 @@ class PoolMathServiceSensor(Entity):
 
     @property
     def state(self):
-        """Return the log types being tracked in Pool Math."""
-        return self._managed_sensors.keys()
+        return self._attrs.get(ATTR_LAST_UPDATED_TIME)
 
     @property
     def icon(self):
@@ -174,10 +173,6 @@ class PoolMathServiceSensor(Entity):
     @property
     def sensor_names(self):
         return self._managed_sensors.keys()
-
-    @property
-    def state(self):
-        return self._attrs.get(ATTR_LAST_UPDATED_TIME)
 
 
 class UpdatableSensor(RestoreEntity):
