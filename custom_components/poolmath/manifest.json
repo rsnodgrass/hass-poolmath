@@ -1,13 +1,11 @@
 {
     "domain": "poolmath",
     "name": "Pool Math (Trouble Free Pool)",
-    "version": "0.1.4",
+    "version": "0.2.0",
     "documentation": "https://github.com/rsnodgrass/hass-poolmath/",
     "issue_tracker": "https://github.com/rsnodgrass/hass-poolmath/issues",
     "requirements": [
-	"beautifulsoup4>=4.9.0",
 	"jsonpath>=0.82",
-	"xmltodict>=0.12.0",
 	"httpx>=0.16.1"
     ],
     "dependencies": [],
