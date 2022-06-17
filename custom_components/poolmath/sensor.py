@@ -121,8 +121,8 @@ class PoolMathServiceSensor(Entity):
             # trigger an update of this sensor (and all related sensors)
             client = self._poolmath_client
             poolmath_json = await client.async_update()
-        except:
-            LOG.warning(f"No response from PoolMath request to {self._attrs.get(CONF_URL)}")
+        except Exception as e:
+            LOG.warning(f"No response from PoolMath GET {self._attrs.get(CONF_URL)}: {e}")
             return
 
         if not poolmath_json:
