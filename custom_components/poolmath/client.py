@@ -55,7 +55,12 @@ class PoolMathClient:
 
         if not poolmath_json:
             return
-        pool = poolmath_json.get("pools")[0].get("pool")
+
+        pools = poolmath_json.get("pools")
+        if not pools:
+            return
+
+        pool = pools[0].get("pool")
         overview = pool.get("overview")
 
         latest_timestamp = None
