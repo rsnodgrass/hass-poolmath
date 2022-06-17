@@ -90,7 +90,7 @@ class PoolMathServiceSensor(Entity):
         self._managed_sensors = {}
         self._poolmath_client = poolmath_client
         
-        self._attrs |= {
+        self._attrs = {
             ATTR_ATTRIBUTION: ATTRIBUTION,
             CONF_URL: self._poolmath_client.url
         }
