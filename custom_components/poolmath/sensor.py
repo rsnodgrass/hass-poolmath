@@ -84,12 +84,14 @@ class PoolMathServiceSensor(Entity):
     ):
         """Initialize the Pool Math service sensor."""
         self.hass = hass
+        self._config = config
+        
         self._name = name
 
         self._managed_sensors = {}
         self._attrs = {
             ATTR_ATTRIBUTION: ATTRIBUTION,
-            CONF_URL: config.get(CONF_URL)
+            CONF_URL: self._config.get(CONF_URL)
         }
 
         self._poolmath_client = poolmath_client
@@ -123,8 +125,14 @@ class PoolMathServiceSensor(Entity):
             LOG.warning(f"No PoolMath response, is your YAML configuration using the updated https://api prefix URLs?")
             return
 
+
         # update state attributes with relevant data
-        pool = poolmath_json.get('pools')[0].get('pool')
+        pools = poolmath_json.get('pools')
+        if not pools:
+            LOG.warning(f"PoolMath returned NO pools for the configured URL {self._config.get(CONF_URL)}. Please confirm your URL follows PoolMath's latest https://api.... URL format and properly works in your browser.")
+            return
+
+        pool = pools[0].get('pool')
         self._attrs |= {
             'name': pool.get('name'),
             'volume': pool.get('volume')
