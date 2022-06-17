@@ -123,7 +123,7 @@ class PoolMathServiceSensor(Entity):
             client = self._poolmath_client
             poolmath_json = await client.async_update()
         except Exception as e:
-            LOG.warning(f"PoolMath connection failed! {url}: {e}")
+            LOG.warning(f"PoolMath request failed! {url}: {e}")
             return
 
         if not poolmath_json:
