@@ -20,6 +20,8 @@ ONLY_INCLUDE_IF_TRACKED = {
     "csi": "trackCSI"
 }
 
+EXAMPLE_URL = "https://api.poolmathapp.com/share/XXXXXX.json"
+
 class PoolMathClient:
     def __init__(self, url, name=DEFAULT_NAME, timeout=DEFAULT_TIMEOUT):
         self._url = url
@@ -31,8 +33,12 @@ class PoolMathClient:
         match = re.search(r"poolmathapp.com/(mypool|share)/([a-zA-Z0-9]+)", self._url)
         if match:
             self._pool_id = match[2]
+        else:
+            LOG.error(f"Invalid URL for PoolMath {self._url}, use {EXAMPLE_URL} format")
 
         self._json_url = f"https://api.poolmathapp.com/share/{self._pool_id}.json"
+        if self._json_url != self._url:
+            LOG.warning(f"Using JSON URL {self._json_url} instead of yaml configured URL {self._url}")
 
     async def async_update(self):
         """Fetch latest json formatted data from the Pool Math API"""
