@@ -15,7 +15,7 @@ CONF_TARGET = "target"
 CONF_TIMEOUT = "timeout"
 
 DEFAULT_NAME = "Pool"
-DEFAULT_TIMEOUT = 5.0
+DEFAULT_TIMEOUT = 10.0
 
 ICON_GAUGE = "mdi:gauge"
 ICON_POOL = "mdi:pool"
