@@ -117,19 +117,22 @@ class PoolMathServiceSensor(Entity):
     async def async_update(self):
         """Get the latest data from the source and updates the state."""
 
-        # trigger an update of this sensor (and all related sensors)
-        client = self._poolmath_client
-        poolmath_json = await client.async_update()
+        try:
+            # trigger an update of this sensor (and all related sensors)
+            client = self._poolmath_client
+            poolmath_json = await client.async_update()
+        except:
+            LOG.warning(f"No response from PoolMath request to {self._attrs.get(CONF_URL)}")
+            return
 
         if not poolmath_json:
             LOG.warning(f"No PoolMath response, is your YAML configuration using the updated https://api prefix URLs?")
             return
 
-
         # update state attributes with relevant data
         pools = poolmath_json.get('pools')
         if not pools:
-            LOG.warning(f"PoolMath returned NO pools for the configured URL {self._config.get(CONF_URL)}. Please confirm your URL follows PoolMath's latest https://api.... URL format and properly works in your browser.")
+            LOG.warning(f"PoolMath returned NO pool data for URL {self._config.get(CONF_URL)}. Please confirm your URL follows PoolMath's json URL and loads in your browser. (e.g. {self._attrs.get(CONF_URL)})")
             return
 
         pool = pools[0].get('pool')
