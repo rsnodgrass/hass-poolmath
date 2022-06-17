@@ -85,16 +85,16 @@ class PoolMathServiceSensor(Entity):
         """Initialize the Pool Math service sensor."""
         self.hass = hass
         self._config = config
-        
         self._name = name
-
+        
         self._managed_sensors = {}
-        self._attrs = {
-            ATTR_ATTRIBUTION: ATTRIBUTION,
-            CONF_URL: self._config.get(CONF_URL)
-        }
-
         self._poolmath_client = poolmath_client
+        
+        self._attrs |= {
+            ATTR_ATTRIBUTION: ATTRIBUTION,
+            CONF_URL: self._poolmath_client.url
+        }
+        
         self._async_add_entities_callback = async_add_entities_callback
 
     @property

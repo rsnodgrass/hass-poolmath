@@ -116,6 +116,10 @@ class PoolMathClient:
     def name(self):
         return self._name
 
+    @property
+    def url(self):
+        return self._json_url
+
     @staticmethod
     def _entry_timestamp(entry):
         return entry.find("time", class_="timestamp timereal").text
