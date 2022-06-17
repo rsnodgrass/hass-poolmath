@@ -23,7 +23,7 @@ from .client import PoolMathClient
 from .const import (
     ATTR_ATTRIBUTION,
     ATTR_DESCRIPTION,
-    ATTR_LOG_TIMESTAMP,
+    ATTR_LAST_UPDATED_TIME,
     ATTR_TARGET_MAX,
     ATTR_TARGET_MIN,
     ATTR_TARGET_SOURCE,
@@ -135,7 +135,7 @@ class PoolMathServiceSensor(Entity):
         timestamp = await client.process_log_entry_callbacks(
             poolmath_json, self._update_sensor_callback
         )
-        self._attrs[ATTR_LOG_TIMESTAMP] = timestamp
+        self._attrs[ATTR_LAST_UPDATED_TIME] = timestamp
 
         
     @property
@@ -177,7 +177,7 @@ class PoolMathServiceSensor(Entity):
 
     @property
     def state(self):
-        return self._attrs.get(ATTR_LOG_TIMESTAMP)
+        return self._attrs.get(ATTR_LAST_UPDATED_TIME)
 
 
 class UpdatableSensor(RestoreEntity):
@@ -243,7 +243,7 @@ class UpdatableSensor(RestoreEntity):
 
     def inject_state(self, state, timestamp, attributes):
         state_changed = self._state != state
-        self._attrs[ATTR_LOG_TIMESTAMP] = timestamp
+        self._attrs[ATTR_LAST_UPDATED_TIME] = timestamp
         if attributes:
             self._attrs |= attributes
 
@@ -273,8 +273,8 @@ class UpdatableSensor(RestoreEntity):
         LOG.debug(f"Restored sensor {self._name} previous state {self._state}")
 
         # restore attributes
-        if ATTR_LOG_TIMESTAMP in state.attributes:
-            self._attrs[ATTR_LOG_TIMESTAMP] = state.attributes[ATTR_LOG_TIMESTAMP]
+        if ATTR_LAST_UPDATED_TIME in state.attributes:
+            self._attrs[ATTR_LAST_UPDATED_TIME] = state.attributes[ATTR_LAST_UPDATED_TIME]
 
         async_dispatcher_connect(
             self.hass, DATA_UPDATED, self._schedule_immediate_update
