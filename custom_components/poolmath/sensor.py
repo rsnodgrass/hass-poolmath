@@ -17,6 +17,7 @@ from homeassistant.exceptions import PlatformNotReady
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.restore_state import RestoreEntity
+#from homeassistant.components.sensor.SensorEntity import SensorEntity
 
 from .client import PoolMathClient
 from .const import (
@@ -86,7 +87,10 @@ class PoolMathServiceSensor(Entity):
         self._name = name
 
         self._managed_sensors = {}
-        self._attrs = {ATTR_ATTRIBUTION: ATTRIBUTION, CONF_URL: config.get(CONF_URL)}
+        self._attrs = {
+            ATTR_ATTRIBUTION: ATTRIBUTION,
+            CONF_URL: config.get(CONF_URL)
+        }
 
         self._poolmath_client = poolmath_client
         self._async_add_entities_callback = async_add_entities_callback
@@ -114,18 +118,26 @@ class PoolMathServiceSensor(Entity):
 
         # trigger an update of this sensor (and all related sensors)
         client = self._poolmath_client
-        soup = await client.async_update()
+        poolmath_json = await client.async_update()
 
-        if not soup:
+        if not poolmath_json:
             LOG.warning(f"No PoolMath response, is your YAML configuration using the updated https://api prefix URLs?")
             return
 
+        # update state attributes with relevant data
+        pool = poolmath_json.get('pools')[0].get('pool')
+        self._attrs |= {
+            'name': pool.get('name'),
+            'volume': pool.get('volume')
+        }
+        
         # iterate through all the log entries and update sensor states
         timestamp = await client.process_log_entry_callbacks(
-            soup, self._update_sensor_callback
+            poolmath_json, self._update_sensor_callback
         )
         self._attrs[ATTR_LOG_TIMESTAMP] = timestamp
 
+        
     @property
     def extra_state_attributes(self):
         """Return the any state attributes."""
@@ -152,18 +164,24 @@ class PoolMathServiceSensor(Entity):
 
         return sensor
 
-    async def _update_sensor_callback(self, log_type, timestamp, state):
+    async def _update_sensor_callback(self, log_type, timestamp, state, attributes):
         """Update the sensor with the details from the log entry"""
         sensor = await self.get_sensor_entity(log_type)
         if sensor and sensor.state != state:
             LOG.info(f"{self._name} {log_type}={state} (timestamp={timestamp})")
-            sensor.inject_state(state, timestamp)
+            sensor.inject_state(state, timestamp, attributes)
 
     @property
     def sensor_names(self):
         return self._managed_sensors.keys()
 
-class UpdatableSensor(RestoreEntity, SensorEntity):
+    @property
+    def state(self):
+        return self._attrs.get(ATTR_LOG_TIMESTAMP)
+
+
+class UpdatableSensor(RestoreEntity):
+#class UpdatableSensor(RestoreEntity, SensorEntity):
     """Representation of a sensor whose state is kept up-to-date by an external data source."""
 
     def __init__(self, hass, pool_id, name, config, sensor_type):
@@ -223,9 +241,11 @@ class UpdatableSensor(RestoreEntity, SensorEntity):
     def icon(self):
         return self._config["icon"]
 
-    def inject_state(self, state, timestamp):
+    def inject_state(self, state, timestamp, attributes):
         state_changed = self._state != state
         self._attrs[ATTR_LOG_TIMESTAMP] = timestamp
+        if attributes:
+            self._attrs |= attributes
 
         if state_changed:
             self._state = state

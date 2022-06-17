@@ -1,14 +1,24 @@
-import asyncio
 import logging
+
 import re
-
+import json
 import httpx
-from bs4 import BeautifulSoup
+import asyncio
 
-from .const import CONF_TIMEOUT, DEFAULT_NAME, DEFAULT_TIMEOUT
+from .const import CONF_TIMEOUT, DEFAULT_NAME, DEFAULT_TIMEOUT, ATTR_TARGET_SOURCE, ATTR_TARGET_MIN, ATTR_TARGET_MAX
 
 LOG = logging.getLogger(__name__)
 
+DEFAULT_POOL_ID = 'unknown'
+
+KNOWN_SENSOR_KEYS = [ "fc", "cc", "cya", "ch", "ph", "ta", "salt", "bor", "tds", "csi" ]
+
+ONLY_INCLUDE_IF_TRACKED = {
+    "salt": "trackSalt",
+    "bor": "trackBor",
+    "cc": "trackCC",
+    "csi": "trackCSI"
+}
 
 class PoolMathClient:
     def __init__(self, url, name=DEFAULT_NAME, timeout=DEFAULT_TIMEOUT):
@@ -16,65 +26,77 @@ class PoolMathClient:
         self._name = name
         self._timeout = timeout
 
-        # parse out the unique pool identifier from the url
-        self._pool_id = "unknown"
-        match = re.search(r"/(mypool|share)/(.+)", self._url)
+        # parse out the unique pool identifier from the provided URL
+        self._pool_id = DEFAULT_POOL_ID
+        match = re.search(r"poolmathapp.com/(mypool|share)/([a-zA-Z0-9]+)", self._url)
         if match:
             self._pool_id = match[2]
-        else:
-            self._pool_id = None
+
+        self._json_url = f"https://api.poolmathapp.com/share/{self._pool_id}.json"
 
     async def async_update(self):
-        """Fetch latest data from the Pool Math service as parsed HTML soup"""
+        """Fetch latest json formatted data from the Pool Math API"""
 
         async with httpx.AsyncClient() as client:
             LOG.info(
-                f"GET {self._url} (timeout={self._timeout}; name={self.name}; id={self.pool_id})"
+                f"GET {self._json_url} (timeout={self._timeout}; name={self.name}; id={self.pool_id})"
             )
-            response = await client.request("GET", self._url, timeout=self._timeout, allow_redirects=True)
-            LOG.debug(f"GET {self._url} response: {response.status_code}")
+            response = await client.request("GET", self._json_url, timeout=self._timeout, follow_redirects=True)
+            LOG.debug(f"GET {self._json_url} response: {response.status_code}")
 
             if response.status_code == httpx.codes.OK:
-                return BeautifulSoup(response.text, "html.parser")
+                return json.loads(response.text)
 
             return None
 
-    async def process_log_entry_callbacks(self, poolmath_soup, async_callback):
+    async def process_log_entry_callbacks(self, poolmath_json, async_callback):
         """Call provided async callback once for each type of log entry"""
-        """   async_callback(log_type, timestamp, state)"""
+        """   async_callback(log_type, timestamp, state, attributes)"""
 
-        if not poolmath_soup:
+        if not poolmath_json:
             return
-        
+        pool = poolmath_json.get("pools")[0].get("pool")
+        overview = pool.get("overview")
+
         latest_timestamp = None
-        already_processed_log_types = {}
+        for measurement in KNOWN_SENSOR_KEYS:
+            value = overview.get(measurement)
+            if not value:
+                continue
 
-        # Read back through all log entries and update any changed sensor states (since a given
-        # log entry may only have a subset of sensor states)
-        log_entries = poolmath_soup.find_all("div", class_="logCard")
-        # LOG.debug(f"{self.name} log entries: %s", log_entries)
+            # if a measurement can be disabled for tracking in PoolMath, skip adding this
+            # sensor if the user has marked it to not be tracked
+            if measurement in ONLY_INCLUDE_IF_TRACKED:
+                if not pool.get(ONLY_INCLUDE_IF_TRACKED.get(measurement)):
+                    LOG.info(f"Ignoring measurement {measurement} since PoolMath is set to not track this field")
+                    continue
 
-        for log_entry in log_entries:
-            log_fields = log_entry.select(".chiclet")
+            timestamp = overview.get(f"{measurement}Ts")
 
-            # find timestamp for the most recent PoolMath log entry
-            if not latest_timestamp:
-                latest_timestamp = PoolMathClient._entry_timestamp(log_entry)
+            # find the timestamp of the most recent measurement update
+            if not latest_timestamp or timestamp > latest_timestamp:
+                latest_timestamp = timestamp
 
-            # FIXME: improve parsing to be more robust to Pool Math changes
-            for entry in log_fields:
-                log_type = entry.contents[3].text.lower()
+            # add any attributes relevent to this measurement
+            attributes = {}
+            value_min = pool.get(f"{measurement}Min")
+            if value_min:
+                attributes[ATTR_TARGET_MIN] = value_min
 
-                # only update if we haven't already updated the same log_type yet
-                if not log_type in already_processed_log_types:
-                    timestamp = PoolMathClient._entry_timestamp(log_entry)
-                    state = entry.contents[1].text
+            value_max = pool.get(f"{measurement}Max")
+            if value_max:
+                attributes[ATTR_TARGET_MAX] = value_max
 
-                    await async_callback(log_type, timestamp, state)
-                    already_processed_log_types[log_type] = state
+            target = pool.get(f"{measurement}Target")
+            if target:
+                attributes['target'] = target
+                attributes[ATTR_TARGET_SOURCE] = 'PoolMath'
+
+            # update the sensor
+            await async_callback(measurement, timestamp, value, attributes)
 
         return latest_timestamp
-
+    
     @property
     def pool_id(self):
         return self._pool_id
