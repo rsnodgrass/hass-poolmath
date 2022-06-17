@@ -119,7 +119,7 @@ type: entities
 ```yaml
 poolmath:
   sources:
-    - url: https://api.poolmathapp.com/share/tfp-168502
+    - url: https://api.poolmathapp.com/share/AbC123
       name: "Swimming Pool"
     - url: https://api.poolmathapp.com/share/7WPG8yL
       name: "Spa"
