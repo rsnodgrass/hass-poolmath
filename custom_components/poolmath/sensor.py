@@ -175,9 +175,9 @@ class PoolMathServiceSensor(Entity):
 
         return sensor
 
-    async def _update_sensor_callback(self, log_type, timestamp, state, attributes):
-        """Update the sensor with the details from the log entry"""
-        sensor = await self.get_sensor_entity(log_type)
+    async def _update_sensor_callback(self, measurement_type, timestamp, state, attributes):
+        """Update the sensor with the details from the measurement"""
+        sensor = await self.get_sensor_entity(measurement_type)
         if sensor and sensor.state != state:
             LOG.info(f"{self._name} {log_type}={state} (timestamp={timestamp})")
             sensor.inject_state(state, timestamp, attributes)
@@ -250,6 +250,7 @@ class UpdatableSensor(RestoreEntity):
 
     def inject_state(self, state, timestamp, attributes):
         state_changed = self._state != state
+        
         self._attrs[ATTR_LAST_UPDATED_TIME] = timestamp
         if attributes:
             self._attrs |= attributes

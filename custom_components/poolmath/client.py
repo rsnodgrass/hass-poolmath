@@ -72,7 +72,7 @@ class PoolMathClient:
         latest_timestamp = None
         for measurement in KNOWN_SENSOR_KEYS:
             value = overview.get(measurement)
-            if not value:
+            if value == None:
                 continue
 
             # if a measurement can be disabled for tracking in PoolMath, skip adding this
