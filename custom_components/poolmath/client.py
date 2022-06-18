@@ -57,7 +57,7 @@ class PoolMathClient:
 
     async def process_log_entry_callbacks(self, poolmath_json, async_callback):
         """Call provided async callback once for each type of log entry"""
-        """   async_callback(log_type, timestamp, state, attributes)"""
+        """   async_callback(measurement_type, timestamp, state, attributes)"""
 
         if not poolmath_json:
             return
