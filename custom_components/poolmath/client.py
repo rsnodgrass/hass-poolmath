@@ -28,9 +28,9 @@ class PoolMathClient:
         self._name = name
         self._timeout = timeout
 
-        # parse out the unique pool identifier from the provided URL
+        # parse out the unique pool identifier from the provided URL (include hyphen for tfp-)
         self._pool_id = DEFAULT_POOL_ID
-        match = re.search(r"poolmathapp.com/(mypool|share)/([a-zA-Z0-9]+)", self._url)
+        match = re.search(r"poolmathapp.com/(mypool|share)/([a-zA-Z0-9-]+)", self._url)
         if match:
             self._pool_id = match[2]
         else:
