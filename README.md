@@ -26,6 +26,9 @@ Creates sensors for pools being managed with Trouble Free Pools's [Pool Math](ht
 * Borates
 * Calcite Saturation Index (CSI)
 * Temperature
+* Pressure
+* Flow Rate
+* SWG Cell Percentage
 
 Note: this **requires a [Trouble Free Pool](https://www.troublefreepool.com/) Pool Math Premium subscription** to access your pool or spa's data from the Pool Math cloud service.
 
