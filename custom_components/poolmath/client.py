@@ -11,7 +11,8 @@ LOG = logging.getLogger(__name__)
 
 DEFAULT_POOL_ID = 'unknown'
 
-KNOWN_SENSOR_KEYS = [ "fc", "cc", "cya", "ch", "ph", "ta", "salt", "bor", "tds", "csi" ]
+KNOWN_SENSOR_KEYS = [ "fc", "cc", "cya", "ch", "ph", "ta", "salt", "bor", "tds", "csi",
+                      "waterTemp", "flowRate", "pressure", "swgCellPercent" ]
 
 ONLY_INCLUDE_IF_TRACKED = {
     "salt": "trackSalt",
@@ -79,7 +80,7 @@ class PoolMathClient:
             # sensor if the user has marked it to not be tracked
             if measurement in ONLY_INCLUDE_IF_TRACKED:
                 if not pool.get(ONLY_INCLUDE_IF_TRACKED.get(measurement)):
-                    LOG.info(f"Ignoring measurement {measurement} since PoolMath is set to not track this field")
+                    LOG.info(f"Ignoring measurement {measurement} since tracking is disable in PoolMath")
                     continue
 
             timestamp = overview.get(f"{measurement}Ts")

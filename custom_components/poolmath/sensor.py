@@ -141,7 +141,7 @@ class PoolMathServiceSensor(Entity):
             'name': pool.get('name'),
             'volume': pool.get('volume')
         }
-        
+
         # iterate through all the log entries and update sensor states
         timestamp = await client.process_log_entry_callbacks(
             poolmath_json, self._update_sensor_callback

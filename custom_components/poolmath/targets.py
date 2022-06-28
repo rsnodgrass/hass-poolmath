@@ -86,6 +86,30 @@ POOL_MATH_SENSOR_SETTINGS = {
         ATTR_DESCRIPTION: "Temperature",
         ATTR_ICON: "mdi:coolant-temperature",
     },
+    "waterTemp": {
+        ATTR_NAME: "Temp",
+        ATTR_UNIT_OF_MEASUREMENT: TEMP_FAHRENHEIT,
+        ATTR_DESCRIPTION: "Temperature",
+        ATTR_ICON: "mdi:coolant-temperature",
+    },
+    "swgCellPercentage": {
+        ATTR_NAME: "SWG Cell",
+        ATTR_UNIT_OF_MEASUREMENT: '%',
+        ATTR_DESCRIPTION: "SWG Cell Percentage",
+        ATTR_ICON: "mdi:coolant-temperature",
+    },
+    "pressure": {
+        ATTR_NAME: "Pressure",
+        ATTR_UNIT_OF_MEASUREMENT: TEMP_FAHRENHEIT,
+        ATTR_DESCRIPTION: "Filter Pressure",
+        ATTR_ICON: "mdi:coolant-temperature",
+    },
+    "flowRate": {
+        ATTR_NAME: "Flow Rate",
+        ATTR_UNIT_OF_MEASUREMENT: 'gpm',
+        ATTR_DESCRIPTION: "Flow Rate",
+        ATTR_ICON: "mdi:coolant-temperature",
+    },
 }
 
 # FIXME: targets should be profiles that users can select from based on the needs
