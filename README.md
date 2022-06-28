@@ -107,6 +107,8 @@ type: entities
 
 ### Community Support
 
+* **For support, use the [official Home Assistant discussion Pool Math](https://community.home-assistant.io/t/custom-component-pool-math-sensors-for-pool-chemicals-and-operations/435126), there is no support or dedicated development for this integration.**
+
 * [How to use the Pool Math app?](https://www.troublefreepool.com/threads/how-to-use-the-pool-math-app.179282/)
 * For issues with the Pool Math apps, see forums or contact [poolmath@troublefreepool.com](mailto:poolmath@troublefreepool.com)
 
