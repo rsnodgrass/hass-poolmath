@@ -106,7 +106,7 @@ POOL_MATH_SENSOR_SETTINGS = {
     },
     "flowRate": {
         ATTR_NAME: "Flow Rate",
-        ATTR_UNIT_OF_MEASUREMENT: 'gpm',
+        ATTR_UNIT_OF_MEASUREMENT: 'gpm', # FIXME: confirm units
         ATTR_DESCRIPTION: "Flow Rate",
         ATTR_ICON: "mdi:coolant-temperature",
     },

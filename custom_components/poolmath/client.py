@@ -105,7 +105,7 @@ class PoolMathClient:
                 attributes[ATTR_TARGET_SOURCE] = 'PoolMath'
 
             # update the sensor
-            await async_callback(measurement, timestamp, value, attributes)
+            await async_callback(measurement, timestamp, value, attributes, poolmath_json)
 
         return latest_timestamp
     

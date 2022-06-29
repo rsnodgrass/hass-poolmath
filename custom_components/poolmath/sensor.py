@@ -11,6 +11,8 @@ from homeassistant.const import (
     ATTR_UNIT_OF_MEASUREMENT,
     CONF_NAME,
     CONF_URL,
+    TEMP_CELSIUS,
+    TEMP_FAHRENHEIT,
 )
 from homeassistant.core import callback
 from homeassistant.exceptions import PlatformNotReady
@@ -154,7 +156,7 @@ class PoolMathServiceSensor(Entity):
         """Return the any state attributes."""
         return self._attrs
 
-    async def get_sensor_entity(self, sensor_type):
+    async def get_sensor_entity(self, sensor_type, poolmath_json):
         sensor = self._managed_sensors.get(sensor_type, None)
         if sensor:
             return sensor
@@ -167,7 +169,7 @@ class PoolMathServiceSensor(Entity):
         name = self._name + " " + config[ATTR_NAME]
         pool_id = self._poolmath_client.pool_id
 
-        sensor = UpdatableSensor(self.hass, pool_id, name, config, sensor_type)
+        sensor = UpdatableSensor(self.hass, pool_id, name, config, sensor_type, poolmath_json)
         self._managed_sensors[sensor_type] = sensor
 
         # register sensor with Home Assistant (async callback requires passing to loop)
@@ -175,11 +177,11 @@ class PoolMathServiceSensor(Entity):
 
         return sensor
 
-    async def _update_sensor_callback(self, measurement_type, timestamp, state, attributes):
+    async def _update_sensor_callback(self, measurement_type, timestamp, state, attributes, poolmath_json):
         """Update the sensor with the details from the measurement"""
-        sensor = await self.get_sensor_entity(measurement_type)
+        sensor = await self.get_sensor_entity(measurement_type, poolmath_json)
         if sensor and sensor.state != state:
-            LOG.info(f"{self._name} {measurement_type}={state} (timestamp={timestamp})")
+            LOG.info(f"{sensor.name} {measurement_type}={state} {sensor.unit_of_measurement} (timestamp={timestamp})")
             sensor.inject_state(state, timestamp, attributes)
 
     @property
@@ -191,7 +193,7 @@ class UpdatableSensor(RestoreEntity):
 #class UpdatableSensor(RestoreEntity, SensorEntity):
     """Representation of a sensor whose state is kept up-to-date by an external data source."""
 
-    def __init__(self, hass, pool_id, name, config, sensor_type):
+    def __init__(self, hass, pool_id, name, config, sensor_type, poolmath_json):
         """Initialize the sensor."""
         super().__init__()
 
@@ -206,7 +208,22 @@ class UpdatableSensor(RestoreEntity):
         else:
             self._unique_id = None
 
-        self._attrs = {ATTR_ATTRIBUTION: ATTRIBUTION}
+        self._attrs = { ATTR_ATTRIBUTION: ATTRIBUTION }
+
+        # keep an example JSON response when first created to be able to determine things
+        # that are not specified with the sensor value (since units/update timestamps are
+        # in separate keys within the document)
+        self._example_json = poolmath_json
+
+        # TEMPORARY HACK to get correct unit of measurement for water temps (but this also
+        # applies to other units). No time to fix now, but perhaps someone will submit a PR
+        # to fix this in future.
+        self._unit_of_measurement = self._config[ATTR_UNIT_OF_MEASUREMENT]
+        if self._unit_of_measurement in [ TEMP_FAHRENHEIT, TEMP_CELSIUS ]:
+            if self._example_json.get('waterTempUnits') == 1:
+                self._unit_of_measurement = TEMP_CELSIUS
+            else:
+                self._unit_of_measurement = TEMP_FAHRENHEIT
 
         # FIXME: use 'targets' configuration value and load appropriate yaml
         targets_map = get_pool_targets()
@@ -232,7 +249,7 @@ class UpdatableSensor(RestoreEntity):
     @property
     def unit_of_measurement(self):
         """Return the unit the value is expressed in."""
-        return self._config[ATTR_UNIT_OF_MEASUREMENT]
+        return self._unit_of_measurement
 
     @property
     def state(self):
