@@ -210,20 +210,24 @@ class UpdatableSensor(RestoreEntity):
 
         self._attrs = { ATTR_ATTRIBUTION: ATTRIBUTION }
 
-        # keep an example JSON response when first created to be able to determine things
-        # that are not specified with the sensor value (since units/update timestamps are
-        # in separate keys within the document)
-        self._example_json = poolmath_json
-
         # TEMPORARY HACK to get correct unit of measurement for water temps (but this also
         # applies to other units). No time to fix now, but perhaps someone will submit a PR
         # to fix this in future.
         self._unit_of_measurement = self._config[ATTR_UNIT_OF_MEASUREMENT]
         if self._unit_of_measurement in [ TEMP_FAHRENHEIT, TEMP_CELSIUS ]:
-            if self._example_json.get('waterTempUnits') == 1:
-                self._unit_of_measurement = TEMP_CELSIUS
-            else:
-                self._unit_of_measurement = TEMP_FAHRENHEIT
+
+            # inspect the first JSON response to determine things that are not specified
+            # with sensor values (since units/update timestamps are in separate keys
+            # within the JSON doc)
+            pools = poolmath_json.get('pools')
+            if pools:
+                pool = pools[0].get('pool')
+                if pools.get('waterTempUnitDefault') == 1:
+                    self._unit_of_measurement = TEMP_CELSIUS
+                else:
+                    self._unit_of_measurement = TEMP_FAHRENHEIT
+                    
+            LOG.info(f"Unit of temperature measurement {self._unit_of_measurement}")
 
         # FIXME: use 'targets' configuration value and load appropriate yaml
         targets_map = get_pool_targets()
