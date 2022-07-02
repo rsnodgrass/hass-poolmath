@@ -222,7 +222,7 @@ class UpdatableSensor(RestoreEntity):
             pools = poolmath_json.get('pools')
             if pools:
                 pool = pools[0].get('pool')
-                if pools.get('waterTempUnitDefault') == 1:
+                if pool.get('waterTempUnitDefault') == 1:
                     self._unit_of_measurement = TEMP_CELSIUS
                 else:
                     self._unit_of_measurement = TEMP_FAHRENHEIT
