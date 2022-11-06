@@ -94,7 +94,7 @@ POOL_MATH_SENSOR_SETTINGS = {
     },
     "swgCellPercentage": {
         ATTR_NAME: "SWG Cell",
-        ATTR_UNIT_OF_MEASUREMENT: '%',
+        ATTR_UNIT_OF_MEASUREMENT: "%",
         ATTR_DESCRIPTION: "SWG Cell Percentage",
         ATTR_ICON: "mdi:coolant-temperature",
     },
@@ -106,7 +106,7 @@ POOL_MATH_SENSOR_SETTINGS = {
     },
     "flowRate": {
         ATTR_NAME: "Flow Rate",
-        ATTR_UNIT_OF_MEASUREMENT: 'gpm', # FIXME: confirm units
+        ATTR_UNIT_OF_MEASUREMENT: "gpm",  # FIXME: confirm units
         ATTR_DESCRIPTION: "Flow Rate",
         ATTR_ICON: "mdi:coolant-temperature",
     },

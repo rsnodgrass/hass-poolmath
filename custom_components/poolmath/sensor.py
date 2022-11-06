@@ -19,7 +19,8 @@ from homeassistant.exceptions import PlatformNotReady
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.restore_state import RestoreEntity
-#from homeassistant.components.sensor.SensorEntity import SensorEntity
+
+# from homeassistant.components.sensor.SensorEntity import SensorEntity
 
 from .client import PoolMathClient
 from .const import (
@@ -88,15 +89,15 @@ class PoolMathServiceSensor(Entity):
         self.hass = hass
         self._config = config
         self._name = name
-        
+
         self._managed_sensors = {}
         self._poolmath_client = poolmath_client
-        
+
         self._attrs = {
             ATTR_ATTRIBUTION: ATTRIBUTION,
-            CONF_URL: self._poolmath_client.url
+            CONF_URL: self._poolmath_client.url,
         }
-        
+
         self._async_add_entities_callback = async_add_entities_callback
 
     @property
@@ -133,16 +134,13 @@ class PoolMathServiceSensor(Entity):
             return
 
         # update state attributes with relevant data
-        pools = poolmath_json.get('pools')
+        pools = poolmath_json.get("pools")
         if not pools:
             LOG.warning(f"PoolMath returned EMPTY pool data: {url}")
             return
 
-        pool = pools[0].get('pool')
-        self._attrs |= {
-            'name': pool.get('name'),
-            'volume': pool.get('volume')
-        }
+        pool = pools[0].get("pool")
+        self._attrs |= {"name": pool.get("name"), "volume": pool.get("volume")}
 
         # iterate through all the log entries and update sensor states
         timestamp = await client.process_log_entry_callbacks(
@@ -150,7 +148,6 @@ class PoolMathServiceSensor(Entity):
         )
         self._attrs[ATTR_LAST_UPDATED_TIME] = timestamp
 
-        
     @property
     def extra_state_attributes(self):
         """Return the any state attributes."""
@@ -169,7 +166,9 @@ class PoolMathServiceSensor(Entity):
         name = self._name + " " + config[ATTR_NAME]
         pool_id = self._poolmath_client.pool_id
 
-        sensor = UpdatableSensor(self.hass, pool_id, name, config, sensor_type, poolmath_json)
+        sensor = UpdatableSensor(
+            self.hass, pool_id, name, config, sensor_type, poolmath_json
+        )
         self._managed_sensors[sensor_type] = sensor
 
         # register sensor with Home Assistant (async callback requires passing to loop)
@@ -177,11 +176,15 @@ class PoolMathServiceSensor(Entity):
 
         return sensor
 
-    async def _update_sensor_callback(self, measurement_type, timestamp, state, attributes, poolmath_json):
+    async def _update_sensor_callback(
+        self, measurement_type, timestamp, state, attributes, poolmath_json
+    ):
         """Update the sensor with the details from the measurement"""
         sensor = await self.get_sensor_entity(measurement_type, poolmath_json)
         if sensor and sensor.state != state:
-            LOG.info(f"{sensor.name} {measurement_type}={state} {sensor.unit_of_measurement} (timestamp={timestamp})")
+            LOG.info(
+                f"{sensor.name} {measurement_type}={state} {sensor.unit_of_measurement} (timestamp={timestamp})"
+            )
             sensor.inject_state(state, timestamp, attributes)
 
     @property
@@ -190,7 +193,7 @@ class PoolMathServiceSensor(Entity):
 
 
 class UpdatableSensor(RestoreEntity):
-#class UpdatableSensor(RestoreEntity, SensorEntity):
+    # class UpdatableSensor(RestoreEntity, SensorEntity):
     """Representation of a sensor whose state is kept up-to-date by an external data source."""
 
     def __init__(self, hass, pool_id, name, config, sensor_type, poolmath_json):
@@ -208,25 +211,25 @@ class UpdatableSensor(RestoreEntity):
         else:
             self._unique_id = None
 
-        self._attrs = { ATTR_ATTRIBUTION: ATTRIBUTION }
+        self._attrs = {ATTR_ATTRIBUTION: ATTRIBUTION}
 
         # TEMPORARY HACK to get correct unit of measurement for water temps (but this also
         # applies to other units). No time to fix now, but perhaps someone will submit a PR
         # to fix this in future.
         self._unit_of_measurement = self._config[ATTR_UNIT_OF_MEASUREMENT]
-        if self._unit_of_measurement in [ TEMP_FAHRENHEIT, TEMP_CELSIUS ]:
+        if self._unit_of_measurement in [TEMP_FAHRENHEIT, TEMP_CELSIUS]:
 
             # inspect the first JSON response to determine things that are not specified
             # with sensor values (since units/update timestamps are in separate keys
             # within the JSON doc)
-            pools = poolmath_json.get('pools')
+            pools = poolmath_json.get("pools")
             if pools:
-                pool = pools[0].get('pool')
-                if pool.get('waterTempUnitDefault') == 1:
+                pool = pools[0].get("pool")
+                if pool.get("waterTempUnitDefault") == 1:
                     self._unit_of_measurement = TEMP_CELSIUS
                 else:
                     self._unit_of_measurement = TEMP_FAHRENHEIT
-                    
+
             LOG.info(f"Unit of temperature measurement {self._unit_of_measurement}")
 
         # FIXME: use 'targets' configuration value and load appropriate yaml
@@ -271,7 +274,7 @@ class UpdatableSensor(RestoreEntity):
 
     def inject_state(self, state, timestamp, attributes):
         state_changed = self._state != state
-        
+
         self._attrs[ATTR_LAST_UPDATED_TIME] = timestamp
         if attributes:
             self._attrs |= attributes
@@ -303,7 +306,9 @@ class UpdatableSensor(RestoreEntity):
 
         # restore attributes
         if ATTR_LAST_UPDATED_TIME in state.attributes:
-            self._attrs[ATTR_LAST_UPDATED_TIME] = state.attributes[ATTR_LAST_UPDATED_TIME]
+            self._attrs[ATTR_LAST_UPDATED_TIME] = state.attributes[
+                ATTR_LAST_UPDATED_TIME
+            ]
 
         async_dispatcher_connect(
             self.hass, DATA_UPDATED, self._schedule_immediate_update
