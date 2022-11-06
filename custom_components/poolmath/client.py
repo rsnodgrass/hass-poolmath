@@ -5,23 +5,45 @@ import json
 import httpx
 import asyncio
 
-from .const import CONF_TIMEOUT, DEFAULT_NAME, DEFAULT_TIMEOUT, ATTR_TARGET_SOURCE, ATTR_TARGET_MIN, ATTR_TARGET_MAX
+from .const import (
+    CONF_TIMEOUT,
+    DEFAULT_NAME,
+    DEFAULT_TIMEOUT,
+    ATTR_TARGET_SOURCE,
+    ATTR_TARGET_MIN,
+    ATTR_TARGET_MAX,
+)
 
 LOG = logging.getLogger(__name__)
 
-DEFAULT_POOL_ID = 'unknown'
+DEFAULT_POOL_ID = "unknown"
 
-KNOWN_SENSOR_KEYS = [ "fc", "cc", "cya", "ch", "ph", "ta", "salt", "bor", "tds", "csi",
-                      "waterTemp", "flowRate", "pressure", "swgCellPercent" ]
+KNOWN_SENSOR_KEYS = [
+    "fc",
+    "cc",
+    "cya",
+    "ch",
+    "ph",
+    "ta",
+    "salt",
+    "bor",
+    "tds",
+    "csi",
+    "waterTemp",
+    "flowRate",
+    "pressure",
+    "swgCellPercent",
+]
 
 ONLY_INCLUDE_IF_TRACKED = {
     "salt": "trackSalt",
     "bor": "trackBor",
     "cc": "trackCC",
-    "csi": "trackCSI"
+    "csi": "trackCSI",
 }
 
 EXAMPLE_URL = "https://api.poolmathapp.com/share/XXXXXX.json"
+
 
 class PoolMathClient:
     def __init__(self, url, name=DEFAULT_NAME, timeout=DEFAULT_TIMEOUT):
@@ -39,7 +61,9 @@ class PoolMathClient:
 
         self._json_url = f"https://api.poolmathapp.com/share/{self._pool_id}.json"
         if self._json_url != self._url:
-            LOG.warning(f"Using JSON URL {self._json_url} instead of yaml configured URL {self._url}")
+            LOG.warning(
+                f"Using JSON URL {self._json_url} instead of yaml configured URL {self._url}"
+            )
 
     async def async_update(self):
         """Fetch latest json formatted data from the Pool Math API"""
@@ -48,7 +72,9 @@ class PoolMathClient:
             LOG.info(
                 f"GET {self._json_url} (timeout={self._timeout}; name={self.name}; id={self.pool_id})"
             )
-            response = await client.request("GET", self._json_url, timeout=self._timeout, follow_redirects=True)
+            response = await client.request(
+                "GET", self._json_url, timeout=self._timeout, follow_redirects=True
+            )
             LOG.debug(f"GET {self._json_url} response: {response.status_code}")
 
             if response.status_code == httpx.codes.OK:
@@ -80,7 +106,9 @@ class PoolMathClient:
             # sensor if the user has marked it to not be tracked
             if measurement in ONLY_INCLUDE_IF_TRACKED:
                 if not pool.get(ONLY_INCLUDE_IF_TRACKED.get(measurement)):
-                    LOG.info(f"Ignoring measurement {measurement} since tracking is disable in PoolMath")
+                    LOG.info(
+                        f"Ignoring measurement {measurement} since tracking is disable in PoolMath"
+                    )
                     continue
 
             timestamp = overview.get(f"{measurement}Ts")
@@ -101,14 +129,16 @@ class PoolMathClient:
 
             target = pool.get(f"{measurement}Target")
             if target:
-                attributes['target'] = target
-                attributes[ATTR_TARGET_SOURCE] = 'PoolMath'
+                attributes["target"] = target
+                attributes[ATTR_TARGET_SOURCE] = "PoolMath"
 
             # update the sensor
-            await async_callback(measurement, timestamp, value, attributes, poolmath_json)
+            await async_callback(
+                measurement, timestamp, value, attributes, poolmath_json
+            )
 
         return latest_timestamp
-    
+
     @property
     def pool_id(self):
         return self._pool_id
