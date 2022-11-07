@@ -20,8 +20,6 @@ from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.restore_state import RestoreEntity
 
-# from homeassistant.components.sensor.SensorEntity import SensorEntity
-
 from .client import PoolMathClient
 from .const import (
     ATTR_ATTRIBUTION,
@@ -40,6 +38,9 @@ from .const import (
     ICON_POOL,
 )
 from .targets import POOL_MATH_SENSOR_SETTINGS, get_pool_targets
+
+# from homeassistant.components.sensor.SensorEntity import SensorEntity
+
 
 LOG = logging.getLogger(__name__)
 
