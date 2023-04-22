@@ -20,8 +20,6 @@ from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.restore_state import RestoreEntity
 
-# from homeassistant.components.sensor.SensorEntity import SensorEntity
-
 from .client import PoolMathClient
 from .const import (
     ATTR_ATTRIBUTION,
@@ -40,6 +38,9 @@ from .const import (
     ICON_POOL,
 )
 from .targets import POOL_MATH_SENSOR_SETTINGS, get_pool_targets
+
+# from homeassistant.components.sensor.SensorEntity import SensorEntity
+
 
 LOG = logging.getLogger(__name__)
 
@@ -218,7 +219,6 @@ class UpdatableSensor(RestoreEntity):
         # to fix this in future.
         self._unit_of_measurement = self._config[ATTR_UNIT_OF_MEASUREMENT]
         if self._unit_of_measurement in [TEMP_FAHRENHEIT, TEMP_CELSIUS]:
-
             # inspect the first JSON response to determine things that are not specified
             # with sensor values (since units/update timestamps are in separate keys
             # within the JSON doc)
