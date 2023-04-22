@@ -1,4 +1,3 @@
-import asyncio
 import logging
 from datetime import timedelta
 
@@ -6,7 +5,6 @@ import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import (
-    ATTR_ICON,
     ATTR_NAME,
     ATTR_UNIT_OF_MEASUREMENT,
     CONF_NAME,
@@ -15,7 +13,6 @@ from homeassistant.const import (
     TEMP_FAHRENHEIT,
 )
 from homeassistant.core import callback
-from homeassistant.exceptions import PlatformNotReady
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.restore_state import RestoreEntity
@@ -23,18 +20,13 @@ from homeassistant.helpers.restore_state import RestoreEntity
 from .client import PoolMathClient
 from .const import (
     ATTR_ATTRIBUTION,
-    ATTR_DESCRIPTION,
     ATTR_LAST_UPDATED_TIME,
-    ATTR_TARGET_MAX,
-    ATTR_TARGET_MIN,
     ATTR_TARGET_SOURCE,
     ATTRIBUTION,
     CONF_TARGET,
     CONF_TIMEOUT,
     DEFAULT_NAME,
     DEFAULT_TIMEOUT,
-    DOMAIN,
-    ICON_GAUGE,
     ICON_POOL,
 )
 from .targets import POOL_MATH_SENSOR_SETTINGS, get_pool_targets

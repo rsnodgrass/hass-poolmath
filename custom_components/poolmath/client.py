@@ -1,4 +1,3 @@
-import asyncio
 import json
 import logging
 import re
@@ -9,7 +8,6 @@ from .const import (
     ATTR_TARGET_MAX,
     ATTR_TARGET_MIN,
     ATTR_TARGET_SOURCE,
-    CONF_TIMEOUT,
     DEFAULT_NAME,
     DEFAULT_TIMEOUT,
 )
@@ -99,7 +97,7 @@ class PoolMathClient:
         latest_timestamp = None
         for measurement in KNOWN_SENSOR_KEYS:
             value = overview.get(measurement)
-            if value == None:
+            if value is None:
                 continue
 
             # if a measurement can be disabled for tracking in PoolMath, skip adding this
