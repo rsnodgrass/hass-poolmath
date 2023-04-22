@@ -1,6 +1,7 @@
+---
 # https://www.horizonpoolsupply.com/_uls/resources/Saturation_Index_Info.pdf
 
-formula: "pH + temperature_factor + calcium_factor + alkalinity_factor - TDS factor"
+formula: pH + temperature_factor + calcium_factor + alkalinity_factor - TDS factor
 
 temperature_factor:
   32: 0.0
