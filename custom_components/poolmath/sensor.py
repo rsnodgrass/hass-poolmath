@@ -9,6 +9,7 @@ from homeassistant.const import (
     ATTR_UNIT_OF_MEASUREMENT,
     CONF_NAME,
     CONF_URL,
+    UnitOfTemperature
 )
 
 from homeassistant.core import callback
