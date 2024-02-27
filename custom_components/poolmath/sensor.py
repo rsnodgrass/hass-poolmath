@@ -9,9 +9,8 @@ from homeassistant.const import (
     ATTR_UNIT_OF_MEASUREMENT,
     CONF_NAME,
     CONF_URL,
-    TEMP_CELSIUS,
-    TEMP_FAHRENHEIT,
 )
+
 from homeassistant.core import callback
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity import Entity
@@ -210,7 +209,7 @@ class UpdatableSensor(RestoreEntity):
         # applies to other units). No time to fix now, but perhaps someone will submit a PR
         # to fix this in future.
         self._unit_of_measurement = self._config[ATTR_UNIT_OF_MEASUREMENT]
-        if self._unit_of_measurement in [TEMP_FAHRENHEIT, TEMP_CELSIUS]:
+        if self._unit_of_measurement in [UnitOfTemperature.FAHRENHEIT, UnitOfTemperature.CELSIUS]:
             # inspect the first JSON response to determine things that are not specified
             # with sensor values (since units/update timestamps are in separate keys
             # within the JSON doc)
@@ -218,9 +217,9 @@ class UpdatableSensor(RestoreEntity):
             if pools:
                 pool = pools[0].get("pool")
                 if pool.get("waterTempUnitDefault") == 1:
-                    self._unit_of_measurement = TEMP_CELSIUS
+                    self._unit_of_measurement = UnitOfTemperature.CELSIUS
                 else:
-                    self._unit_of_measurement = TEMP_FAHRENHEIT
+                    self._unit_of_measurement = UnitOfTemperature.FAHRENHEIT
 
             LOG.info(f"Unit of temperature measurement {self._unit_of_measurement}")
 
