@@ -38,7 +38,7 @@ LOG = logging.getLogger(__name__)
 
 DATA_UPDATED = 'poolmath_data_updated'
 
-SCAN_INTERVAL = timedelta(minutes=15)
+SCAN_INTERVAL = timedelta(minutes=2)
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {

@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 [![Buy Me A Coffee](https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg)](https://buymeacoffee.com/DYks67r)
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=WREP29UDAMB6G)  
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=WREP29UDAMB6G)
 
 Creates sensors for pools being managed with Trouble Free Pools's [Pool Math](https://www.troublefreepool.com/blog/poolmath/) apps including [Pool Math iOS](https://apps.apple.com/us/app/pool-math-by-troublefreepool/id1228819359) and [Pool Math Android](https://play.google.com/store/apps/details?id=com.troublefreepool.poolmath&hl=en_US). From the [Trouble Free Pool](https://troublefreepool.com/) website:
 
@@ -55,7 +55,7 @@ sensor:
     url: https://api.poolmathapp.com/share/7WPG8yL.json
 ```
 
-NOTE: This updates the state from PoolMath every 15 minutes to keep from overwhelming their service, as the majority of Pool Math users update their data manual after testing rather than automated. The check interval can be changed in yaml config by adding a 'scan_interval' for the sensor.
+NOTE: This updates the state from PoolMath every 2 minutes to keep from overwhelming their service, as the majority of Pool Math users update their data manual after testing rather than automated. The check interval can be changed in yaml config by adding a 'scan_interval' for the sensor.
 
 ### Example Lovelace UI
 
