@@ -9,7 +9,7 @@ from homeassistant.const import (
     ATTR_UNIT_OF_MEASUREMENT,
     CONF_NAME,
     CONF_URL,
-    UnitOfTemperature
+    UnitOfTemperature,
 )
 
 from homeassistant.core import callback
@@ -36,7 +36,7 @@ from .targets import POOL_MATH_SENSOR_SETTINGS, get_pool_targets
 
 LOG = logging.getLogger(__name__)
 
-DATA_UPDATED = "poolmath_data_updated"
+DATA_UPDATED = 'poolmath_data_updated'
 
 SCAN_INTERVAL = timedelta(minutes=15)
 
@@ -47,8 +47,8 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Optional(CONF_TIMEOUT, default=DEFAULT_TIMEOUT): cv.positive_int,
         # NOTE: targets are not really implemented, other than tfp
         vol.Optional(
-            CONF_TARGET, default="tfp"
-        ): cv.string  # targets/*.yaml file with min/max targets
+            CONF_TARGET, default='tfp'
+        ): cv.string,  # targets/*.yaml file with min/max targets
         # FIXME: allow specifying EXACTLY which log types to monitor, always create the sensors
         # vol.Optional(CONF_LOG_TYPES, default=None):
     }
@@ -96,7 +96,7 @@ class PoolMathServiceSensor(Entity):
     @property
     def name(self):
         """Return the name of the sensor."""
-        return "Pool Math Service: " + self._name
+        return 'Pool Math Service: ' + self._name
 
     @property
     def state(self):
@@ -119,21 +119,21 @@ class PoolMathServiceSensor(Entity):
             client = self._poolmath_client
             poolmath_json = await client.async_update()
         except Exception as e:
-            LOG.warning(f"PoolMath request failed! {url}: {e}")
+            LOG.warning(f'PoolMath request failed! {url}: {e}')
             return
 
         if not poolmath_json:
-            LOG.warning(f"PoolMath returned NO JSON data: {url}")
+            LOG.warning(f'PoolMath returned NO JSON data: {url}')
             return
 
         # update state attributes with relevant data
-        pools = poolmath_json.get("pools")
+        pools = poolmath_json.get('pools')
         if not pools:
-            LOG.warning(f"PoolMath returned EMPTY pool data: {url}")
+            LOG.warning(f'PoolMath returned EMPTY pool data: {url}')
             return
 
-        pool = pools[0].get("pool")
-        self._attrs |= {"name": pool.get("name"), "volume": pool.get("volume")}
+        pool = pools[0].get('pool')
+        self._attrs |= {'name': pool.get('name'), 'volume': pool.get('volume')}
 
         # iterate through all the log entries and update sensor states
         timestamp = await client.process_log_entry_callbacks(
@@ -156,7 +156,7 @@ class PoolMathServiceSensor(Entity):
             LOG.warning(f"Unknown sensor '{sensor_type}' discovered for {self.name}")
             return None
 
-        name = self._name + " " + config[ATTR_NAME]
+        name = self._name + ' ' + config[ATTR_NAME]
         pool_id = self._poolmath_client.pool_id
 
         sensor = UpdatableSensor(
@@ -176,7 +176,7 @@ class PoolMathServiceSensor(Entity):
         sensor = await self.get_sensor_entity(measurement_type, poolmath_json)
         if sensor and sensor.state != state:
             LOG.info(
-                f"{sensor.name} {measurement_type}={state} {sensor.unit_of_measurement} (timestamp={timestamp})"
+                f'{sensor.name} {measurement_type}={state} {sensor.unit_of_measurement} (timestamp={timestamp})'
             )
             sensor.inject_state(state, timestamp, attributes)
 
@@ -200,7 +200,7 @@ class UpdatableSensor(RestoreEntity):
         self._state = None
 
         if pool_id:
-            self._unique_id = f"poolmath_{pool_id}_{sensor_type}"
+            self._unique_id = f'poolmath_{pool_id}_{sensor_type}'
         else:
             self._unique_id = None
 
@@ -210,26 +210,29 @@ class UpdatableSensor(RestoreEntity):
         # applies to other units). No time to fix now, but perhaps someone will submit a PR
         # to fix this in future.
         self._unit_of_measurement = self._config[ATTR_UNIT_OF_MEASUREMENT]
-        if self._unit_of_measurement in [UnitOfTemperature.FAHRENHEIT, UnitOfTemperature.CELSIUS]:
+        if self._unit_of_measurement in [
+            UnitOfTemperature.FAHRENHEIT,
+            UnitOfTemperature.CELSIUS,
+        ]:
             # inspect the first JSON response to determine things that are not specified
             # with sensor values (since units/update timestamps are in separate keys
             # within the JSON doc)
-            pools = poolmath_json.get("pools")
+            pools = poolmath_json.get('pools')
             if pools:
-                pool = pools[0].get("pool")
-                if pool.get("waterTempUnitDefault") == 1:
+                pool = pools[0].get('pool')
+                if pool.get('waterTempUnitDefault') == 1:
                     self._unit_of_measurement = UnitOfTemperature.CELSIUS
                 else:
                     self._unit_of_measurement = UnitOfTemperature.FAHRENHEIT
 
-            LOG.info(f"Unit of temperature measurement {self._unit_of_measurement}")
+            LOG.info(f'Unit of temperature measurement {self._unit_of_measurement}')
 
         # FIXME: use 'targets' configuration value and load appropriate yaml
         targets_map = get_pool_targets()
         if targets_map:
             self._targets = targets_map.get(sensor_type)
             if self._targets:
-                self._attrs[ATTR_TARGET_SOURCE] = "tfp"
+                self._attrs[ATTR_TARGET_SOURCE] = 'tfp'
                 self._attrs.update(self._targets)
 
     @property
@@ -262,7 +265,7 @@ class UpdatableSensor(RestoreEntity):
 
     @property
     def icon(self):
-        return self._config["icon"]
+        return self._config['icon']
 
     def inject_state(self, state, timestamp, attributes):
         state_changed = self._state != state
@@ -294,7 +297,7 @@ class UpdatableSensor(RestoreEntity):
         if not state:
             return
         self._state = state.state
-        LOG.debug(f"Restored sensor {self._name} previous state {self._state}")
+        LOG.debug(f'Restored sensor {self._name} previous state {self._state}')
 
         # restore attributes
         if ATTR_LAST_UPDATED_TIME in state.attributes:
