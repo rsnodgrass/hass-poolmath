@@ -4,7 +4,7 @@ from homeassistant.const import (
     ATTR_ICON,
     ATTR_NAME,
     ATTR_UNIT_OF_MEASUREMENT,
-    TEMP_FAHRENHEIT,
+    UnitOfTemperature
 )
 
 from .const import (
@@ -81,13 +81,13 @@ POOL_MATH_SENSOR_SETTINGS = {
     },
     'temp': {
         ATTR_NAME: 'Temp',
-        ATTR_UNIT_OF_MEASUREMENT: TEMP_FAHRENHEIT,
+        ATTR_UNIT_OF_MEASUREMENT: UnitOfTemperature.FAHRENHEIT,
         ATTR_DESCRIPTION: 'Temperature',
         ATTR_ICON: 'mdi:coolant-temperature',
     },
     'waterTemp': {
         ATTR_NAME: 'Temp',
-        ATTR_UNIT_OF_MEASUREMENT: TEMP_FAHRENHEIT,
+        ATTR_UNIT_OF_MEASUREMENT: UnitOfTemperature.FAHRENHEIT,
         ATTR_DESCRIPTION: 'Temperature',
         ATTR_ICON: 'mdi:coolant-temperature',
     },
@@ -99,7 +99,7 @@ POOL_MATH_SENSOR_SETTINGS = {
     },
     'pressure': {
         ATTR_NAME: 'Pressure',
-        ATTR_UNIT_OF_MEASUREMENT: TEMP_FAHRENHEIT,
+        ATTR_UNIT_OF_MEASUREMENT: UnitOfTemperature.FAHRENHEIT,
         ATTR_DESCRIPTION: 'Filter Pressure',
         ATTR_ICON: 'mdi:coolant-temperature',
     },
