@@ -1,21 +1,21 @@
 {
-    "config": {
-        "abort": {
-            "already_configured": "Enheten er allerede konfigurert"
+  "config": {
+    "abort": {
+      "already_configured": "Enheten er allerede konfigurert"
+    },
+    "error": {
+      "cannot_connect": "Tilkoblingen mislyktes. Prøv på nytt",
+      "invalid_auth": "Ugyldig godkjenning",
+      "unknown": "Uventet feil"
+    },
+    "step": {
+      "user": {
+        "data": {
+          "email": "Epostadresse",
+          "password": "Passord"
         },
-        "error": {
-            "cannot_connect": "Tilkoblingen mislyktes. Prøv på nytt",
-            "invalid_auth": "Ugyldig godkjenning",
-            "unknown": "Uventet feil"
-        },
-        "step": {
-            "user": {
-                "data": {
-                    "email": "Epostadresse",
-                    "password": "Passord"
-                },
-                "title": "Koble til bassengmatematikken din"
-            }
-        }
+        "title": "Koble til bassengmatematikken din"
+      }
     }
+  }
 }
