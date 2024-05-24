@@ -1,11 +1,16 @@
 {
-    "domain": "poolmath",
-    "name": "Pool Math (Trouble Free Pool)",
-    "version": "0.2.7",
-    "documentation": "https://github.com/rsnodgrass/hass-poolmath/",
-    "issue_tracker": "https://community.home-assistant.io/t/custom-component-pool-math-sensors-for-pool-chemicals-and-operations/435126",
-    "requirements": ["jsonpath>=0.82", "httpx>=0.16.1"],
-    "dependencies": [],
-    "codeowners": ["@rsnodgrass"],
-    "iot_class": "cloud_polling"
+  "domain": "poolmath",
+  "name": "Pool Math (Trouble Free Pool)",
+  "codeowners": [
+    "@rsnodgrass"
+  ],
+  "dependencies": [],
+  "documentation": "https://github.com/rsnodgrass/hass-poolmath/",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://community.home-assistant.io/t/custom-component-pool-math-sensors-for-pool-chemicals-and-operations/435126",
+  "requirements": [
+    "jsonpath>=0.82",
+    "httpx>=0.16.1"
+  ],
+  "version": "0.2.7"
 }
