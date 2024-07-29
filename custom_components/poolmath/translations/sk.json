@@ -1,0 +1,21 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "Zariadenie je už nakonfigurované"
+    },
+    "error": {
+      "cannot_connect": "Pripojenie zlyhalo, skúste to znova",
+      "invalid_auth": "Neplatné overenie",
+      "unknown": "Neočakávaná chyba"
+    },
+    "step": {
+      "user": {
+        "data": {
+          "email": "E-Mail adresa",
+          "password": "Heslo"
+        },
+        "title": "Pripojte sa k svojej bazénovej matematike"
+      }
+    }
+  }
+}
