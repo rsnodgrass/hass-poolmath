@@ -4,6 +4,7 @@
   "codeowners": [
     "@rsnodgrass"
   ],
+  "config_flow": true,
   "dependencies": [],
   "documentation": "https://github.com/rsnodgrass/hass-poolmath/",
   "iot_class": "cloud_polling",
