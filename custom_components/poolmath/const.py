@@ -12,6 +12,7 @@ ATTR_TARGET_MIN = "target_min"
 ATTR_TARGET_MAX = "target_max"
 ATTR_TARGET_SOURCE = "target_source"
 
+CONF_SHARE_ID = "share_id"
 CONF_TARGET = "target"
 CONF_TIMEOUT = "timeout"
 

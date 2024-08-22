@@ -21,6 +21,7 @@ from .const import (
     ATTR_LAST_UPDATED_TIME,
     ATTR_TARGET_SOURCE,
     ATTRIBUTION,
+    CONF_SHARE_ID,
     CONF_TARGET,
     CONF_TIMEOUT,
     ICON_POOL,
@@ -44,13 +45,13 @@ async def async_setup_entry(
 ) -> None:
     """Set up Pool Math sensor based on a config entry."""
 
-    url = entry.options[CONF_URL]
+    share_id = entry.options[CONF_SHARE_ID]
     name = entry.options[CONF_NAME]
     timeout = entry.options[CONF_TIMEOUT]
     target = entry.options[CONF_TARGET]
     # log_types = entry.options[CONF_LOG_TYPES]
 
-    client = PoolMathClient(url, name=name, timeout=timeout)
+    client = PoolMathClient(share_id, name=name, timeout=timeout)
 
     # create the core Pool Math service sensor, which is responsible for updating all other sensors
     sensor = PoolMathServiceSensor(hass, entry, name, client, async_add_entities)
