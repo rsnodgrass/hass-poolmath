@@ -84,6 +84,10 @@ class PoolMathServiceSensor(SensorEntity):
 
         self._async_add_entities_callback = async_add_entities_callback
 
+    async def async_added_to_hass(self):
+        """Request an update to bypass scan_interval at startup."""
+        self.async_schedule_update_ha_state(True)
+
     @property
     def name(self):
         """Return the name of the sensor."""
