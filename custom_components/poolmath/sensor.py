@@ -3,6 +3,7 @@ import logging
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
+    ATTR_ATTRIBUTION,
     ATTR_NAME,
     ATTR_UNIT_OF_MEASUREMENT,
     CONF_NAME,
@@ -17,7 +18,6 @@ from homeassistant.helpers.restore_state import RestoreEntity
 
 from .client import PoolMathClient
 from .const import (
-    ATTR_ATTRIBUTION,
     ATTR_LAST_UPDATED_TIME,
     ATTR_TARGET_SOURCE,
     ATTRIBUTION,

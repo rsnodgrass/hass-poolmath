@@ -5,7 +5,6 @@ DOMAIN = "poolmath"
 
 ATTRIBUTION = "Data by PoolMath (Trouble Free Pool)"
 
-ATTR_ATTRIBUTION = "attribution"
 ATTR_DESCRIPTION = "description"
 ATTR_LAST_UPDATED_TIME = "last_updated"
 ATTR_TARGET_MIN = "target_min"
