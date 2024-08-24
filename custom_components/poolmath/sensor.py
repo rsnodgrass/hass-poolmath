@@ -1,6 +1,7 @@
 from datetime import timedelta
 import logging
 
+from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     ATTR_ATTRIBUTION,
@@ -11,8 +12,8 @@ from homeassistant.const import (
     UnitOfTemperature,
 )
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
-from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.restore_state import RestoreEntity
 
@@ -24,12 +25,10 @@ from .const import (
     CONF_SHARE_ID,
     CONF_TARGET,
     CONF_TIMEOUT,
+    DOMAIN,
     ICON_POOL,
 )
 from .targets import POOL_MATH_SENSOR_SETTINGS, get_pool_targets
-
-# from homeassistant.components.sensor.SensorEntity import SensorEntity
-
 
 LOG = logging.getLogger(__name__)
 
@@ -58,7 +57,7 @@ async def async_setup_entry(
     async_add_entities([sensor])
 
 
-class PoolMathServiceSensor(Entity):
+class PoolMathServiceSensor(SensorEntity):
     """Sensor monitoring the Pool Math cloud service and updating any related sensors"""
 
     def __init__(self, hass, entry, name, poolmath_client, async_add_entities_callback):
@@ -74,6 +73,14 @@ class PoolMathServiceSensor(Entity):
             ATTR_ATTRIBUTION: ATTRIBUTION,
             CONF_URL: self._poolmath_client.url,
         }
+        self._attr_unique_id = f"poolmath_{self._poolmath_client.pool_id}"
+        self._attr_device_info = DeviceInfo(
+            configuration_url="https://www.troublefreepool.com/blog/poolmath/",
+            entry_type=DeviceEntryType.SERVICE,
+            identifiers={(DOMAIN, self._entry.entry_id)},
+            manufacturer="Pool Math (Trouble Free Pool)",
+            name="Pool Math",
+        )
 
         self._async_add_entities_callback = async_add_entities_callback
 
@@ -144,7 +151,7 @@ class PoolMathServiceSensor(Entity):
         pool_id = self._poolmath_client.pool_id
 
         sensor = UpdatableSensor(
-            self.hass, pool_id, name, config, sensor_type, poolmath_json
+            self.hass, self._entry, pool_id, name, config, sensor_type, poolmath_json
         )
         self._managed_sensors[sensor_type] = sensor
 
@@ -169,26 +176,29 @@ class PoolMathServiceSensor(Entity):
         return self._managed_sensors.keys()
 
 
-class UpdatableSensor(RestoreEntity):
-    # class UpdatableSensor(RestoreEntity, SensorEntity):
+class UpdatableSensor(RestoreEntity, SensorEntity):
     """Representation of a sensor whose state is kept up-to-date by an external data source."""
 
-    def __init__(self, hass, pool_id, name, config, sensor_type, poolmath_json):
+    def __init__(self, hass, entry, pool_id, name, config, sensor_type, poolmath_json):
         """Initialize the sensor."""
         super().__init__()
 
         self.hass = hass
         self._name = name
+        self._entry = entry
         self._config = config
         self._sensor_type = sensor_type
         self._state = None
 
-        if pool_id:
-            self._unique_id = f"poolmath_{pool_id}_{sensor_type}"
-        else:
-            self._unique_id = None
-
         self._attrs = {ATTR_ATTRIBUTION: ATTRIBUTION}
+        self._attr_unique_id = f"poolmath_{pool_id}_{sensor_type}"
+        self._attr_device_info = DeviceInfo(
+            configuration_url="https://www.troublefreepool.com/blog/poolmath/",
+            entry_type=DeviceEntryType.SERVICE,
+            identifiers={(DOMAIN, self._entry.entry_id)},
+            manufacturer="Pool Math (Trouble Free Pool)",
+            name="Pool Math",
+        )
 
         # TEMPORARY HACK to get correct unit of measurement for water temps (but this also
         # applies to other units). No time to fix now, but perhaps someone will submit a PR
@@ -223,10 +233,6 @@ class UpdatableSensor(RestoreEntity):
     def name(self):
         """Return the name of the sensor."""
         return self._name
-
-    @property
-    def unique_id(self):
-        return self._unique_id
 
     @property
     def should_poll(self):
