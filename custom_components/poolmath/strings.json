@@ -2,10 +2,12 @@
   "config": {
     "step": {
       "user": {
-        "title": "Connect to Pool Math",
+        "description": "Connect to Pool Math",
         "data": {
-          "email": "[%key:common::config_flow::data::email%]",
-          "password": "[%key:common::config_flow::data::password%]"
+          "share_id": "[%key:common::config_flow::data::share_id%]",
+          "name": "[%key:common::config_flow::data::name%]",
+          "timeout": "[%key:common::config_flow::data::timeout%]",
+          "target": "[%key:common::config_flow::data::target%]"
         }
       }
     },
@@ -16,6 +18,18 @@
     },
     "abort": {
       "already_configured": "Device is already configured"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "share_id": "[%key:common::config_flow::data::share_id%]",
+          "name": "[%key:common::config_flow::data::name%]",
+          "timeout": "[%key:common::config_flow::data::timeout%]",
+          "target": "[%key:common::config_flow::data::target%]"
+        }
+      }
     }
   }
 }

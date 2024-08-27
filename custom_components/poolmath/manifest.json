@@ -4,8 +4,10 @@
   "codeowners": [
     "@rsnodgrass"
   ],
+  "config_flow": true,
   "dependencies": [],
   "documentation": "https://github.com/rsnodgrass/hass-poolmath/",
+  "integration_type": "service",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://community.home-assistant.io/t/custom-component-pool-math-sensors-for-pool-chemicals-and-operations/435126",
   "requirements": [
