@@ -1,8 +1,8 @@
+import aiohttp
 import json
 import logging
 import re
 
-import httpx
 
 from .const import (
     ATTR_TARGET_MAX,
@@ -66,19 +66,21 @@ class PoolMathClient:
     async def async_update(self):
         """Fetch latest json formatted data from the Pool Math API"""
 
-        async with httpx.AsyncClient() as client:
-            LOG.info(
-                f'GET {self._json_url} (timeout={self._timeout}; name={self.name}; id={self.pool_id})'
-            )
-            response = await client.request(
-                'GET', self._json_url, timeout=self._timeout, follow_redirects=True
-            )
-            LOG.debug(f'GET {self._json_url} response: {response.status_code}')
-
-            if response.status_code == httpx.codes.OK:
-                return json.loads(response.text)
-
-            return None
+        async with aiohttp.ClientSession() as session:
+            try:
+                LOG.info(
+                    f'GET {self._json_url} (timeout={self._timeout}; name={self.name}; id={self.pool_id})'
+                )
+                async with session.get(self._json_url, timeout=self._timeout) as response:
+                    LOG.debug(f'GET {self._json_url} response: {response.status}')
+                    if response.status == 200:
+                        return await response.json()
+                    else:
+                        LOG.error(f"Error: Received status code {response.status} from API")
+                        return None
+            except aiohttp.ClientError as e:
+                LOG.error(f"Error fetching data from PoolMath API: {e}")
+                return None
 
     async def process_log_entry_callbacks(self, poolmath_json, async_callback):
         """Call provided async callback once for each type of log entry"""
