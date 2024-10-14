@@ -65,7 +65,7 @@ class PoolMathClient:
             except aiohttp.ClientError as e:
                 LOG.error(f"Error fetching data from PoolMath API: {e}")
                 return None
-            
+
     async def process_log_entry_callbacks(self, poolmath_json, async_callback):
         """Call provided async callback once for each type of log entry"""
         """   async_callback(measurement_type, timestamp, state, attributes)"""
