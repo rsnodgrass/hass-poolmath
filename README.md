@@ -47,13 +47,15 @@ Make sure [Home Assistant Community Store (HACS)](https://github.com/custom-comp
 
 ### Configuration
 
-Under Settings of the Pool Math iOS or Android application, find the Sharing section.  Turn this on, which allows anyone with access to the unique URL to be able to view data about your pool. Your pool's URL will be displayed, use that in the YAML configuration for the poolmath sensor.
+Under Settings of the Pool Math iOS or Android application, find the Sharing section.  Turn this on, which allows anyone with access to the unique URL to be able to view data about your pool. Your pool's URL will be displayed. The Share ID from the URL will be used to configure the poolmath service.
 
-```yaml
-sensor:
-  - platform: poolmath
-    url: https://api.poolmathapp.com/share/7WPG8yL.json
-```
+Example URL: `https://troublefreepool.com/mypool/7WPG8yL`
+
+Example Share ID: `7WPG8yL`
+
+Configure `Pool Math (Trouble Free Pool)` via integrations page or press the blue button below.
+
+[![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=poolmath)
 
 NOTE: This updates the state from PoolMath every 2 minutes to keep from overwhelming their service, as the majority of Pool Math users update their data manual after testing rather than automated. The check interval can be changed in yaml config by adding a 'scan_interval' for the sensor.
 
