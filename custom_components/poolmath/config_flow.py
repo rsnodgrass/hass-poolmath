@@ -8,9 +8,9 @@ import voluptuous as vol
 from homeassistant.config_entries import (
     ConfigEntry,
     ConfigFlow,
-    OptionsFlowWithConfigEntry,
+    OptionsFlow,
 )
-from homeassistant.const import CONF_NAME
+from homeassistant.const import CONF_NAME, __version__ as HAVERSION
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import config_validation as cv
@@ -29,7 +29,7 @@ from .const import (
 LOG = logging.getLogger(__name__)
 
 
-def _initial_form(flow: Union[ConfigFlow, OptionsFlowWithConfigEntry]):
+def _initial_form(flow: Union[ConfigFlow, OptionsFlow]):
     """Return flow form for init/user step id."""
 
     if isinstance(flow, ConfigFlow):
@@ -38,7 +38,7 @@ def _initial_form(flow: Union[ConfigFlow, OptionsFlowWithConfigEntry]):
         name = DEFAULT_NAME
         timeout = DEFAULT_TIMEOUT
         target = DEFAULT_TARGET
-    elif isinstance(flow, OptionsFlowWithConfigEntry):
+    elif isinstance(flow, OptionsFlow):
         step_id = "init"
         share_id = flow.config_entry.options.get(CONF_SHARE_ID)
         name = flow.config_entry.options.get(CONF_NAME, DEFAULT_NAME)
@@ -65,8 +65,13 @@ def _initial_form(flow: Union[ConfigFlow, OptionsFlowWithConfigEntry]):
     )
 
 
-class PoolMathOptionsFlow(OptionsFlowWithConfigEntry):
+class PoolMathOptionsFlow(OptionsFlow):
     """Handle Pool Math options."""
+
+    def __init__(self, config_entry: ConfigEntry) -> None:
+        """Initialize options flow."""
+        if AwesomeVersion(HAVERSION) < "2024.11.99":
+            self.config_entry = config_entry
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
