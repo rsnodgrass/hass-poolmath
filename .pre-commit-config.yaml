@@ -18,7 +18,7 @@ repos:
         args: [--settings-path=pyproject.toml]  # ["--profile", "black" ]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.8.0
+    rev: v0.8.5
     hooks:
       - id: ruff
         args: [ --fix ]  # run linter
@@ -28,7 +28,7 @@ repos:
   #### OPTIONAL: for keeping syntax more current
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.19.0
+    rev: v3.19.1
     hooks:
       - id: pyupgrade
         args: [--py311-plus]    # NOTE: SET TO HOME ASSISTANT VERSION
