@@ -7,6 +7,9 @@
 
 [![Buy Me A Coffee](https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg)](https://buymeacoffee.com/DYks67r)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=WREP29UDAMB6G)
+[![Support on Patreon][patreon-shield]][patreon]
+
+[![Community Forum][forum-shield]][forum]
 
 Creates sensors for pools being managed with Trouble Free Pools's [Pool Math](https://www.troublefreepool.com/blog/poolmath/) apps including [Pool Math iOS](https://apps.apple.com/us/app/pool-math-by-troublefreepool/id1228819359) and [Pool Math Android](https://play.google.com/store/apps/details?id=com.troublefreepool.poolmath&hl=en_US). From the [Trouble Free Pool](https://troublefreepool.com/) website:
 
@@ -140,3 +143,12 @@ poolmath:
 * [ABC's of Pool Water Chemistry by Trouble Free Pool](https://www.troublefreepool.com/blog/2018/12/12/abcs-of-pool-water-chemistry/)
 * [PookMath calculator](https://www.troublefreepool.com/calc.html)
 * [PoolLab 1.0 Pool Chemical Tester with Bluetooth](https://www.amazon.com/Pool-Lab-1-0/dp/B0722ZD4G3?tag=rynoshark-20)
+
+
+
+
+[forum]: https://community.home-assistant.io/t/custom-component-pool-math-sensors-for-pool-chemicals-and-operations/435126
+[forum-shield]: https://img.shields.io/badge/community-forum-brightgreen.svg
+[patreon]: https://www.patreon.com/rsnodgrass
+[patreon-shield]: https://frenck.dev/wp-content/uploads/2019/12/patreon.png
+[project-stage-shield]: https://img.shields.io/badge/project%20stage-production%20ready-brightgreen.svg
