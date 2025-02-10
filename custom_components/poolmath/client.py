@@ -1,7 +1,5 @@
 import aiohttp
-import json
 import logging
-import re
 
 
 from .const import (
@@ -66,10 +64,17 @@ class PoolMathClient:
                 LOG.error(f"Error fetching data from PoolMath API: {e}")
                 return None
 
-    async def process_log_entry_callbacks(self, poolmath_json, async_callback):
-        """Call provided async callback once for each type of log entry"""
-        """   async_callback(measurement_type, timestamp, state, attributes)"""
+    async def process_log_entry_callbacks(
+        self,
+        poolmath_json: Dict[str, Any],
+        async_callback: Callable[[str, datetime, float, Dict[str, Any], Dict[str, Any]], None]
+    ) -> None:
+        """Call provided async callback once for each type of log entry
 
+        Args:
+            poolmath_json: Raw JSON response from Pool Math API
+            async_callback: Callback function to process each measurement
+        """
         if not poolmath_json:
             return
 
@@ -81,6 +86,7 @@ class PoolMathClient:
         overview = pool.get("overview")
 
         latest_timestamp = None
+
         for measurement in KNOWN_SENSOR_KEYS:
             value = overview.get(measurement)
             if value is None:
@@ -122,7 +128,6 @@ class PoolMathClient:
             )
 
         return latest_timestamp
-
     @property
     def pool_id(self):
         return self._share_id
