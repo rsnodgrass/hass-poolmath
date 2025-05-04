@@ -38,11 +38,12 @@ ONLY_INCLUDE_IF_TRACKED = {
 
 
 class PoolMathClient:
-    def __init__(self, share_id: str, name=DEFAULT_NAME, timeout=DEFAULT_TIMEOUT):
-        self._share_id = share_id
+    def __init__(self, user_id: str, pool_id: str, name=DEFAULT_NAME, timeout=DEFAULT_TIMEOUT):
+        self._user_id = user_id
+        self._pool_id = pool_id
         self._name = name
         self._timeout = timeout
-        self._json_url = f"https://api.poolmathapp.com/share/{self._share_id}.json"
+        self._json_url = f"https://api.poolmathapp.com/share/?userId={self._user_id}&poolId={self._pool_id}"
         LOG.debug(f"Using JSON URL: {self._json_url}")
 
     async def async_update(self):
@@ -51,7 +52,7 @@ class PoolMathClient:
         async with aiohttp.ClientSession() as session:
             try:
                 LOG.info(
-                    f"GET {self._json_url} (timeout={self._timeout}; name={self._name}; id={self._share_id})"
+                    f"GET {self._json_url} (timeout={self._timeout}; name={self._name}; user_id={self._user_id}; pool_id={self._pool_id})"
                 )
                 async with session.get(self._json_url, timeout=self._timeout) as response:
                     LOG.debug(f"GET {self._json_url} response: {response.status}")
@@ -130,11 +131,11 @@ class PoolMathClient:
         return latest_timestamp
     @property
     def pool_id(self):
-        return self._share_id
+        return self._pool_id
 
     @property
-    def share_id(self):
-        return self._share_id
+    def user_id(self):
+        return self._user_id
 
     @property
     def name(self):
