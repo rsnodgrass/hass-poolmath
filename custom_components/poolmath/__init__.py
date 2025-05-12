@@ -55,7 +55,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     entry.async_on_unload(entry.add_update_listener(async_reload_entry))
 
     # forward entry setup to platform(s)
-    await hass.config_entries.async_forward_entry_setup(entry, Platform.SENSOR)
+    await hass.config_entries.async_forward_entry_setups(entry, [Platform.SENSOR])
 
     return True
 
