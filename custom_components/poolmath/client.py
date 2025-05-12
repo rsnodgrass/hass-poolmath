@@ -43,7 +43,7 @@ class PoolMathClient:
         self._pool_id = pool_id
         self._name = name
         self._timeout = timeout
-        self._json_url = f"https://api.poolmathapp.com/share/?userId={self._user_id}&poolId={self._pool_id}"
+        self._json_url = f"https://api.poolmathapp.com/share/pool?userId={self._user_id}&poolId={self._pool_id}"
         LOG.debug(f"Using JSON URL: {self._json_url}")
 
     async def async_update(self):
