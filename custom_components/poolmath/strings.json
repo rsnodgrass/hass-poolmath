@@ -21,6 +21,32 @@
       "already_configured": "Device is already configured"
     }
   },
+  "issues": {
+    "config_migration_needed": {
+      "title": "Pool Math configuration needs to be updated",
+      "fix_flow": {
+        "step": {
+          "share_url": {
+            "title": "Update Pool Math configuration",
+            "description": "Please enter your Pool Math Share URL to update your configuration from share_id to user_id and pool_id.",
+            "data": {
+              "share_url": "Pool Math Share URL"
+            }
+          }
+        },
+        "abort": {
+          "not_supported": "This issue fix is not supported",
+          "already_fixed": "Configuration has already been updated"
+        },
+        "error": {
+          "invalid_url": "Invalid Pool Math share URL",
+          "api_error": "Error connecting to Pool Math API",
+          "missing_data": "Could not extract user_id or pool_id from the API response",
+          "unknown": "Unexpected error occurred"
+        }
+      }
+    }
+  },
   "options": {
     "step": {
       "init": {
