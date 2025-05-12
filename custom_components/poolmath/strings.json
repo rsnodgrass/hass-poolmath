@@ -4,7 +4,8 @@
       "user": {
         "description": "Connect to Pool Math",
         "data": {
-          "share_id": "[%key:common::config_flow::data::share_id%]",
+          "user_id": "[%key:common::config_flow::data::user_id%]",
+          "pool_id": "[%key:common::config_flow::data::pool_id%]",
           "name": "[%key:common::config_flow::data::name%]",
           "timeout": "[%key:common::config_flow::data::timeout%]",
           "target": "[%key:common::config_flow::data::target%]"
@@ -24,7 +25,8 @@
     "step": {
       "init": {
         "data": {
-          "share_id": "[%key:common::config_flow::data::share_id%]",
+          "user_id": "[%key:common::config_flow::data::user_id%]",
+          "pool_id": "[%key:common::config_flow::data::pool_id%]",
           "name": "[%key:common::config_flow::data::name%]",
           "timeout": "[%key:common::config_flow::data::timeout%]",
           "target": "[%key:common::config_flow::data::target%]"
