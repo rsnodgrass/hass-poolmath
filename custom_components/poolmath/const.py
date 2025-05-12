@@ -13,6 +13,8 @@ ATTR_TARGET_SOURCE = "target_source"
 
 CONF_USER_ID = "user_id"
 CONF_POOL_ID = "pool_id"
+CONF_SHARE_ID = "share_id"  # Old configuration key
+CONF_SHARE_URL = "share_url"  # Share URL for simple setup
 CONF_TARGET = "target"
 CONF_TIMEOUT = "timeout"
 

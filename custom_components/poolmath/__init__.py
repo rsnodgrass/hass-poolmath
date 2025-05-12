@@ -6,14 +6,29 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_NAME, Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.helpers import issue_registry as ir
 
-from .const import CONF_USER_ID, CONF_POOL_ID, CONF_TARGET, CONF_TIMEOUT, DOMAIN
+from .const import CONF_USER_ID, CONF_POOL_ID, CONF_TARGET, CONF_TIMEOUT, CONF_SHARE_ID, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Pool Math from a config entry."""
+
+    # Check if the config entry is using the old format with share_id
+    if CONF_SHARE_ID in entry.data and (CONF_USER_ID not in entry.data or CONF_POOL_ID not in entry.data):
+        # Create a repair issue
+        ir.async_create_issue(
+            hass,
+            DOMAIN,
+            "config_migration_needed",
+            is_fixable=True,
+            severity=ir.IssueSeverity.ERROR,
+            translation_key="config_migration_needed",
+            data={"config_entry": entry},
+        )
+        return False
 
     # prefer options
     user_id = entry.options.get(CONF_USER_ID, entry.data[CONF_USER_ID])
