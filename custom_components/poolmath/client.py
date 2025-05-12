@@ -1,5 +1,7 @@
 import aiohttp
 import logging
+from typing import Any, Dict, Callable
+from datetime import datetime
 
 
 from .const import (
@@ -45,6 +47,44 @@ class PoolMathClient:
         self._timeout = timeout
         self._json_url = f"https://api.poolmathapp.com/share/pool?userId={self._user_id}&poolId={self._pool_id}"
         LOG.debug(f"Using JSON URL: {self._json_url}")
+    
+    @staticmethod
+    async def extract_ids_from_share_url(share_url, timeout=DEFAULT_TIMEOUT):
+        """Extract user_id and pool_id from a Pool Math share URL."""
+        import re
+        
+        # Extract the share_id from the URL
+        match = re.search(r"https://(?:api\.poolmathapp\.com|troublefreepool\.com)/(?:share/|mypool/)([a-zA-Z0-9]+)", share_url)
+        if not match:
+            LOG.error("Invalid Pool Math share URL format")
+            return None, None
+            
+        share_id = match.group(1)
+        
+        # Fetch the JSON data to extract user_id and pool_id
+        json_url = f"https://api.poolmathapp.com/share/{share_id}.json"
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(json_url, timeout=timeout) as response:
+                    if response.status != 200:
+                        LOG.error(f"Error: Received status code {response.status} from API")
+                        return None, None
+                    
+                    data = await response.json()
+                    
+                    # Extract user_id and pool_id from the response
+                    user_id = data.get("userId")
+                    pool = next(iter(data.get("pools", [])), {}).get("pool", {})
+                    pool_id = pool.get("id")
+                    
+                    if not user_id or not pool_id:
+                        LOG.error("Could not extract user_id or pool_id from Pool Math API")
+                        return None, None
+                    
+                    return user_id, pool_id
+        except Exception as exc:
+            LOG.exception(f"Error fetching data from Pool Math API: {exc}")
+            return None, None
 
     async def async_update(self):
         """Fetch latest json formatted data from the Pool Math API"""
