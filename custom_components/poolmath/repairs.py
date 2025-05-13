@@ -18,7 +18,7 @@ from .const import (
     INTEGRATION_NAME,
 )
 
-_LOGGER = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 CONF_SHARE_URL = "share_url"
 
@@ -41,7 +41,7 @@ class PoolMathRepairFlow(RepairsFlow):
         if user_input is not None:
             share_url = user_input[CONF_SHARE_URL]
             
-            # Extract the share_id from the URL
+            # validate and extract share_id from the URL
             match = re.search(URL_PATTERN, share_url)
             if not match:
                 return self.async_show_form(
@@ -60,7 +60,7 @@ class PoolMathRepairFlow(RepairsFlow):
                 async with aiohttp.ClientSession() as session:
                     async with session.get(json_url, timeout=10) as response:
                         if response.status != 200:
-                            _LOGGER.error(f"Error: Received status code {response.status} from API")
+                            LOG.error(f"Error: Received status code {response.status} from API")
                             return self.async_show_form(
                                 step_id="share_url",
                                 data_schema=vol.Schema({
@@ -68,22 +68,19 @@ class PoolMathRepairFlow(RepairsFlow):
                                 }),
                                 errors={"base": "api_error"},
                             )
-                        data = await response.json()
                         
-                        # Extract the pool data
+                        # extract the required user_id/pool_id from the JSON response
+                        data = await response.json()                        
                         pool = next(iter(data.get("pools", [])), {}).get("pool", {})
-                        
-                        # Get the user_id from the pool data
                         user_id = pool.get("userId")
-                            
-                        # Get the pool_id from the pool data
                         pool_id = pool.get("id")
                         
-                        _LOGGER.debug(f"Extracted user_id: {user_id}, pool_id: {pool_id}")
+                        LOG.debug(f"Extracted user_id: {user_id}, pool_id: {pool_id}")
                         
                         if not user_id or not pool_id:
-                            _LOGGER.error(f"Missing data in API response: user_id={user_id}, pool_id={pool_id}")
-                            _LOGGER.debug(f"API response data: {data}")
+                            LOG.error(f"Missing data in API response: user_id={user_id}, pool_id={pool_id}")
+                            LOG.debug(f"API response data: {data}")
+                            
                             return self.async_show_form(
                                 step_id="share_url",
                                 data_schema=vol.Schema({
@@ -92,7 +89,7 @@ class PoolMathRepairFlow(RepairsFlow):
                                 errors={"base": "missing_data"},
                             )
                         
-                        # Update the config entry with the new data
+                        # update config entry with the new data
                         new_data = dict(self.config_entry.data)
                         new_data[CONF_USER_ID] = user_id
                         new_data[CONF_POOL_ID] = pool_id
@@ -100,10 +97,10 @@ class PoolMathRepairFlow(RepairsFlow):
                         self.hass.config_entries.async_update_entry(
                             self.config_entry, data=new_data
                         )
-                        
                         return self.async_create_entry(title="", data={})
+
             except Exception as exc:
-                _LOGGER.exception("Error fetching data from Pool Math API: %s", exc)
+                LOG.exception("Error fetching data from Pool Math API: %s", exc)
                 return self.async_show_form(
                     step_id="share_url",
                     data_schema=vol.Schema({
