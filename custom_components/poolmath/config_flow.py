@@ -79,11 +79,7 @@ def _initial_form(flow: Union[ConfigFlow, OptionsFlow]):
 
 class PoolMathOptionsFlow(OptionsFlow):
     """Handle Pool Math options."""
-
-    def __init__(self, config_entry: ConfigEntry):
-        """Initialize options flow."""
-        self.config_entry = config_entry
-
+    
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
@@ -117,4 +113,12 @@ class PoolMathFlowHandler(ConfigFlow, domain=DOMAIN):
         config_entry: ConfigEntry,
     ) -> PoolMathOptionsFlow:
         """Get the options flow for this handler."""
-        return PoolMathOptionsFlow(config_entry)
+        
+        # Maintain compatibility with Home Assistant's options flow 
+        # system while adapting to the new pattern where the constructor 
+        # doesn't take config_entry. The config_entry is still available 
+        # to the options flow through self.config_entry, but we're now 
+        # setting it as an attribute rather than passing it through the constructor.
+        flow = PoolMathOptionsFlow()
+        flow.config_entry = config_entry
+        return flow
