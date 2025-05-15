@@ -62,8 +62,7 @@ def _initial_form(flow: Union[ConfigFlow, OptionsFlow]):
             # FIXME: allow specifying EXACTLY which log types to monitor, always create the sensors
             # vol.Optional(CONF_LOG_TYPES, default=None):
             vol.Optional(CONF_SCAN_INTERVAL, default=scan_interval): cv.positive_int,
-        }),
-        errors=flow._errors or {},
+        })
     )
 
 
