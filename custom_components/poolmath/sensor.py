@@ -199,8 +199,7 @@ class PoolMathServiceSensor(SensorEntity):
     async def get_sensor_entity(
         self, sensor_type: str, poolmath_json: dict
     ) -> UpdatableSensor | None:
-        sensor = self._managed_sensors.get(sensor_type, None)
-        if sensor:
+        if sensor := self._managed_sensors.get(sensor_type, None):
             return sensor
 
         config = POOL_MATH_SENSOR_SETTINGS.get(sensor_type, None)
@@ -212,7 +211,7 @@ class PoolMathServiceSensor(SensorEntity):
         pool_id = self._poolmath_client.pool_id
 
         sensor = UpdatableSensor(
-            self.hass, self._entry, pool_id, name, config, sensor_type, poolmath_json
+            self.hass, self._entry, name, config, sensor_type, poolmath_json
         )
         self._managed_sensors[sensor_type] = sensor
 
@@ -270,7 +269,7 @@ class PoolMathServiceSensor(SensorEntity):
 class UpdatableSensor(RestoreEntity, SensorEntity):
     """Representation of a sensor whose state is kept up-to-date by an external data source."""
 
-    def __init__(self, hass, entry, pool_id, name, config, sensor_type, poolmath_json):
+    def __init__(self, hass, entry, name, config, sensor_type, poolmath_json):
         """Initialize the sensor."""
         super().__init__()
 
@@ -282,7 +281,7 @@ class UpdatableSensor(RestoreEntity, SensorEntity):
         self._state = None
         self._attrs = {
             ATTR_ATTRIBUTION: ATTRIBUTION,
-            CONF_POOL_ID: pool_id,
+            CONF_POOL_ID: config.pool_id,
             CONF_USER_ID: config.user_id
         }
         self._attr_unique_id = f"poolmath_{pool_id}_{sensor_type}"
@@ -308,8 +307,7 @@ class UpdatableSensor(RestoreEntity, SensorEntity):
             # inspect the first JSON response to determine things that are not specified
             # with sensor values (since units/update timestamps are in separate keys
             # within the JSON doc)
-            pools = poolmath_json.get("pools")
-            if pools:
+            if pools := poolmath_json.get("pools"):
                 pool = pools[0].get("pool")
                 if pool.get("waterTempUnitDefault") == 1:
                     self._unit_of_measurement = UnitOfTemperature.CELSIUS
@@ -375,8 +373,7 @@ class UpdatableSensor(RestoreEntity, SensorEntity):
         calculations on several other sensor values may be used to determine
         the correct target values for a given sensor.
         """
-        targets = get_pool_sensor_targets()
-        if targets:
+        if targets := get_pool_sensor_targets():
             self._attrs[ATTR_TARGET_SOURCE] = "tfp"
             if target_val := targets.get(self._sensor_type):
                 self._attrs.update(target_val)
@@ -395,6 +392,7 @@ class UpdatableSensor(RestoreEntity, SensorEntity):
         state = await self.async_get_last_state()
         if not state:
             return
+        
         self._state = state.state
         LOG.debug(f"Restored sensor {self._name} previous state {self._state}")
 
