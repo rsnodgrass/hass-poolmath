@@ -1,20 +1,23 @@
 ---
-# https://www.horizonpoolsupply.com/_uls/resources/Saturation_Index_Info.pdf
+# Saturation Index (SI) calculation
+# Source: https://www.horizonpoolsupply.com/_uls/resources/Saturation_Index_Info.pdf
 
 formula: pH + temperature_factor + calcium_factor + alkalinity_factor - TDS factor
 
 temperature_factor:
-  32: 0.0
-  37: 0.1
-  46: 0.2
-  53: 0.3
-  60: 0.4
-  66: 0.5
-  76: 0.6
-  84: 0.7
-  94: 0.8
-  105: 0.9
+  # Temperature in Fahrenheit
+  32: 0.0  # 0°C
+  37: 0.1  # 3°C
+  46: 0.2  # 8°C
+  53: 0.3  # 12°C
+  60: 0.4  # 16°C
+  66: 0.5  # 19°C
+  76: 0.6  # 24°C
+  84: 0.7  # 29°C
+  94: 0.8  # 34°C
+  105: 0.9 # 41°C
 
+# Calcium hardness factor (ppm)
 calcium_factor:
   25: 1.0
   50: 1.3

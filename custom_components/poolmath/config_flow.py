@@ -10,7 +10,7 @@ from homeassistant.config_entries import (
     ConfigFlow,
     OptionsFlow,
 )
-from homeassistant.const import CONF_NAME, CONF_SCAN_INTERVAL, __version__ as HAVERSION
+from homeassistant.const import CONF_NAME, CONF_SCAN_INTERVAL
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import config_validation as cv
@@ -36,10 +36,8 @@ def _initial_form(flow: Union[ConfigFlow, OptionsFlow]):
 
     if isinstance(flow, ConfigFlow):
         step_id = "user"
-    elif isinstance(flow, OptionsFlow):
-        step_id = "init"
     else:
-        raise TypeError("Invalid flow type")
+        step_id = "init"
 
     options = {} # empty in case of isinstance ConfigFlow
     if isinstance(flow, OptionsFlow):
@@ -54,29 +52,23 @@ def _initial_form(flow: Union[ConfigFlow, OptionsFlow]):
 
     return flow.async_show_form(
         step_id=step_id,  # parameterized to follow guidance on using "user"
-        data_schema=vol.Schema(
-            {
-                vol.Required(CONF_USER_ID, default=user_id): cv.string,
-                vol.Required(CONF_POOL_ID, default=pool_id): cv.string,
-                vol.Optional(CONF_NAME, default=name): cv.string,
-                vol.Optional(CONF_TIMEOUT, default=timeout): cv.positive_int,
-                # NOTE: targets are not really implemented, other than tfp
-                vol.Optional(CONF_TARGET, default=target): cv.string,  # targets/*.yaml file with min/max targets
-                # FIXME: allow specifying EXACTLY which log types to monitor, always create the sensors
-                # vol.Optional(CONF_LOG_TYPES, default=None):
-                vol.Optional(CONF_SCAN_INTERVAL, default=scan_interval): cv.positive_int,
-            }
-        ),
+        data_schema=vol.Schema({
+            vol.Required(CONF_USER_ID, default=user_id): cv.string,
+            vol.Required(CONF_POOL_ID, default=pool_id): cv.string,
+            vol.Optional(CONF_NAME, default=name): cv.string,
+            vol.Optional(CONF_TIMEOUT, default=timeout): cv.positive_int,
+            # NOTE: targets are not really implemented, other than tfp
+            vol.Optional(CONF_TARGET, default=target): cv.string,  # targets/*.yaml file with min/max targets
+            # FIXME: allow specifying EXACTLY which log types to monitor, always create the sensors
+            # vol.Optional(CONF_LOG_TYPES, default=None):
+            vol.Optional(CONF_SCAN_INTERVAL, default=scan_interval): cv.positive_int,
+        }),
+        errors=flow._errors or {},
     )
 
 
 class PoolMathOptionsFlow(OptionsFlow):
     """Handle Pool Math options."""
-
-    def __init__(self, config_entry: ConfigEntry) -> None:
-        """Initialize options flow."""
-        if AwesomeVersion(HAVERSION) < "2024.11.99":
-            self.config_entry = config_entry
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
@@ -97,7 +89,8 @@ class PoolMathFlowHandler(ConfigFlow, domain=DOMAIN):
             # already configured user_id and pool_id?
             user_id = user_input.get(CONF_USER_ID)
             pool_id = user_input.get(CONF_POOL_ID)
-            await self.async_set_unique_id(user_id + "-" + pool_id)
+            
+            await self.async_set_unique_id(f"{user_id}-{pool_id}")
             self._abort_if_unique_id_configured()
 
             return self.async_create_entry(title=INTEGRATION_NAME, data=user_input)

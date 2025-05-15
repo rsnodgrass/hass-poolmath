@@ -11,6 +11,8 @@ from .const import (
     ATTR_DESCRIPTION,
     ATTR_TARGET_MAX,
     ATTR_TARGET_MIN,
+    ATTR_TARGET_SOURCE,
+    CONF_TARGET,
     ICON_GAUGE,
 )
 

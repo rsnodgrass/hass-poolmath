@@ -1,8 +1,7 @@
 import aiohttp
 import logging
-from typing import Any, Dict, Callable
+from typing import Any, Dict, Optional, Callable
 from datetime import datetime
-
 
 from .const import (
     ATTR_TARGET_MAX,
@@ -14,6 +13,7 @@ from .const import (
 
 LOG = logging.getLogger(__name__)
 
+# Constants for sensor keys and tracking
 KNOWN_SENSOR_KEYS = [
     "fc",
     "cc",
@@ -38,18 +38,26 @@ ONLY_INCLUDE_IF_TRACKED = {
     "csi": "trackCSI",
 }
 
-
 class PoolMathClient:
-    def __init__(self, user_id: str, pool_id: str, name=DEFAULT_NAME, timeout=DEFAULT_TIMEOUT):
+    """Client for interacting with the Pool Math API."""
+
+    def __init__(
+        self,
+        user_id: str,
+        pool_id: str,
+        name: str = DEFAULT_NAME,
+        timeout: float = DEFAULT_TIMEOUT
+    ) -> None:
         self._user_id = user_id
         self._pool_id = pool_id
         self._name = name
         self._timeout = timeout
-        self._json_url = f"https://api.poolmathapp.com/share/pool?userId={self._user_id}&poolId={self._pool_id}"
-        LOG.debug(f"Using JSON URL: {self._json_url}")
-    
+        self._json_url = f"https://api.poolmathapp.com/share/pool?userId={user_id}&poolId={pool_id}"
+        LOG.debug(f"Using PoolMathClient for {name} at {self._json_url}")
+
     @staticmethod
-    async def extract_ids_from_share_url(share_url, timeout=DEFAULT_TIMEOUT):
+    async def extract_ids_from_share_url(share_url: str, 
+                                         timeout: float = DEFAULT_TIMEOUT) -> tuple[Optional[str], Optional[str]]:
         """Extract user_id and pool_id from a Pool Math share URL."""
         import re
         
