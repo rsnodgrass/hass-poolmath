@@ -69,15 +69,10 @@ def _initial_form(flow: Union[ConfigFlow, OptionsFlow]):
                     "tfp": "Trouble Free Pools",
                     "hayward_aquarite": "Hayward AquaRite SWG",
                     "bioguard": "Bio Guard",
-                    "robert_lowry": "Robert Lowry",
-                    "ultimate_pool_care": "Ultimate Pool Care",
-                    "salt_water_pool": "Salt Water Pool",
+                    "robert_lowry": "Robert Lowry"
                 })
             ),
-            # FIXME: allow specifying EXACTLY which log types to monitor, always create the sensors
-            # vol.Optional(CONF_LOG_TYPES, default=None):
             vol.Optional(CONF_SCAN_INTERVAL, default=scan_interval): cv.positive_int,
-            # Translation: "How often to check for pool data updates (in minutes)"
         })
     )
 
