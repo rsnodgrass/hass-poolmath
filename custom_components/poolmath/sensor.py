@@ -2,7 +2,7 @@ from __future__ import annotations
 from datetime import timedelta
 import logging
 
-from homeassistant.components.sensor import SensorEntity
+from homeassistant.components.sensor import SensorEntity, RestoreEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -108,18 +108,16 @@ class PoolMathServiceSensor(SensorEntity):
         self._coordinator = coordinator
         self._attrs = {
             ATTR_ATTRIBUTION: ATTRIBUTION,
-            CONF_POOL_ID: pool_id,
+            CONF_POOL_ID: config.pool_id,
             CONF_USER_ID: config.user_id
         }
-
         self._attr_name = f"Pool: {config.name}"
         self._attr_unique_id = f"poolmath_{config.user_id}_{config.pool_id}"
         self._attr_icon = "mdi:water"
         self._attr_device_info = DeviceInfo(
             configuration_url="https://www.troublefreepool.com/blog/poolmath/",
             entry_type=DeviceEntryType.SERVICE,
-            identifiers={(DOMAIN, f"pool_math_{config.user_id}_{config.pool_id}"),
-                        (DOMAIN, config.name)},  # Keep name as secondary identifier for backward compatibility
+            identifiers={(DOMAIN, f"pool_math_{config.user_id}_{config.pool_id}")},
             manufacturer="Pool Math (Trouble Free Pool)",
             name="Pool Math",
         )
@@ -135,6 +133,15 @@ class PoolMathServiceSensor(SensorEntity):
     def extra_state_attributes(self) -> Dict[str, Any]:
         """Return the state attributes."""
         return self._attrs
+
+    async def async_added_to_hass(self) -> None:
+        """Handle entity being added to Home Assistant."""
+        await super().async_added_to_hass()
+        
+        # restore previous state if available on HA startup
+        if (last_state := await self.async_get_last_state()) is not None:
+            self._state = last_state.state
+            self._attrs = last_state.attributes
 
     @callback
     def _handle_coordinator_update(self) -> None:

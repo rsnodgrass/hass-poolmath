@@ -122,9 +122,6 @@ type: entities
 ### Feature Requests
 
 * move all communication/interfaces to Pool Math into separate pypoolmath package that can be maintained separately
-* on HA start, if the Pool Math cloud service is not available, no sensors are created (they get created later when service returns); ideas how to improve this:
-  1. if Pool Math service is down, just create ALL sensors hardcoded in POOL_MATH_SENSOR_SETTINGS (or check to see if RestoreEnttiy has entries for those) ... this might be easiest, and could just be standard startup procedure
-  2. update PoolMathServiceSensor to also use RestoreEntity and recreate all sensors that were saved in its state
 * add [@berniedp's calculation to suggest SWG % setting](https://community.home-assistant.io/t/custom-component-pool-math-sensors-for-pool-chemicals-and-operations/435126/12?u=ryans)
 * add Total Chlorine (TC) calculation
 * make the HA yaml configuration for this a platform, rather than a sensor config...e.g.:
