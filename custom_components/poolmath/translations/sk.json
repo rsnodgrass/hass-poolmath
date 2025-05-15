@@ -26,8 +26,8 @@
     "step": {
       "init": {
         "data": {
-          "user_id": "ID zdieľania z adresy URL zdieľania PoolMath",
-          "pool_id": "ID bazéna z JSON výsledkov PoolMath zdieľaného URL",
+          "user_id": "ID používateľa z URL zdieľania PoolMath (napr. api.poolmathapp.com/share/?userId=XXX)",
+          "pool_id": "ID bazéna z URL zdieľania PoolMath",
           "name": "Pool názov",
           "timeout": "Časový limit aktualizácie",
           "target": "Zdroj cieľových úrovní",

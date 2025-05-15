@@ -20,5 +20,19 @@
         "title": "Stellen Sie eine Verbindung zu Ihrem Pool Math her"
       }
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "user_id": "Benutzer-ID aus PoolMath-Teilen-URL (z.B. api.poolmathapp.com/share/?userId=XXX)",
+          "pool_id": "Pool-ID aus PoolMath-Teilen-URL",
+          "name": "Pool Name",
+          "timeout": "Aktualisierungs-Timeout",
+          "target": "Zielwertequelle",
+          "scan_interval": "Aktualisierungsintervall (Minuten; Standard=8) - bitte wählen Sie einen höheren Wert, um die Pool Math Server zu schützen"
+        }
+      }
+    }
   }
 }

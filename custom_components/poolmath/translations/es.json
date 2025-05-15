@@ -6,7 +6,7 @@
         "data": {
           "user_id": "ID de usuario de PoolMath (por ejemplo: api.poolmathapp.com/share/?userId=XXX)",
           "pool_id": "ID de piscina de PoolMath",
-          "timeout": "Tiempo de actualización",
+          "timeout": "Intervalo de actualización",
           "target": "Fuente de niveles de destino",
           "scan_interval": "¿Con qué frecuencia se deben actualizar los datos del pool (en minutos)?",
           "email": "[%key:common::config_flow::data::username%]",
@@ -21,6 +21,20 @@
     },
     "abort": {
       "already_configured": "El dispositivo ya está configurado"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "user_id": "ID de usuario de PoolMath (por ejemplo: api.poolmathapp.com/share/?userId=XXX)",
+          "pool_id": "ID de piscina de PoolMath",
+          "name": "Nombre de la piscina",
+          "timeout": "Intervalo de actualización",
+          "target": "Fuente de niveles de destino",
+          "scan_interval": "Intervalo de actualización (minutos; predeterminado=8) - por favor, evite establecer un valor más bajo para proteger los servidores de Pool Math"
+        }
+      }
     }
   }
 }

@@ -26,8 +26,8 @@
     "step": {
       "init": {
         "data": {
-          "User_id": "User ID ID from PoolMath Share URL JSON Results",
-          "pool_id": "Pool ID from PoolMath Share URL JSON Results",
+          "user_id": "User ID from PoolMath share URL (e.g. https:api.poolmathapp.com/share/?userId=XXX)",
+          "pool_id": "Pool ID from PoolMath share URL",
           "name": "Pool Name",
           "timeout": "Update timeout",
           "target": "Target levels source",

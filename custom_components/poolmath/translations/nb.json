@@ -13,13 +13,26 @@
         "data": {
           "user_id": "Bruker-ID fra PoolMath (for eksempel: api.poolmathapp.com/share/?userId=XXX)",
           "pool_id": "Basseng-ID fra PoolMath",
-          "email": "Epostadresse",
           "password": "Passord",
           "timeout": "Oppdaterings tidsavbrudd",
           "target": "Målverdi kilde",
           "scan_interval": "Hvor ofte skal pooldata oppdateres (i minutter)"
         },
         "title": "Koble til bassengmatematikken din"
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "user_id": "Bruker-ID fra PoolMath (for eksempel: api.poolmathapp.com/share/?userId=XXX)",
+          "pool_id": "Basseng-ID fra PoolMath",
+          "name": "Bassengnavn",
+          "timeout": "Oppdaterings tidsavbrudd",
+          "target": "Målverdi kilde",
+          "scan_interval": "Oppdateringsintervall (minutter; standard=8) - vennligst unngå å sette en lavere verdi for å beskytte Pool Math-servrene"
+        }
       }
     }
   }

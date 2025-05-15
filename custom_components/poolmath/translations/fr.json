@@ -20,5 +20,19 @@
         "title": "Connectez-vous à votre moniteur Pool Math"
       }
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "user_id": "ID utilisateur de PoolMath (par exemple : api.poolmathapp.com/share/?userId=XXX)",
+          "pool_id": "ID piscine de PoolMath",
+          "name": "Nom de la piscine",
+          "timeout": "Délai d'actualisation",
+          "target": "Source des niveaux cibles",
+          "scan_interval": "Intervalle d'actualisation (minutes ; par défaut=8) - veuillez éviter de définir une valeur plus faible pour protéger les serveurs de Pool Math"
+        }
+      }
+    }
   }
 }
