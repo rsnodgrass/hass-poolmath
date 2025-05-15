@@ -348,8 +348,6 @@ class UpdatableSensor(RestoreEntity, SensorEntity):
         return self._config["icon"]
 
     async def inject_state(self, state, timestamp, attributes=None) -> None:
-        state_changed = self._state != state
-
         self._attrs[ATTR_LAST_UPDATED_TIME] = timestamp
         self._attrs[ATTR_LAST_UPDATED] = datetime.fromtimestamp(
             timestamp / 1000.0
@@ -358,7 +356,9 @@ class UpdatableSensor(RestoreEntity, SensorEntity):
         if attributes:
             self._attrs |= attributes
 
-        if state_changed:
+        # if state actually changed, notify HA and update any
+        # anciliary data (e.g. targets)
+        if self._state != state:
             self._state = state
             await self.update_sensor_targets()
 
