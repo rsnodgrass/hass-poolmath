@@ -1,41 +1,26 @@
+from __future__ import annotations
 from datetime import timedelta
 import logging
 
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import (
-    ATTR_ATTRIBUTION,
-    ATTR_NAME,
-    ATTR_UNIT_OF_MEASUREMENT,
-    CONF_NAME,
-    CONF_URL,
-    UnitOfTemperature,
-)
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.restore_state import RestoreEntity
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .client import PoolMathClient
 from .const import (
-    ATTR_LAST_UPDATED_TIME,
-    ATTR_TARGET_SOURCE,
     ATTRIBUTION,
     CONF_USER_ID,
     CONF_POOL_ID,
     CONF_TARGET,
     CONF_TIMEOUT,
     DOMAIN,
-    ICON_POOL,
 )
+from .models import PoolMathConfig, PoolMathState
 from .targets import POOL_MATH_SENSOR_SETTINGS, get_pool_targets
 
 LOG = logging.getLogger(__name__)
-
-DATA_UPDATED = "poolmath_data_updated"
-
-SCAN_INTERVAL = timedelta(minutes=8)
 
 
 async def async_setup_entry(
@@ -45,70 +30,130 @@ async def async_setup_entry(
 ) -> None:
     """Set up Pool Math sensor based on a config entry."""
 
-    user_id = entry.options[CONF_USER_ID]
-    pool_id = entry.options[CONF_POOL_ID]
-    name = entry.options[CONF_NAME]
-    timeout = entry.options[CONF_TIMEOUT]
-    target = entry.options[CONF_TARGET]
-    # log_types = entry.options[CONF_LOG_TYPES]
+    config = PoolMathConfig(
+        user_id=entry.options[CONF_USER_ID],
+        pool_id=entry.options[CONF_POOL_ID],
+        name=entry.options[CONF_NAME],
+        timeout=entry.options[CONF_TIMEOUT],
+        target=entry.options[CONF_TARGET],
+        update_interval=timedelta(minutes=entry.options.get(CONF_SCAN_INTERVAL, 8)),
+    )
 
-    client = PoolMathClient(user_id, pool_id, name=name, timeout=timeout)
+    client = PoolMathClient(
+        user_id=config.user_id,
+        pool_id=config.pool_id,
+        name=config.name,
+        timeout=config.timeout,
+    )
 
-    # create the core Pool Math service sensor, which is responsible for updating all other sensors
-    sensor = PoolMathServiceSensor(hass, entry, name, client, async_add_entities)
-    async_add_entities([sensor])
+    coordinator = PoolMathDataCoordinator(hass, client, config)
+    
+    # Fetch initial data so we have data when entities subscribe
+    #
+    # If the refresh fails, async_config_entry_first_refresh will
+    # raise ConfigEntryNotReady and setup will try again later
+    #
+    # If you do not want to retry setup on failure, use
+    # coordinator.async_refresh() instead
+    #
+    await coordinator.async_config_entry_first_refresh()
+
+    async_add_entities([
+        PoolMathServiceSensor(coordinator, config)
+    ])
+
+
+class PoolMathDataCoordinator(DataUpdateCoordinator[PoolMathState]):
+    """Coordinator for Pool Math data updates."""
+
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        client: PoolMathClient,
+        config: PoolMathConfig,
+    ) -> None:
+        """Initialize the coordinator."""
+        super().__init__(
+            hass,
+            name="Pool Math",
+            update_interval=config.update_interval,
+        )
+        self._client = client
+        self._config = config
+
+    async def _async_update_data(self) -> PoolMathState:
+        """Fetch data from Pool Math API."""
+        try:
+            data = await self._client.async_get_data()
+            return PoolMathState(
+                last_updated=data.get("last_updated"),
+                attributes=data,
+            )
+        except Exception as err:
+            LOG.error("Error updating Pool Math data: %s", err)
+            raise UpdateFailed(err) from err
 
 
 class PoolMathServiceSensor(SensorEntity):
-    """Sensor monitoring the Pool Math cloud service and updating any related sensors"""
+    """Sensor monitoring the Pool Math cloud service."""
 
-    def __init__(self, hass, entry, name, poolmath_client, async_add_entities_callback):
+    def __init__(
+        self,
+        coordinator: PoolMathDataCoordinator,
+        config: PoolMathConfig,
+    ) -> None:
         """Initialize the Pool Math service sensor."""
-        self.hass = hass
-        self._entry = entry
-        self._name = name
-
-        self._managed_sensors = {}
-        self._poolmath_client = poolmath_client
-
+        super().__init__(coordinator)
+        self._config = config
+        self._coordinator = coordinator
         self._attrs = {
             ATTR_ATTRIBUTION: ATTRIBUTION,
-            CONF_URL: self._poolmath_client.url,
+            CONF_POOL_ID: pool_id,
+            CONF_USER_ID: config.user_id
         }
-        self._attr_unique_id = f"poolmath_{self._poolmath_client.pool_id}"
+
+        self._attr_name = f"Pool: {config.name}"
+        self._attr_unique_id = f"poolmath_{config.user_id}_{config.pool_id}"
+        self._attr_icon = "mdi:water"
         self._attr_device_info = DeviceInfo(
             configuration_url="https://www.troublefreepool.com/blog/poolmath/",
             entry_type=DeviceEntryType.SERVICE,
-            identifiers={(DOMAIN, self._entry.entry_id)},
+            identifiers={(DOMAIN, f"pool_math_{config.user_id}_{config.pool_id}"),
+                        (DOMAIN, config.name)},  # Keep name as secondary identifier for backward compatibility
             manufacturer="Pool Math (Trouble Free Pool)",
             name="Pool Math",
         )
 
-        self._async_add_entities_callback = async_add_entities_callback
-
-    async def async_added_to_hass(self):
-        """Request an update to bypass scan_interval at startup."""
-        self.async_schedule_update_ha_state(True)
+    @property
+    def state(self) -> str | None:
+        """Return the state of the sensor."""
+        if self.coordinator.data:
+            return self.coordinator.data.last_updated
+        return None
 
     @property
-    def name(self):
-        """Return the name of the sensor."""
-        return "Pool Math Service: " + self._name
+    def extra_state_attributes(self) -> Dict[str, Any]:
+        """Return the state attributes."""
+        return self._attrs
 
-    @property
-    def state(self):
-        return self._attrs.get(ATTR_LAST_UPDATED_TIME)
-
-    @property
-    def icon(self):
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
         return ICON_POOL
 
     @property
     def should_poll(self):
         return True
 
-    async def async_update(self):
-        """Get the latest data from the source and updates the state."""
+    async def async_update(self) -> None:
+        """Update the sensor's state and attributes from Pool Math API.
+
+        This method fetches the latest pool data and updates:
+        - Pool name and volume
+        - Last updated timestamp
+        - All sensor states via callback
+        """
 
         url = self._attrs.get(CONF_URL)
         try:
@@ -116,7 +161,9 @@ class PoolMathServiceSensor(SensorEntity):
             client = self._poolmath_client
             poolmath_json = await client.async_update()
         except Exception as e:
-            LOG.warning(f"PoolMath request failed! {url}: {e}")
+            LOG.warning(
+                f"Failed to update Pool Math data for {self.name} at {url}: {str(e)}"
+            )
             return
 
         if not poolmath_json:
@@ -130,7 +177,10 @@ class PoolMathServiceSensor(SensorEntity):
             return
 
         pool = pools[0].get("pool")
-        self._attrs |= {"name": pool.get("name"), "volume": pool.get("volume")}
+        self._attrs |= {
+            "name": pool.get("name", "Unknown Pool"),
+            "volume": pool.get("volume", 0)
+        }
 
         # iterate through all the log entries and update sensor states
         timestamp = await client.process_log_entry_callbacks(
@@ -138,12 +188,9 @@ class PoolMathServiceSensor(SensorEntity):
         )
         self._attrs[ATTR_LAST_UPDATED_TIME] = timestamp
 
-    @property
-    def extra_state_attributes(self):
-        """Return the any state attributes."""
-        return self._attrs
-
-    async def get_sensor_entity(self, sensor_type, poolmath_json):
+    async def get_sensor_entity(
+        self, sensor_type: str, poolmath_json: dict
+    ) -> UpdatableSensor | None:
         sensor = self._managed_sensors.get(sensor_type, None)
         if sensor:
             return sensor
@@ -195,8 +242,11 @@ class UpdatableSensor(RestoreEntity, SensorEntity):
         self._config = config
         self._sensor_type = sensor_type
         self._state = None
-
-        self._attrs = {ATTR_ATTRIBUTION: ATTRIBUTION}
+        self._attrs = {
+            ATTR_ATTRIBUTION: ATTRIBUTION,
+            CONF_POOL_ID: pool_id,
+            CONF_USER_ID: config.user_id
+        }
         self._attr_unique_id = f"poolmath_{pool_id}_{sensor_type}"
         self._attr_device_info = DeviceInfo(
             configuration_url="https://www.troublefreepool.com/blog/poolmath/",

@@ -10,7 +10,7 @@ from homeassistant.config_entries import (
     ConfigFlow,
     OptionsFlow,
 )
-from homeassistant.const import CONF_NAME, __version__ as HAVERSION
+from homeassistant.const import CONF_NAME, CONF_SCAN_INTERVAL, __version__ as HAVERSION
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import config_validation as cv
@@ -23,6 +23,7 @@ from .const import (
     DEFAULT_NAME,
     DEFAULT_TARGET,
     DEFAULT_TIMEOUT,
+    DEFAULT_UPDATE_INTERVAL,
     DOMAIN,
     INTEGRATION_NAME,
 )
@@ -35,20 +36,21 @@ def _initial_form(flow: Union[ConfigFlow, OptionsFlow]):
 
     if isinstance(flow, ConfigFlow):
         step_id = "user"
-        user_id = None
-        pool_id = None
-        name = DEFAULT_NAME
-        timeout = DEFAULT_TIMEOUT
-        target = DEFAULT_TARGET
     elif isinstance(flow, OptionsFlow):
         step_id = "init"
-        user_id = flow.config_entry.options.get(CONF_USER_ID)
-        pool_id = flow.config_entry.options.get(CONF_POOL_ID)
-        name = flow.config_entry.options.get(CONF_NAME, DEFAULT_NAME)
-        timeout = flow.config_entry.options.get(CONF_TIMEOUT, DEFAULT_TIMEOUT)
-        target = flow.config_entry.options.get(CONF_TARGET, DEFAULT_TARGET)
     else:
         raise TypeError("Invalid flow type")
+
+    options = {} # empty in case of isinstance ConfigFlow
+    if isinstance(flow, OptionsFlow):
+        options = flow.config_entry.options
+
+    user_id = options.get(CONF_USER_ID)
+    pool_id = options.get(CONF_POOL_ID)
+    name = options.get(CONF_NAME, DEFAULT_NAME)
+    timeout = options.get(CONF_TIMEOUT, DEFAULT_TIMEOUT)
+    target = options.get(CONF_TARGET, DEFAULT_TARGET)
+    scan_interval = options.get(CONF_SCAN_INTERVAL, DEFAULT_UPDATE_INTERVAL)
 
     return flow.async_show_form(
         step_id=step_id,  # parameterized to follow guidance on using "user"
@@ -59,11 +61,10 @@ def _initial_form(flow: Union[ConfigFlow, OptionsFlow]):
                 vol.Optional(CONF_NAME, default=name): cv.string,
                 vol.Optional(CONF_TIMEOUT, default=timeout): cv.positive_int,
                 # NOTE: targets are not really implemented, other than tfp
-                vol.Optional(
-                    CONF_TARGET, default=target
-                ): cv.string,  # targets/*.yaml file with min/max targets
+                vol.Optional(CONF_TARGET, default=target): cv.string,  # targets/*.yaml file with min/max targets
                 # FIXME: allow specifying EXACTLY which log types to monitor, always create the sensors
                 # vol.Optional(CONF_LOG_TYPES, default=None):
+                vol.Optional(CONF_SCAN_INTERVAL, default=scan_interval): cv.positive_int,
             }
         ),
     )

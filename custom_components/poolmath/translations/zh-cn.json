@@ -1,0 +1,58 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "description": "连接到Pool Math",
+                "data": {
+                    "user_id": "PoolMath用户ID",
+                    "pool_id": "PoolMath泳池ID",
+                    "name": "泳池名称",
+                    "timeout": "更新超时时间",
+                    "target": "目标水平源"
+                }
+            }
+        },
+        "error": {
+            "cannot_connect": "连接失败，请重试",
+            "invalid_auth": "无效的认证",
+            "unknown": "未知错误"
+        },
+        "abort": {
+            "already_configured": "设备已配置"
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "data": {
+                    "user_id": "PoolMath用户ID",
+                    "pool_id": "PoolMath泳池ID",
+                    "name": "泳池名称",
+                    "timeout": "更新超时时间",
+                    "target": "目标水平源",
+                    "scan_interval": "更新间隔（分钟；默认=8） - 请避免设置过低以保护Pool Math服务器"
+                }
+            }
+        }
+    },
+    "issues": {
+        "config_migration_needed": {
+            "title": "Pool Math：需要更新配置",
+            "description": "Pool Math集成已更新，现在需要使用user_id和pool_id而不是share_id。请提交修复以更新您的配置。",
+            "fix_flow": {
+                "step": {
+                    "share_url": {
+                        "title": "更新Pool Math配置",
+                        "description": "请粘贴您的Pool Math分享URL。您可以在Pool Math应用的设置>分享中找到。URL应该类似：https://api.poolmathapp.com/share/XXXXXXX 或 https://troublefreepool.com/mypool/XXXXXXX。",
+                        "data": {
+                            "share_url": "Pool Math分享URL"
+                        }
+                    }
+                },
+                "abort": {
+                    "already_configured": "配置已更新"
+                }
+            }
+        }
+    }
+}

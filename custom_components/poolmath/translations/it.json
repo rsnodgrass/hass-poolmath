@@ -1,0 +1,58 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "description": "Connetti a Pool Math",
+                "data": {
+                    "user_id": "ID Utente PoolMath",
+                    "pool_id": "ID Piscina PoolMath",
+                    "name": "Nome Piscina",
+                    "timeout": "Timeout di aggiornamento",
+                    "target": "Sorgente livelli obiettivo"
+                }
+            }
+        },
+        "error": {
+            "cannot_connect": "Impossibile connettersi, riprova",
+            "invalid_auth": "Autenticazione non valida",
+            "unknown": "Errore imprevisto"
+        },
+        "abort": {
+            "already_configured": "Dispositivo già configurato"
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "data": {
+                    "user_id": "ID Utente PoolMath",
+                    "pool_id": "ID Piscina PoolMath",
+                    "name": "Nome Piscina",
+                    "timeout": "Timeout di aggiornamento",
+                    "target": "Sorgente livelli obiettivo",
+                    "scan_interval": "Intervallo di aggiornamento (minuti; predefinito=8) - evita di impostare un valore inferiore per proteggere i server di Pool Math"
+                }
+            }
+        }
+    },
+    "issues": {
+        "config_migration_needed": {
+            "title": "Pool Math: Aggiornamento Configurazione Necessario",
+            "description": "L'integrazione Pool Math è stata aggiornata e ora richiede un user_id e pool_id invece di share_id. Per favore, invia una correzione per aggiornare la tua configurazione.",
+            "fix_flow": {
+                "step": {
+                    "share_url": {
+                        "title": "Aggiorna Configurazione Pool Math",
+                        "description": "Per favore, incolla il tuo URL di condivisione Pool Math dall'app Pool Math. Puoi trovarlo in Impostazioni > Condivisione. L'URL dovrebbe essere simile a: https://api.poolmathapp.com/share/XXXXXXX o https://troublefreepool.com/mypool/XXXXXXX.",
+                        "data": {
+                            "share_url": "URL Condivisione Pool Math"
+                        }
+                    }
+                },
+                "abort": {
+                    "already_configured": "Configurazione già aggiornata"
+                }
+            }
+        }
+    }
+}

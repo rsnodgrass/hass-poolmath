@@ -29,7 +29,8 @@
           "pool_id": "Pool ID from PoolMath Share URL JSON Results",
           "name": "Pool Name",
           "timeout": "Update timeout",
-          "target": "Target levels source"
+          "target": "Target levels source",
+          "scan_interval": "Update interval (minutes; default=8) - please avoid setting lower to protect Pool Math servers"
         }
       }
     }

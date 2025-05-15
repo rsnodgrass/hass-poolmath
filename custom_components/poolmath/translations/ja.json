@@ -1,0 +1,58 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "description": "Pool Mathに接続",
+                "data": {
+                    "user_id": "PoolMathユーザーID",
+                    "pool_id": "PoolMathプールID",
+                    "name": "プール名",
+                    "timeout": "更新タイムアウト",
+                    "target": "目標レベルのソース"
+                }
+            }
+        },
+        "error": {
+            "cannot_connect": "接続に失敗しました、もう一度お試しください",
+            "invalid_auth": "認証エラー",
+            "unknown": "予期せぬエラー"
+        },
+        "abort": {
+            "already_configured": "デバイスは既に設定されています"
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "data": {
+                    "user_id": "PoolMathユーザーID",
+                    "pool_id": "PoolMathプールID",
+                    "name": "プール名",
+                    "timeout": "更新タイムアウト",
+                    "target": "目標レベルのソース",
+                    "scan_interval": "更新間隔（分）（デフォルト=8） - Pool Mathサーバーを保護するために、低い値を設定しないでください"
+                }
+            }
+        }
+    },
+    "issues": {
+        "config_migration_needed": {
+            "title": "Pool Math: 設定の更新が必要です",
+            "description": "Pool Mathの統合が更新され、share_idの代わりにuser_idとpool_idが必要になりました。設定を更新するために、修復を送信してください。",
+            "fix_flow": {
+                "step": {
+                    "share_url": {
+                        "title": "Pool Math設定の更新",
+                        "description": "Pool Mathアプリの設定>共有からPool Mathの共有URLを貼り付けてください。URLは次のようになります：https://api.poolmathapp.com/share/XXXXXXX または https://troublefreepool.com/mypool/XXXXXXX。",
+                        "data": {
+                            "share_url": "Pool Math共有URL"
+                        }
+                    }
+                },
+                "abort": {
+                    "already_configured": "設定は既に更新されています"
+                }
+            }
+        }
+    }
+}
