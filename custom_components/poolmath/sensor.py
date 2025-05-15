@@ -75,6 +75,7 @@ class PoolMathDataCoordinator(DataUpdateCoordinator[PoolMathState]):
         """Initialize the coordinator."""
         super().__init__(
             hass,
+            LOG,
             name="Pool Math",
             update_interval=config.update_interval,
         )
