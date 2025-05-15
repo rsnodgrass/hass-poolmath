@@ -174,7 +174,7 @@ TFP_RECOMMENDED_TARGET_LEVELS = {
 DEFAULT_TARGETS = TFP_TARGET_NAME
 
 
-def get_pool_targets(target_name=DEFAULT_TARGETS):
+def get_pool_sensor_targets(target_name=DEFAULT_TARGETS):
     if target_name == TFP_TARGET_NAME:
         return TFP_RECOMMENDED_TARGET_LEVELS
     else:

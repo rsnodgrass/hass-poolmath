@@ -67,7 +67,6 @@ def _initial_form(flow: Union[ConfigFlow, OptionsFlow]):
             vol.Optional(CONF_TARGET, default="tfp"): vol.All(
                 vol.In({
                     "tfp": "Trouble Free Pools",
-                    "hayward_aquarite": "Hayward AquaRite SWG",
                     "bioguard": "Bio Guard",
                     "robert_lowry": "Robert Lowry"
                 })
@@ -96,7 +95,6 @@ class PoolMathFlowHandler(ConfigFlow, domain=DOMAIN):
     async def async_step_user(self, user_input=None) -> FlowResult:
         """Handle the initial step."""
         if user_input is not None:
-            # already configured user_id and pool_id?
             user_id = user_input.get(CONF_USER_ID)
             pool_id = user_input.get(CONF_POOL_ID)
             

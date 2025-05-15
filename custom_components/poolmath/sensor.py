@@ -230,7 +230,7 @@ class PoolMathServiceSensor(SensorEntity):
             LOG.info(
                 f"{sensor.name} {measurement_type}={state} {sensor.unit_of_measurement} (timestamp={timestamp})"
             )
-            sensor.inject_state(state, timestamp, attributes)
+            await sensor.inject_state(state, timestamp, attributes)
 
         # If FC or CC is updated, update the calculated TC sensor as well
         if measurement_type in ['fc', 'cc']:
@@ -258,7 +258,7 @@ class PoolMathServiceSensor(SensorEntity):
                     LOG.info(
                         f"Updating TC sensor: FC={fc_value} + CC={cc_value} = TC={tc_value} mg/L"
                     )
-                    tc_sensor.inject_state(tc_value, timestamp, attributes)
+                    await tc_sensor.inject_state(tc_value, timestamp, attributes)
             except (ValueError, TypeError) as e:
                 LOG.warning(f"Error calculating total chlorine: {e}")
 
@@ -294,7 +294,10 @@ class UpdatableSensor(RestoreEntity, SensorEntity):
             name="Pool Math",
         )
 
-        # TEMPORARY HACK to get correct unit of measurement for water temps (but this also
+        self.determine_unit_of_measurement()
+
+    def determine_unit_of_measurement(self) -> None:
+                # TEMPORARY HACK to get correct unit of measurement for water temps (but this also
         # applies to other units). No time to fix now, but perhaps someone will submit a PR
         # to fix this in future.
         self._unit_of_measurement = self._config[ATTR_UNIT_OF_MEASUREMENT]
@@ -315,13 +318,6 @@ class UpdatableSensor(RestoreEntity, SensorEntity):
 
             LOG.info(f"Unit of temperature measurement {self._unit_of_measurement}")
 
-        # FIXME: use 'targets' configuration value and load appropriate yaml
-        targets_map = get_pool_targets()
-        if targets_map:
-            self._targets = targets_map.get(sensor_type)
-            if self._targets:
-                self._attrs[ATTR_TARGET_SOURCE] = "tfp"
-                self._attrs.update(self._targets)
 
     @property
     def name(self):
@@ -351,20 +347,39 @@ class UpdatableSensor(RestoreEntity, SensorEntity):
     def icon(self):
         return self._config["icon"]
 
-    def inject_state(self, state, timestamp, attributes):
+    async def inject_state(self, state, timestamp, attributes=None) -> None:
         state_changed = self._state != state
 
         self._attrs[ATTR_LAST_UPDATED_TIME] = timestamp
+        self._attrs[ATTR_LAST_UPDATED] = datetime.fromtimestamp(
+            timestamp / 1000.0
+        ).strftime("%Y-%m-%d %H:%M:%S")
+
         if attributes:
             self._attrs |= attributes
 
         if state_changed:
             self._state = state
+            await self.update_sensor_targets()
 
-            # FIXME: see should_poll
             # notify Home Assistant that the sensor has been updated
-            # if (self.hass and self.schedule_update_ha_state):
-            #    self.schedule_update_ha_state(True)
+            await self.async_write_ha_state()
+
+    async def update_sensor_targets(self) -> None:
+        """
+        Update attributes for the sensor to include targets if 
+        any are defined for this sensor value. (e.g. target, target_min, 
+        target_max, warning_above).
+        
+        This should be called on every state update since eventually the
+        calculations on several other sensor values may be used to determine
+        the correct target values for a given sensor.
+        """
+        targets = get_pool_sensor_targets()
+        if targets:
+            self._attrs[ATTR_TARGET_SOURCE] = "tfp"
+            if target_val := targets.get(self._sensor_type):
+                self._attrs.update(target_val)
 
     async def async_added_to_hass(self) -> None:
         await super().async_added_to_hass()

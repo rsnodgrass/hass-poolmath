@@ -7,7 +7,7 @@ robert_lowry:
       target: 7.5
       target_min: 7.4
       target_max: 7.6
-      max_alarm: 7.8
+      warning_above: 7.8
     cya:
       target_min: 30
       target_max: 50
