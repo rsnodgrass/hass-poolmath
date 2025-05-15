@@ -1,4 +1,8 @@
 import logging
+import os
+from pathlib import Path
+import yaml
+from typing import Dict, Optional
 
 from homeassistant.const import (
     ATTR_ICON,
@@ -17,6 +21,39 @@ from .const import (
 )
 
 LOG = logging.getLogger(__name__)
+
+async def async_load_targets() -> Dict[str, str]:
+    """Load target definitions from YAML files in the targets directory.
+
+    Returns:
+        Dict[str, str]: Mapping of target IDs to their friendly names
+    """
+    targets = {}
+    targets_dir = Path(__file__).parent / "targets"
+    
+    if not targets_dir.exists():
+        LOG.error(f"Targets dir not found: {targets_dir}")
+        return targets
+
+    try:
+        for yaml_file in targets_dir.glob("*.yaml"):
+            try:
+                async with aiofiles.open(yaml_file, 'r') as file:
+                    content = await file.read()
+                    target_data = yaml.safe_load(content)
+                    if target_data:
+                        # Use the filename without extension as the target ID
+                        target_id = yaml_file.stem
+                        if target_name := target_data.get('name', target_id):
+                            targets[target_id] = target_name
+                        else:
+                            LOG.warning(f"Target {yaml_file} missing 'name' key")
+            except Exception as e:
+                LOG.error(f"Error loading target from {yaml_file}: {e}")
+    except Exception as e:
+        LOG.error(f"Error reading targets directory: {e}")
+
+    return targets
 
 # FIXME: add strings translation support for names/descriptiongs/units?
 # see https://www.troublefreepool.com/blog/2018/12/12/abcs-of-pool-water-chemistry/

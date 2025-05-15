@@ -1,7 +1,8 @@
-  # http://www.lowrycg.com/pool-acid-dose-calculator/
-  # https://www.poolspanews.com/how-to/maintenance/chemical-guru-robert-lowry-explains-recent-changes-to-his-chemistry-method_o
-  robert_lowry:
+robert_lowry:
     name: "Robert Lowry"
+    links:
+    - http://www.lowrycg.com/pool-acid-dose-calculator/
+    - https://www.poolspanews.com/how-to/maintenance/chemical-guru-robert-lowry-explains-recent-changes-to-his-chemistry-method_o
     ph:
       target: 7.5
       target_min: 7.4

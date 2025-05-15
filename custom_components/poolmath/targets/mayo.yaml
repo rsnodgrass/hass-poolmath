@@ -1,8 +1,0 @@
-  mayo:
-    name: "Mayo Clinic"
-    notes: "Target temps from Mayo Clinic"
-    links:
-	- https://www.mayoclinic.org/diseases-conditions/arthritis/expert-answers/water-exercise/faq-20057930
-    temp:
-      target_min: 83.0
-      target_max: 88.0

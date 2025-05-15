@@ -1,4 +1,4 @@
-  bio_guard:
+bioguard:
     name: "Bio Guard"
     fc:
       target_min: 1.0

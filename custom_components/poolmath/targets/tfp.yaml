@@ -1,8 +1,8 @@
-  tfp:
-    name: "TFP Pool Math"
-    notes: "The default target ranges from Trouble Free Pool Pool Math"
+tfp:
+    name: "Trouble Free Pool"
+    notes: "Default target ranges from Trouble Free Pool"
     links:
-	- https://www.troublefreepool.com/calc.html
+    - https://www.troublefreepool.com/calc.html
     fc:
       target_min: 8.0
       target_max: 13.0

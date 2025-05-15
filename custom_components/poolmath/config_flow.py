@@ -66,7 +66,12 @@ def _initial_form(flow: Union[ConfigFlow, OptionsFlow]):
             # NOTE: targets are not really implemented, other than tfp
             vol.Optional(CONF_TARGET, default="tfp"): vol.All(
                 vol.In({
-                    "tfp": "Trouble Free Pools"
+                    "tfp": "Trouble Free Pools",
+                    "hayward_aquarite": "Hayward AquaRite SWG",
+                    "bioguard": "Bio Guard",
+                    "robert_lowry": "Robert Lowry",
+                    "ultimate_pool_care": "Ultimate Pool Care",
+                    "salt_water_pool": "Salt Water Pool",
                 })
             ),
             # FIXME: allow specifying EXACTLY which log types to monitor, always create the sensors
