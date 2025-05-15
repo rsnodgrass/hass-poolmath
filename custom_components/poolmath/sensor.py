@@ -232,24 +232,35 @@ class PoolMathServiceSensor(SensorEntity):
             )
             sensor.inject_state(state, timestamp, attributes)
 
-        # If this is a FC or CC update, update the TC sensor as well
+        # If FC or CC is updated, update the calculated TC sensor as well
         if measurement_type in ['fc', 'cc']:
-            fc_sensor = await self.get_sensor_entity('fc', poolmath_json)
-            cc_sensor = await self.get_sensor_entity('cc', poolmath_json)
-            if fc_sensor and cc_sensor:
-                try:
-                    fc_value = float(fc_sensor.state) if fc_sensor.state else 0
-                    cc_value = float(cc_sensor.state) if cc_sensor.state else 0
-                    tc_value = fc_value + cc_value
+            await self._update_total_chlorine_sensor(timestamp, attributes, poolmath_json)
+
+    async def _update_total_chlorine_sensor(
+        self, timestamp, attributes, poolmath_json
+    ):
+        """
+        Update Total Chlorine sensor calculated from FC and CC measurements
+        since PoolMath JSON API does not include a tc value.
+        """
+        # NOTE: If a pypoolmath client is ever created, it may be better to
+        # just inject a 'tc' key/value into the response JSON rather than here.
+        fc_sensor = await self.get_sensor_entity('fc', poolmath_json)
+        cc_sensor = await self.get_sensor_entity('cc', poolmath_json)
+        if fc_sensor and cc_sensor:
+            try:
+                fc_value = float(fc_sensor.state) if fc_sensor.state else 0
+                cc_value = float(cc_sensor.state) if cc_sensor.state else 0
+                tc_value = fc_value + cc_value
                     
-                    tc_sensor = await self.get_sensor_entity('tc', poolmath_json)
-                    if tc_sensor:
-                        LOG.info(
-                            f"Updating TC sensor: FC={fc_value} mg/L + CC={cc_value} mg/L = TC={tc_value} mg/L"
-                        )
-                        tc_sensor.inject_state(tc_value, timestamp, attributes)
-                except (ValueError, TypeError) as e:
-                    LOG.warning(f"Error calculating total chlorine: {e}")
+                tc_sensor = await self.get_sensor_entity('tc', poolmath_json)
+                if tc_sensor:
+                    LOG.info(
+                        f"Updating TC sensor: FC={fc_value} + CC={cc_value} = TC={tc_value} mg/L"
+                    )
+                    tc_sensor.inject_state(tc_value, timestamp, attributes)
+            except (ValueError, TypeError) as e:
+                LOG.warning(f"Error calculating total chlorine: {e}")
 
     @property
     def sensor_names(self):
