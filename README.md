@@ -124,16 +124,7 @@ type: entities
 * move all communication/interfaces to Pool Math into separate pypoolmath package that can be maintained separately
 * add [@berniedp's calculation to suggest SWG % setting](https://community.home-assistant.io/t/custom-component-pool-math-sensors-for-pool-chemicals-and-operations/435126/12?u=ryans)
 * add Total Chlorine (TC) calculation
-* make the HA yaml configuration for this a platform, rather than a sensor config...e.g.:
 
-```yaml
-poolmath:
-  sources:
-    - url: https://api.poolmathapp.com/share/?userId=[USER_ID]&poolId=[POOL_ID]
-      name: "Swimming Pool"
-    - url: https://api.poolmathapp.com/share/?userId=[USER_ID]&poolId=[POOL_ID]
-      name: "Spa"
-```
 
 ### See Also
 
