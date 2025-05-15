@@ -43,12 +43,19 @@ def _initial_form(flow: Union[ConfigFlow, OptionsFlow]):
     if isinstance(flow, OptionsFlow):
         options = flow.config_entry.options
 
+    # from https://api.poolmathapp.com/share/?userId=[USER_ID]&poolId=[POOL_ID]
     user_id = options.get(CONF_USER_ID)
     pool_id = options.get(CONF_POOL_ID)
     name = options.get(CONF_NAME, DEFAULT_NAME)
     timeout = options.get(CONF_TIMEOUT, DEFAULT_TIMEOUT)
     target = options.get(CONF_TARGET, DEFAULT_TARGET)
     scan_interval = options.get(CONF_SCAN_INTERVAL, DEFAULT_UPDATE_INTERVAL)
+
+    # FIXME:
+    # What is the best customer experience here? Is it actually taking user_id and pool_id
+    # since that seems hard to find in Pool Math app and online web portal when using the
+    # share URL. Or is it better to just take share URL and then extract these user/pool ids
+    # from the data returned?  Let's make this EASY on users with minimal technical understanding.
 
     return flow.async_show_form(
         step_id=step_id,  # parameterized to follow guidance on using "user"
