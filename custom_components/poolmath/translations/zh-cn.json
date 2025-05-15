@@ -4,11 +4,12 @@
             "user": {
                 "description": "连接到Pool Math",
                 "data": {
-                    "user_id": "PoolMath用户ID",
+                    "user_id": "PoolMath用户ID（示例：api.poolmathapp.com/share/?userId=XXX）",
                     "pool_id": "PoolMath泳池ID",
                     "name": "泳池名称",
-                    "timeout": "更新超时时间",
-                    "target": "目标水平源"
+                    "timeout": "更新超时",
+                    "target": "目标级别源",
+                    "scan_interval": "泳池数据更新频率（分钟）"
                 }
             }
         },
@@ -25,7 +26,7 @@
         "step": {
             "init": {
                 "data": {
-                    "user_id": "PoolMath用户ID",
+                    "user_id": "PoolMath用户ID（示例：api.poolmathapp.com/share/?userId=XXX）",
                     "pool_id": "PoolMath泳池ID",
                     "name": "泳池名称",
                     "timeout": "更新超时时间",

@@ -11,8 +11,11 @@
     "step": {
       "user": {
         "data": {
-          "email": "E-Mail-Adresse",
-          "password": "Passwort"
+          "user_id": "Benutzer-ID aus PoolMath-Teilen-URL (z.B. api.poolmathapp.com/share/?userId=XXX)",
+          "pool_id": "Pool-ID aus PoolMath-Teilen-URL",
+          "timeout": "Aktualisierungs-Timeout",
+          "target": "Zielwertequelle",
+          "scan_interval": "Wie oft sollen die Pool-Daten aktualisiert werden (in Minuten)"
         },
         "title": "Stellen Sie eine Verbindung zu Ihrem Pool Math her"
       }

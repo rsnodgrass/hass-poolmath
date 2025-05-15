@@ -11,8 +11,11 @@
     "step": {
       "user": {
         "data": {
-          "email": "Adresse e-mail",
-          "password": "Mot de passe"
+          "user_id": "ID utilisateur de PoolMath (par exemple : api.poolmathapp.com/share/?userId=XXX)",
+          "pool_id": "ID piscine de PoolMath",
+          "timeout": "Délai d'actualisation",
+          "target": "Source des niveaux cibles",
+          "scan_interval": "À quelle fréquence les données du pool doivent être mises à jour (en minutes)"
         },
         "title": "Connectez-vous à votre moniteur Pool Math"
       }

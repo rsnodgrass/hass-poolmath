@@ -4,11 +4,12 @@
       "user": {
         "description": "Pripojiť k Pool Math",
         "data": {
-          "user_id": "ID používateľa z JSON výsledkov PoolMath zdieľaného URL",
-          "pool_id": "ID bazéna z JSON výsledkov PoolMath zdieľaného URL",
+          "user_id": "ID používateľa z URL zdieľania PoolMath (napr. api.poolmathapp.com/share/?userId=XXX)",
+          "pool_id": "ID bazéna z URL zdieľania PoolMath",
           "name": "Pool názov",
           "timeout": "Časový limit aktualizácie",
-          "target": "Zdroj cieľových úrovní"
+          "target": "Zdroj cieľových úrovní",
+          "scan_interval": "Ako často sa majú aktualizovať údaje o bazéne (v minútkach)"
         }
       }
     },
@@ -29,7 +30,8 @@
           "pool_id": "ID bazéna z JSON výsledkov PoolMath zdieľaného URL",
           "name": "Pool názov",
           "timeout": "Časový limit aktualizácie",
-          "target": "Zdroj cieľových úrovní"
+          "target": "Zdroj cieľových úrovní",
+          "scan_interval": "Ako často sa majú aktualizovať údaje o bazéne (v minútkach)"
         }
       }
     }

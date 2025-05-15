@@ -56,12 +56,16 @@ def _initial_form(flow: Union[ConfigFlow, OptionsFlow]):
             vol.Required(CONF_USER_ID, default=user_id): cv.string,
             vol.Required(CONF_POOL_ID, default=pool_id): cv.string,
             vol.Optional(CONF_NAME, default=name): cv.string,
-            vol.Optional(CONF_TIMEOUT, default=timeout): cv.positive_int,
             # NOTE: targets are not really implemented, other than tfp
-            vol.Optional(CONF_TARGET, default=target): cv.string,  # targets/*.yaml file with min/max targets
+            vol.Optional(CONF_TARGET, default="tfp"): vol.All(
+                vol.In({
+                    "tfp": "Trouble Free Pools"
+                })
+            ),
             # FIXME: allow specifying EXACTLY which log types to monitor, always create the sensors
             # vol.Optional(CONF_LOG_TYPES, default=None):
             vol.Optional(CONF_SCAN_INTERVAL, default=scan_interval): cv.positive_int,
+            # Translation: "How often to check for pool data updates (in minutes)"
         })
     )
 

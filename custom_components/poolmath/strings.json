@@ -8,7 +8,8 @@
           "pool_id": "[%key:common::config_flow::data::pool_id%]",
           "name": "[%key:common::config_flow::data::name%]",
           "timeout": "[%key:common::config_flow::data::timeout%]",
-          "target": "[%key:common::config_flow::data::target%]"
+          "target": "[%key:common::config_flow::data::target%]",
+          "scan_interval": "How often to check for pool data updates (in minutes)"
         }
       }
     },

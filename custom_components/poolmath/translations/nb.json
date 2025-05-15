@@ -11,8 +11,13 @@
     "step": {
       "user": {
         "data": {
+          "user_id": "Bruker-ID fra PoolMath (for eksempel: api.poolmathapp.com/share/?userId=XXX)",
+          "pool_id": "Basseng-ID fra PoolMath",
           "email": "Epostadresse",
-          "password": "Passord"
+          "password": "Passord",
+          "timeout": "Oppdaterings tidsavbrudd",
+          "target": "Målverdi kilde",
+          "scan_interval": "Hvor ofte skal pooldata oppdateres (i minutter)"
         },
         "title": "Koble til bassengmatematikken din"
       }

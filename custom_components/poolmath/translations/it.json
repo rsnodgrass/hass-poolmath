@@ -4,7 +4,7 @@
             "user": {
                 "description": "Connetti a Pool Math",
                 "data": {
-                    "user_id": "ID Utente PoolMath",
+                    "user_id": "ID Utente PoolMath (ad esempio: api.poolmathapp.com/share/?userId=XXX)",
                     "pool_id": "ID Piscina PoolMath",
                     "name": "Nome Piscina",
                     "timeout": "Timeout di aggiornamento",
@@ -25,7 +25,7 @@
         "step": {
             "init": {
                 "data": {
-                    "user_id": "ID Utente PoolMath",
+                    "user_id": "ID Utente PoolMath (ad esempio: api.poolmathapp.com/share/?userId=XXX)",
                     "pool_id": "ID Piscina PoolMath",
                     "name": "Nome Piscina",
                     "timeout": "Timeout di aggiornamento",
