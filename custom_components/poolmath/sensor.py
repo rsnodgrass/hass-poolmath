@@ -355,13 +355,10 @@ class UpdatableSensor(RestoreEntity, SensorEntity):
             self._attrs |= attributes
 
         # if state actually changed, notify HA and update any
-        # anciliary data (e.g. targets)
+        # ancillary data (e.g. targets)
         if self._state != state:
             self._state = state
             await self.update_sensor_targets()
-
-            # notify Home Assistant that the sensor has been updated
-            await self.async_write_ha_state()
 
     async def update_sensor_targets(self) -> None:
         """
