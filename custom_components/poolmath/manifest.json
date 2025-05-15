@@ -17,6 +17,7 @@
     "jsonpath>=0.82",
     "httpx>=0.16.1"
   ],
+  "min_homeassistant_version": "2025.3",
   "version": "2.0.0",
   "repairs": [
     "repairs"
