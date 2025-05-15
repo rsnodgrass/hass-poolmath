@@ -99,6 +99,12 @@ POOL_MATH_SENSOR_SETTINGS = {
         ATTR_DESCRIPTION: 'SWG Cell Percentage',
         ATTR_ICON: 'mdi:coolant-temperature',
     },
+    'tc': {
+        ATTR_NAME: 'TC',
+        ATTR_UNIT_OF_MEASUREMENT: 'mg/L',
+        ATTR_DESCRIPTION: 'Total Chlorine (FC + CC)',
+        ATTR_ICON: ICON_GAUGE,
+    },
     'pressure': {
         ATTR_NAME: 'Pressure',
         ATTR_UNIT_OF_MEASUREMENT: UnitOfTemperature.FAHRENHEIT,

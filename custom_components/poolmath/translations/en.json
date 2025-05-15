@@ -4,8 +4,8 @@
       "user": {
         "description": "Connect to Pool Math",
         "data": {
-          "user_id": "User ID from PoolMath share URL (e.g. api.poolmathapp.com/share/?userId=XXX)",
-          "pool_id": "Pool ID from PoolMath share URL",
+          "user_id": "User ID from PoolMath share URL JSON version (e.g. api.poolmathapp.com/share/?userId=XXX)",
+          "pool_id": "Pool ID from PoolMath share URL JSON version (to find pool ID, call /share/pool?userId=YOURID)",
           "name": "Pool Name",
           "timeout": "Update timeout",
           "target": "Target levels source",
@@ -26,8 +26,8 @@
     "step": {
       "init": {
         "data": {
-          "user_id": "User ID from PoolMath share URL (e.g. https:api.poolmathapp.com/share/?userId=XXX)",
-          "pool_id": "Pool ID from PoolMath share URL",
+          "user_id": "User ID from PoolMath share URL JSON version (e.g. https:api.poolmathapp.com/share/?userId=XXX)",
+          "pool_id": "Pool ID from PoolMath share URL JSON version (to find pool ID, call /share/pool?userId=YOURID)",
           "name": "Pool Name",
           "timeout": "Update timeout",
           "target": "Target levels source",

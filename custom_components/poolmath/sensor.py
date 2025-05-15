@@ -232,6 +232,25 @@ class PoolMathServiceSensor(SensorEntity):
             )
             sensor.inject_state(state, timestamp, attributes)
 
+        # If this is a FC or CC update, update the TC sensor as well
+        if measurement_type in ['fc', 'cc']:
+            fc_sensor = await self.get_sensor_entity('fc', poolmath_json)
+            cc_sensor = await self.get_sensor_entity('cc', poolmath_json)
+            if fc_sensor and cc_sensor:
+                try:
+                    fc_value = float(fc_sensor.state) if fc_sensor.state else 0
+                    cc_value = float(cc_sensor.state) if cc_sensor.state else 0
+                    tc_value = fc_value + cc_value
+                    
+                    tc_sensor = await self.get_sensor_entity('tc', poolmath_json)
+                    if tc_sensor:
+                        LOG.info(
+                            f"Updating TC sensor: FC={fc_value} mg/L + CC={cc_value} mg/L = TC={tc_value} mg/L"
+                        )
+                        tc_sensor.inject_state(tc_value, timestamp, attributes)
+                except (ValueError, TypeError) as e:
+                    LOG.warning(f"Error calculating total chlorine: {e}")
+
     @property
     def sensor_names(self):
         return self._managed_sensors.keys()
