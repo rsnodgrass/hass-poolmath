@@ -119,6 +119,16 @@ type: entities
 * add [@berniedp's calculation to suggest SWG % setting](https://community.home-assistant.io/t/custom-component-pool-math-sensors-for-pool-chemicals-and-operations/435126/12?u=ryans)
 
 
+### Testing
+
+Quick cheat sheet for testing changes on your instance of Home Assistant:
+
+```console
+scp -r custom_components/poolmath homeassistant.local:/config/custom_components
+ssh homeassistant.local "rm /config/*.log ; ha core restart"
+```
+
+
 ### See Also
 
 * [Trouble Free Pool Pool Math online calculator](https://www.troublefreepool.com/calc.html)
