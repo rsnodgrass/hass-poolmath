@@ -50,19 +50,13 @@ Make sure [Home Assistant Community Store (HACS)](https://github.com/custom-comp
 
 ### Configuration
 
-Under Settings of the Pool Math iOS or Android application, find the Sharing section.  Turn this on (and be sure to save the changes too), which allows anyone with access to the unique URL to be able to view data about your pool. Your pool's URL will be displayed.  You will need this URL to determine your `userId` and `poolId` configuration values for this component.
+Under Settings of the Pool Math iOS or Android application, find the Sharing section. Turn this on (and be sure to save the changes too), which allows anyone with access to the unique URL to be able to view data about your pool. Your pool's URL will be displayed, which you'll need for setting up this integration.
 
-Take the generated URL and modify it to add `.json` to the end of it.  Enter the URL in your browser or curl or some client to see the JSON output.  
-
-Example URL: `https://troublefreepool.com/mypool/7WPG8yL.json`
-
-From the JSON output, you will need to find the values for the `id` and `userId` properties.  Your userId will start with `tfp-` if you are using a TroubleFreePool forum account in the app, or `google-` / `facebook-` / `apple-` if you use those sign in providers.  Your `id` (poolId) will be a longer GUID string.
-
-Configure `Pool Math (Trouble Free Pool)` via integrations page or press the blue button below, filling in the `userId` and `poolId` you determined from the JSON.
+Configure `Pool Math (Trouble Free Pool)` via integrations page or press the blue button below, and enter your Pool Math share URL:
 
 [![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=poolmath)
 
-NOTE: This updates the state from PoolMath every 8 minutes (results are cached for 10 minutes already, and requests are rate limited to no more than once per minute) to keep from overwhelming their service, as the majority of Pool Math users update their data manual after testing rather than automated. The check interval can be changed in yaml config by adding a 'scan_interval' for the sensor.
+NOTE: This updates the state from PoolMath every 8 minutes (results are cached for 10 minutes already, and requests are rate limited to no more than once per minute) to keep from overwhelming their service, as the majority of Pool Math users update their data manual after testing rather than automated. The check interval can be changed in the configuration options.
 
 ### Example Lovelace UI
 
