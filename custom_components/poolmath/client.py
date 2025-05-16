@@ -3,6 +3,8 @@ import logging
 from typing import Any, Dict, Optional, Callable
 from datetime import datetime
 
+from homeassistant.helpers.update_coordinator import CoordinatorEntity, UpdateFailed
+
 from .const import (
     ATTR_TARGET_MAX,
     ATTR_TARGET_MIN,
@@ -95,7 +97,7 @@ class PoolMathClient:
             return None, None
 
     async def async_fetch_data(self):
-        """Fetch latest json formatted data from the Pool Math API"""
+        """Fetch latest json data from the Pool Math service"""
 
         async with aiohttp.ClientSession() as session:
             try:
@@ -107,11 +109,10 @@ class PoolMathClient:
                     if response.status == 200:
                         return await response.json()
                     else:
-                        LOG.error(f"Received status code {response.status} from {self._json_url}")
-                        return None
+                        raise UpdateFailed(f"Failed with status code {response.status} from {self._json_url}")
             except aiohttp.ClientError as e:
-                LOG.error(f"Error fetching PoolMath data from {self._json_url}: {e}")
-                return None
+                LOG.error(f"Failed fetching data from {self._json_url}: {e}")
+                raise
 
     async def process_log_entry_callbacks(
         self,

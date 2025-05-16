@@ -2,62 +2,54 @@
 
 import logging
 
-from homeassistant.config_entries import ConfigEntry
+from homeassistant.config_entries import ConfigEntry, ConfigEntryNotReady
 from homeassistant.const import CONF_NAME, Platform
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers import issue_registry as ir
 
 from .const import CONF_USER_ID, CONF_POOL_ID, CONF_TARGET, CONF_TIMEOUT, CONF_SHARE_ID, DEFAULT_TIMEOUT, DOMAIN
 
-_LOGGER = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Pool Math from a config entry."""
+    try:
+        # If the config entry is using the old format with share_id, create a repair issue
+        if CONF_SHARE_ID in entry.data and (CONF_USER_ID not in entry.data or CONF_POOL_ID not in entry.data):
+            ir.async_create_issue(
+                hass,
+                DOMAIN,
+                "config_migration_needed",
+                is_fixable=True,
+                severity=ir.IssueSeverity.ERROR,
+                translation_key="config_migration_needed",
+                data={"config_entry": entry},
+            )
+            return False
 
-    # Check if the config entry is using the old format with share_id
-    if CONF_SHARE_ID in entry.data and (CONF_USER_ID not in entry.data or CONF_POOL_ID not in entry.data):
-        # Create a repair issue
-        ir.async_create_issue(
-            hass,
-            DOMAIN,
-            "config_migration_needed",
-            is_fixable=True,
-            severity=ir.IssueSeverity.ERROR,
-            translation_key="config_migration_needed",
-            data={"config_entry": entry},
-        )
-        return False
+        # prefer options over data (not sure why, will have to ask the
+        # original contributor who made this change)
+        opt = entry.options
+        d = entry.data
+        hass.config_entries.async_update_entry(entry, options={
+            CONF_USER_ID: opt.get(CONF_USER_ID, d.get(CONF_USER_ID)),
+            CONF_POOL_ID: opt.get(CONF_POOL_ID, d.get(CONF_POOL_ID)),
+            CONF_NAME: opt.get(CONF_NAME, d.get(CONF_NAME)),
+            CONF_TIMEOUT: opt.get(CONF_TIMEOUT, d.get(CONF_TIMEOUT, DEFAULT_TIMEOUT)),
+            CONF_TARGET: opt.get(CONF_TARGET, d.get(CONF_TARGET)),
+        })
 
-    # prefer options
-    user_id = entry.options.get(CONF_USER_ID, entry.data.get(CONF_USER_ID))
-    pool_id = entry.options.get(CONF_POOL_ID, entry.data.get(CONF_POOL_ID))
-    name = entry.options.get(CONF_NAME, entry.data.get(CONF_NAME))
-    timeout = entry.options.get(CONF_TIMEOUT, entry.data.get(CONF_TIMEOUT, DEFAULT_TIMEOUT))
-    target = entry.options.get(CONF_TARGET, entry.data.get(CONF_TARGET))
+        hass.data.setdefault(DOMAIN, {})[entry.entry_id] = {}
 
-    # store options
-    hass.config_entries.async_update_entry(
-        entry,
-        options={
-            CONF_USER_ID: user_id,
-            CONF_POOL_ID: pool_id,
-            CONF_NAME: name,
-            CONF_TIMEOUT: timeout,
-            CONF_TARGET: target,
-        },
-    )
+        # listen for options updates
+        entry.async_on_unload(entry.add_update_listener(async_reload_entry))
 
-    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = {}
-
-    # listen for options updates
-    entry.async_on_unload(entry.add_update_listener(async_reload_entry))
-
-    # forward entry setup to platform(s)
-    await hass.config_entries.async_forward_entry_setups(entry, [Platform.SENSOR])
-
-    return True
+        await hass.config_entries.async_forward_entry_setups(entry, [Platform.SENSOR])
+        return True
+    except Exception as e:
+        LOG.error(f"Error setting up Pool Math integration: {e}")
+        raise ConfigEntryNotReady from e
 
 
 async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:

@@ -1,13 +1,15 @@
-import logging
-
 from __future__ import annotations
 from datetime import timedelta
+import logging
 
 from homeassistant.components.sensor import SensorEntity, RestoreEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.const import CONF_NAME, CONF_SCAN_INTERVAL, ATTR_ATTRIBUTION
+from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, CoordinatorEntity, UpdateFailed
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+
 
 from .client import PoolMathClient
 from .const import (
@@ -16,10 +18,11 @@ from .const import (
     CONF_POOL_ID,
     CONF_TARGET,
     CONF_TIMEOUT,
+    DEFAULT_TIMEOUT,
     DOMAIN,
 )
 from .models import PoolMathConfig, PoolMathState
-from .targets import POOL_MATH_SENSOR_SETTINGS, get_pool_targets
+from .targets import POOL_MATH_SENSOR_SETTINGS, get_pool_sensor_targets
 
 LOG = logging.getLogger(__name__)
 
@@ -35,7 +38,7 @@ async def async_setup_entry(
         user_id=entry.options[CONF_USER_ID],
         pool_id=entry.options[CONF_POOL_ID],
         name=entry.options[CONF_NAME],
-        timeout=entry.options[CONF_TIMEOUT],
+        timeout=entry.options.get(CONF_TIMEOUT, DEFAULT_TIMEOUT),
         target=entry.options[CONF_TARGET],
         update_interval=timedelta(minutes=entry.options.get(CONF_SCAN_INTERVAL, 8)),
     )
@@ -91,21 +94,21 @@ class PoolMathUpdateCoordinator(DataUpdateCoordinator[PoolMathState]):
         an asynchronous update of data from Pool Math service.
         """
         try:
-            if data := await self._client.async_fetch_data():
-                # returning state will trigger HA to call 
-                # _handle_coordinator_update() callbacks on all 
-                # associated entities
-                return PoolMathState(
-                    data=data,
-                    last_updated=data.get("last_updated")
-                )
-            raise UpdateFailed("Failed updating Pool Math data")
-        except Exception as err:
-            LOG.error("Error updating Pool Math data: %s", err)
-            raise UpdateFailed(err) from err
+            data = await self._client.async_fetch_data()
+            
+            # returning state will trigger HA to call 
+            # _handle_coordinator_update() callbacks on all 
+            # associated entities
+            return PoolMathState(
+                json=data,
+                last_updated=data.get("last_updated")
+            )
+        except Exception as e:
+            LOG.error("Error updating Pool Math: %s", e)
+            raise UpdateFailed(e) from e
 
 
-class PoolMathServiceSensor(CoordinatorEntity[PoolMathUpdateCoordinator], SensorEntity):
+class PoolMathServiceSensor(CoordinatorEntity[PoolMathUpdateCoordinator], RestoreEntity,SensorEntity):
     """
     Sensor monitoring the Pool Math cloud service. 
     This is effectively a DataCoordinator pattern implementation
@@ -157,7 +160,9 @@ class PoolMathServiceSensor(CoordinatorEntity[PoolMathUpdateCoordinator], Sensor
         """Handle entity being added to Home Assistant."""
         await super().async_added_to_hass()
         
-        if (last_state := await self.async_get_last_state()) is not None:
+        # restore state using RestoreEntity functionality
+        last_state = await self.async_get_last_state()
+        if last_state:
             self._state = last_state.state
             self._attrs = last_state.attributes
 
@@ -165,13 +170,12 @@ class PoolMathServiceSensor(CoordinatorEntity[PoolMathUpdateCoordinator], Sensor
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
         if not self._coordinator.data:
-            LOG.error(f"Coordinator callback received no data!")
             return
 
         self._state = self._coordinator.data.last_updated
-        poolmath_data = self._coordinator.data.data
-        
-        if pools := poolmath_data.get("pools"):
+
+        json = self._coordinator.data.json
+        if pools := json.get("pools"):
             pool = pools[0].get("pool")
             self._attrs |= {
                 "name": pool.get("name", "Unknown Pool"),
@@ -179,13 +183,16 @@ class PoolMathServiceSensor(CoordinatorEntity[PoolMathUpdateCoordinator], Sensor
             }
 
         # schedule update of all sensors based on this pool's data
-        self.hass.async_create_task(self._update_sensors_from_coordinator_data(poolmath_data))
+        self.hass.async_create_task(self._update_sensors_from_coordinator_data(json))
         self.async_write_ha_state()
 
 
-    async def _update_sensors_from_coordinator_data(self, poolmath_data: dict):
+    async def _update_sensors_from_coordinator_data(self, json: dict):
         """
         Update all managed sensors from coordinator data.
+        
+        FIXME: Eventually this can go away once the UpdatableSensor class is updated to inherit from
+        CoordinatorEntity[PoolMathUpdateCoordinator].
         """
         try:
             # Iterate through all log entries and update sensor states
@@ -194,18 +201,19 @@ class PoolMathServiceSensor(CoordinatorEntity[PoolMathUpdateCoordinator], Sensor
             )
             self._attrs[ATTR_LAST_UPDATED_TIME] = timestamp
         except Exception as e:
-            LOG.error(f"Error updating sensors from coordinator data: {e}")
+            LOG.error(f"Error updating sensors from DataCoordinator: {e}")
 
     @property
-    def should_poll(self):
-        return False # coordinator takes care of updating periodically
+    def should_poll(self) -> bool:
+        """No need to poll. DataUpdateCoordinator notifies entity of updates."""
+        return False
 
     async def async_update(self) -> None:
         """
         Called by Home Assistant when it needs to refresh the entity's state.
         We don't need to do anything here since we're using the coordinator pattern.
         """
-    pass
+        pass
 
     async def get_sensor_entity(
         self, sensor_type: str, poolmath_json: dict
@@ -303,10 +311,10 @@ class UpdatableSensor(RestoreEntity, SensorEntity):
             name="Pool Math",
         )
 
-        self.determine_unit_of_measurement()
+        self.determine_unit_of_measurement(poolmath_json)
 
-    def determine_unit_of_measurement(self) -> None:
-                # TEMPORARY HACK to get correct unit of measurement for water temps (but this also
+    def determine_unit_of_measurement(self, poolmath_json: dict) -> None:
+        # TEMPORARY HACK to get correct unit of measurement for water temps (but this also
         # applies to other units). No time to fix now, but perhaps someone will submit a PR
         # to fix this in future.
         self._unit_of_measurement = self._config[ATTR_UNIT_OF_MEASUREMENT]
@@ -327,14 +335,29 @@ class UpdatableSensor(RestoreEntity, SensorEntity):
             LOG.info(f"Unit of temperature measurement {self._unit_of_measurement}")
 
 
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""        
+        if not self._coordinator:
+            return
+        
+        # FIXME: update the appropriate key from poolmath_data
+        # which is likely self._sensor_type (but may not be)
+        #
+        #poolmath_data = self._coordinator.data.data
+        #if pools := poolmath_data.get("pools"):
+        #    pool = pools[0].get("pool")
+        #    self.async_write_ha_state()
+
     @property
     def name(self):
         """Return the name of the sensor."""
         return self._name
 
     @property
-    def should_poll(self):
-        return True  # FIXME: get scheduled updates working below
+    def should_poll(self) -> bool:
+        """No need to poll. Coordinator (PoolMathSensorService currently) notifies entity of updates."""
+        return False
 
     @property
     def unit_of_measurement(self):
@@ -392,13 +415,10 @@ class UpdatableSensor(RestoreEntity, SensorEntity):
     async def async_added_to_hass(self) -> None:
         await super().async_added_to_hass()
 
-        # for this integration, restoring state really doesn't matter right now (but leaving code below in place)
-        # Reason: all the sensors are dynamically created based on Pool Math service call, which always returns
-        # the latest state as well!
         if self._state:
             return
 
-        # on restart, attempt to restore previous state (SEE COMMENT ABOVE WHY THIS ISN'T USEFUL CURRENTLY)
+        # on restart, attempt to restore previous state using RestoreEntity
         # (see https://aarongodfrey.dev/programming/restoring-an-entity-in-home-assistant/)
         state = await self.async_get_last_state()
         if not state:
