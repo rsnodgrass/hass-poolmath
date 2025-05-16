@@ -196,8 +196,9 @@ class PoolMathServiceSensor(CoordinatorEntity[PoolMathUpdateCoordinator], Restor
         """
         try:
             # Iterate through all log entries and update sensor states
-            timestamp = await self._poolmath_client.process_log_entry_callbacks(
-                poolmath_data, self._update_sensor_callback
+            client = self._coordinator._client
+            timestamp = await client.process_log_entry_callbacks(
+                json, self._update_sensor_callback
             )
             self._attrs[ATTR_LAST_UPDATED_TIME] = timestamp
         except Exception as e:
