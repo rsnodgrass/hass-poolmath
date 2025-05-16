@@ -1,42 +1,40 @@
+import aiofiles
 import logging
-import os
 from pathlib import Path
 import yaml
-from typing import Dict, Optional
 
 from homeassistant.const import (
     ATTR_ICON,
     ATTR_NAME,
     ATTR_UNIT_OF_MEASUREMENT,
-    UnitOfTemperature
+    UnitOfTemperature,
 )
 
 from .const import (
     ATTR_DESCRIPTION,
     ATTR_TARGET_MAX,
     ATTR_TARGET_MIN,
-    ATTR_TARGET_SOURCE,
-    CONF_TARGET,
     ICON_GAUGE,
 )
 
 LOG = logging.getLogger(__name__)
 
-async def async_load_targets() -> Dict[str, str]:
+
+async def async_load_targets() -> dict[str, str]:
     """Load target definitions from YAML files in the targets directory.
 
     Returns:
         Dict[str, str]: Mapping of target IDs to their friendly names
     """
     targets = {}
-    targets_dir = Path(__file__).parent / "targets"
-    
+    targets_dir = Path(__file__).parent / 'targets'
+
     if not targets_dir.exists():
-        LOG.error(f"Targets dir not found: {targets_dir}")
+        LOG.error(f'Targets dir not found: {targets_dir}')
         return targets
 
     try:
-        for yaml_file in targets_dir.glob("*.yaml"):
+        for yaml_file in targets_dir.glob('*.yaml'):
             try:
                 async with aiofiles.open(yaml_file, 'r') as file:
                     content = await file.read()
@@ -49,11 +47,12 @@ async def async_load_targets() -> Dict[str, str]:
                         else:
                             LOG.warning(f"Target {yaml_file} missing 'name' key")
             except Exception as e:
-                LOG.error(f"Error loading target from {yaml_file}: {e}")
+                LOG.error(f'Error loading target from {yaml_file}: {e}')
     except Exception as e:
-        LOG.error(f"Error reading targets directory: {e}")
+        LOG.error(f'Error reading targets directory: {e}')
 
     return targets
+
 
 # FIXME: add strings translation support for names/descriptiongs/units?
 # see https://www.troublefreepool.com/blog/2018/12/12/abcs-of-pool-water-chemistry/
@@ -174,7 +173,14 @@ TFP_RECOMMENDED_TARGET_LEVELS = {
 DEFAULT_TARGETS = TFP_TARGET_NAME
 
 
-def get_pool_sensor_targets(target_name=DEFAULT_TARGETS):
+def get_known_sensor_target_slugs() -> set[str]:
+    """Return list of slugs for all known sensor target definitions"""
+    # FIXME: Eventually this should come from targets/*.yaml
+    # upon initial import of this module, but hardcode for now.
+    return set('tfp', 'bioguard', 'hayward_aquarite', 'robert_lowry')
+
+
+def get_sensor_targets(target_name=DEFAULT_TARGETS):
     if target_name == TFP_TARGET_NAME:
         return TFP_RECOMMENDED_TARGET_LEVELS
     else:
