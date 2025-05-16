@@ -34,5 +34,5 @@ class PoolMathConfig:
 @dataclass
 class PoolMathState:
     """State data for Pool Math service."""
+    data: Dict[str, Any] = None
     last_updated: Optional[str] = None
-    attributes: Dict[str, Any] = None

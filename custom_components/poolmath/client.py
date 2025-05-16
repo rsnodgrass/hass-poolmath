@@ -94,7 +94,7 @@ class PoolMathClient:
             LOG.exception(f"Error fetching data from Pool Math API: {exc}")
             return None, None
 
-    async def async_update(self):
+    async def async_fetch_data(self):
         """Fetch latest json formatted data from the Pool Math API"""
 
         async with aiohttp.ClientSession() as session:
@@ -107,10 +107,10 @@ class PoolMathClient:
                     if response.status == 200:
                         return await response.json()
                     else:
-                        LOG.error(f"Error: Received status code {response.status} from API")
+                        LOG.error(f"Received status code {response.status} from {self._json_url}")
                         return None
             except aiohttp.ClientError as e:
-                LOG.error(f"Error fetching data from PoolMath API: {e}")
+                LOG.error(f"Error fetching PoolMath data from {self._json_url}: {e}")
                 return None
 
     async def process_log_entry_callbacks(
@@ -121,7 +121,7 @@ class PoolMathClient:
         """Call provided async callback once for each type of log entry
 
         Args:
-            poolmath_json: Raw JSON response from Pool Math API
+            poolmath_json: JSON response from Pool Math API
             async_callback: Callback function to process each measurement
         """
         if not poolmath_json:
