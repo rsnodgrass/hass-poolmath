@@ -14,22 +14,20 @@ LOG = logging.getLogger(__name__)
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Pool Math from a config entry."""
+    # If the config entry is using the old format with share_id, create a repair issue
+    if CONF_SHARE_ID in entry.data and (CONF_USER_ID not in entry.data or CONF_POOL_ID not in entry.data):
+        ir.async_create_issue(
+            hass,
+            DOMAIN,
+            "config_migration_needed",
+            is_fixable=True,
+            severity=ir.IssueSeverity.ERROR,
+            translation_key="config_migration_needed",
+            data={"config_entry": entry},
+        )
+        return False
+    
     try:
-        # If the config entry is using the old format with share_id, create a repair issue
-        if CONF_SHARE_ID in entry.data and (CONF_USER_ID not in entry.data or CONF_POOL_ID not in entry.data):
-            ir.async_create_issue(
-                hass,
-                DOMAIN,
-                "config_migration_needed",
-                is_fixable=True,
-                severity=ir.IssueSeverity.ERROR,
-                translation_key="config_migration_needed",
-                data={"config_entry": entry},
-            )
-            return False
-
-        # prefer options over data (not sure why, will have to ask the
-        # original contributor who made this change)
         opt = entry.options
         d = entry.data
         hass.config_entries.async_update_entry(entry, options={
@@ -47,6 +45,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
         await hass.config_entries.async_forward_entry_setups(entry, [Platform.SENSOR])
         return True
+    
     except Exception as e:
         LOG.error(f"Error setting up Pool Math integration: {e}")
         raise ConfigEntryNotReady from e

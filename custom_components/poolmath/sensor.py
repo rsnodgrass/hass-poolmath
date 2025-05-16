@@ -5,15 +5,15 @@ import logging
 from homeassistant.components.sensor import SensorEntity, RestoreEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.const import CONF_NAME, CONF_SCAN_INTERVAL, ATTR_ATTRIBUTION
+from homeassistant.const import CONF_NAME, CONF_SCAN_INTERVAL, ATTR_ATTRIBUTION, UnitOfTemperature
 from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, CoordinatorEntity, UpdateFailed
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-
 from .client import PoolMathClient
 from .const import (
     ATTRIBUTION,
+    ATTR_NAME,
     CONF_USER_ID,
     CONF_POOL_ID,
     CONF_TARGET,
@@ -57,7 +57,7 @@ async def async_setup_entry(
     # the PoolMathServiceSensor entity that updates all the sensor entities is an
     # alternative implementation of the DataUpdateCoordinator pattern.
     async_add_entities([
-        PoolMathServiceSensor(hass, coordinator, config)
+        PoolMathServiceSensor(hass, coordinator, entry, config)
     ])
     
     # Fetch initial data so we have data when entities subscribe
@@ -119,6 +119,7 @@ class PoolMathServiceSensor(CoordinatorEntity[PoolMathUpdateCoordinator], Restor
         self,
         hass: HomeAssistant,
         coordinator: PoolMathUpdateCoordinator,
+        entry: ConfigEntry,
         config: PoolMathConfig,
     ) -> None:
         """Initialize the Pool Math service sensor."""
@@ -127,6 +128,8 @@ class PoolMathServiceSensor(CoordinatorEntity[PoolMathUpdateCoordinator], Restor
         self.hass = hass
         self._config = config
         self._coordinator = coordinator
+        self._name = config.name
+        self._entry = entry
         
         self._attrs = {
             ATTR_ATTRIBUTION: ATTRIBUTION,
@@ -143,6 +146,8 @@ class PoolMathServiceSensor(CoordinatorEntity[PoolMathUpdateCoordinator], Restor
             manufacturer="Pool Math (Trouble Free Pool)",
             name="Pool Math",
         )
+        
+        self._managed_sensors = {}
 
     @property
     def state(self) -> str | None:
@@ -202,7 +207,7 @@ class PoolMathServiceSensor(CoordinatorEntity[PoolMathUpdateCoordinator], Restor
             )
             self._attrs[ATTR_LAST_UPDATED_TIME] = timestamp
         except Exception as e:
-            LOG.error(f"Error updating sensors from DataCoordinator: {e}")
+            LOG.error(f"Error updating PoolMath sensors", e)
 
     @property
     def should_poll(self) -> bool:
@@ -273,11 +278,11 @@ class PoolMathServiceSensor(CoordinatorEntity[PoolMathUpdateCoordinator], Restor
                 tc_sensor = await self.get_sensor_entity('tc', poolmath_json)
                 if tc_sensor:
                     LOG.info(
-                        f"Updating TC sensor: FC={fc_value} + CC={cc_value} = TC={tc_value} mg/L"
+                        f"Calculating Total Chlorine sensor: FC={fc_value} + CC={cc_value} = TC={tc_value} mg/L"
                     )
                     await tc_sensor.inject_state(tc_value, timestamp, attributes)
             except (ValueError, TypeError) as e:
-                LOG.warning(f"Error calculating total chlorine: {e}")
+                LOG.warning(f"Error calculating Total Chlorine: {e}")
 
     @property
     def sensor_names(self):
@@ -303,7 +308,7 @@ class UpdatableSensor(RestoreEntity, SensorEntity):
             CONF_POOL_ID: config.pool_id,
             CONF_USER_ID: config.user_id
         }
-        self._attr_unique_id = f"poolmath_{pool_id}_{sensor_type}"
+        self._attr_unique_id = f"poolmath_{config.pool_id}_{sensor_type}"
         self._attr_device_info = DeviceInfo(
             configuration_url="https://www.troublefreepool.com/blog/poolmath/",
             entry_type=DeviceEntryType.SERVICE,

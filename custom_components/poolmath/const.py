@@ -7,6 +7,7 @@ ATTRIBUTION = "Data by PoolMath (Trouble Free Pool)"
 
 ATTR_DESCRIPTION = "description"
 ATTR_LAST_UPDATED_TIME = "last_updated"
+ATTR_NAME = "name"
 ATTR_TARGET_MIN = "target_min"
 ATTR_TARGET_MAX = "target_max"
 ATTR_TARGET_SOURCE = "target_source"
