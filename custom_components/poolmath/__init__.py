@@ -8,7 +8,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers import issue_registry as ir
 
-from .const import CONF_USER_ID, CONF_POOL_ID, CONF_TARGET, CONF_TIMEOUT, CONF_SHARE_ID, DOMAIN
+from .const import CONF_USER_ID, CONF_POOL_ID, CONF_TARGET, CONF_TIMEOUT, CONF_SHARE_ID, DEFAULT_TIMEOUT, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -31,11 +31,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         return False
 
     # prefer options
-    user_id = entry.options.get(CONF_USER_ID, entry.data[CONF_USER_ID])
-    pool_id = entry.options.get(CONF_POOL_ID, entry.data[CONF_POOL_ID])
-    name = entry.options.get(CONF_NAME, entry.data[CONF_NAME])
-    timeout = entry.options.get(CONF_TIMEOUT, entry.data[CONF_TIMEOUT])
-    target = entry.options.get(CONF_TARGET, entry.data[CONF_TARGET])
+    user_id = entry.options.get(CONF_USER_ID, entry.data.get(CONF_USER_ID))
+    pool_id = entry.options.get(CONF_POOL_ID, entry.data.get(CONF_POOL_ID))
+    name = entry.options.get(CONF_NAME, entry.data.get(CONF_NAME))
+    timeout = entry.options.get(CONF_TIMEOUT, entry.data.get(CONF_TIMEOUT, DEFAULT_TIMEOUT))
+    target = entry.options.get(CONF_TARGET, entry.data.get(CONF_TARGET))
 
     # store options
     hass.config_entries.async_update_entry(

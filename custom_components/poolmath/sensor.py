@@ -46,10 +46,10 @@ async def async_setup_entry(
         name=config.name,
         timeout=config.timeout,
     )
-    coordinator = PoolMathDataCoordinator(hass, client, config)
+    coordinator = PoolMathUpdateCoordinator(hass, client, config)
 
     # FIXME: We should move all the UpdateableSensors to just be
-    # updated by the PoolMathDataCoordinator directly. The DataUpdateCoordinator
+    # updated by the PoolMathUpdateCoordinator directly. The DataUpdateCoordinator
     # pattern didn't exist within HA when hass-poolmath was created, but basically
     # the PoolMathServiceSensor entity that updates all the sensor entities is an
     # alternative implementation of the DataUpdateCoordinator pattern.
@@ -67,7 +67,7 @@ async def async_setup_entry(
     await coordinator.async_config_entry_first_refresh()
 
 
-class PoolMathDataCoordinator(DataUpdateCoordinator[PoolMathState]):
+class PoolMathUpdateCoordinator(DataUpdateCoordinator[PoolMathState]):
     """
     Coordinator that HA calls to periodically fetch Pool Math data and 
     update associated entities.
@@ -92,6 +92,9 @@ class PoolMathDataCoordinator(DataUpdateCoordinator[PoolMathState]):
         """
         try:
             if data := await self._client.async_fetch_data():
+                # returning state will trigger HA to call 
+                # _handle_coordinator_update() callbacks on all 
+                # associated entities
                 return PoolMathState(
                     data=data,
                     last_updated=data.get("last_updated")
@@ -102,7 +105,7 @@ class PoolMathDataCoordinator(DataUpdateCoordinator[PoolMathState]):
             raise UpdateFailed(err) from err
 
 
-class PoolMathServiceSensor(CoordinatorEntity[PoolMathDataCoordinator], SensorEntity):
+class PoolMathServiceSensor(CoordinatorEntity[PoolMathUpdateCoordinator], SensorEntity):
     """
     Sensor monitoring the Pool Math cloud service. 
     This is effectively a DataCoordinator pattern implementation
@@ -112,7 +115,7 @@ class PoolMathServiceSensor(CoordinatorEntity[PoolMathDataCoordinator], SensorEn
     def __init__(
         self,
         hass: HomeAssistant,
-        coordinator: PoolMathDataCoordinator,
+        coordinator: PoolMathUpdateCoordinator,
         config: PoolMathConfig,
     ) -> None:
         """Initialize the Pool Math service sensor."""
@@ -272,7 +275,7 @@ class PoolMathServiceSensor(CoordinatorEntity[PoolMathDataCoordinator], SensorEn
         return self._managed_sensors.keys()
 
 
-# FIXME: should also eventually inherit from CoordinatorEntity[PoolMathDataCoordinator]
+# FIXME: should also eventually inherit from CoordinatorEntity[PoolMathUpdateCoordinator]
 class UpdatableSensor(RestoreEntity, SensorEntity):
     """Representation of a sensor whose state is kept up-to-date by an external data source."""
 
