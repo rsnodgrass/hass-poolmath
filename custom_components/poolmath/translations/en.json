@@ -4,10 +4,8 @@
       "user": {
         "description": "Connect to Pool Math",
         "data": {
-          "user_id": "User ID from PoolMath share URL JSON version (e.g. api.poolmathapp.com/share/?userId=XXX)",
-          "pool_id": "Pool ID from PoolMath share URL JSON version (to find pool ID, call /share/pool?userId=YOURID)",
+          "share_url": "Pool Math Share URL from the Pool Math app (Settings > Sharing)",
           "name": "Pool Name",
-          "timeout": "Update timeout",
           "target": "Target levels source",
           "scan_interval": "How often to check for pool data updates (in minutes)"
         }
@@ -16,6 +14,8 @@
     "error": {
       "cannot_connect": "Failed to connect, please try again",
       "invalid_auth": "Invalid authentication",
+      "invalid_share_url": "The provided URL is not a valid Pool Math share URL or we could not extract the pool information from it.",
+      "unknown_error": "An unexpected error occurred while processing the share URL. Please check the logs for more details.",
       "unknown": "Unexpected error"
     },
     "abort": {
@@ -26,14 +26,16 @@
     "step": {
       "init": {
         "data": {
-          "user_id": "User ID from PoolMath share URL JSON version (e.g. https:api.poolmathapp.com/share/?userId=XXX)",
-          "pool_id": "Pool ID from PoolMath share URL JSON version (to find pool ID, call /share/pool?userId=YOURID)",
+          "share_url": "Pool Math Share URL from the Pool Math app (Settings > Sharing)",
           "name": "Pool Name",
-          "timeout": "Update timeout",
           "target": "Target levels source",
           "scan_interval": "Update interval (minutes; default=8) - please avoid setting lower to protect Pool Math servers"
         }
       }
+    },
+    "error": {
+      "invalid_share_url": "The provided URL is not a valid Pool Math share URL or we could not extract the pool information from it.",
+      "unknown_error": "An unexpected error occurred while processing the share URL. Please check the logs for more details."
     }
   },
   "issues": {
@@ -46,7 +48,7 @@
             "title": "Update Pool Math Configuration",
             "description": "Please paste your Pool Math share URL from the Pool Math app. You can find this under Settings > Sharing. The URL should look like: https://api.poolmathapp.com/share/XXXXXXX or https://troublefreepool.com/mypool/XXXXXXX.",
             "data": {
-              "share_url": "Pool Math Share URL"
+              "share_url": "Pool Math Share URL from the Pool Math app (Settings > Sharing)"
             }
           }
         },

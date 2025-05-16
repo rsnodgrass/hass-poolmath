@@ -9,6 +9,15 @@ lint.ignore = [
        "F405"  # * imports
 ]
 
+# Import sorting settings (replaces isort)
+[tool.ruff.lint.isort]
+force-single-line = false
+force-sort-within-sections = true
+known-first-party = ["custom_components"]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+combine-as-imports = true
+force-to-top = ["logging"]
+
 [tool.ruff.format]
 quote-style = "single" # Use a single quote instead of double
 
