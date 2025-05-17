@@ -6,7 +6,8 @@ balanced_wrapping = true
 line-length = 88
 indent-width = 4
 lint.ignore = [
-       "F405"   # * imports
+       "F405",   # * imports
+       "FURB109" # Replace `not in [x, y, z]` with `not in (x, y, z)`
 ]
 
 # Import sorting settings (replaces isort)
@@ -27,4 +28,4 @@ all = true
 [tool.refurb]
 python_version = "3.11"
 quiet = true
-ignore = [ "FURB184", "FURB109" ]
+ignore = [ "FURB184" ]
