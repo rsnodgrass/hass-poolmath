@@ -154,5 +154,5 @@ ssh homeassistant.local "rm /config/*.log ; ha core restart"
 [forum]: https://community.home-assistant.io/t/custom-component-pool-math-sensors-for-pool-chemicals-and-operations/435126
 [forum-shield]: https://img.shields.io/badge/community-forum-brightgreen.svg
 [patreon]: https://www.patreon.com/rsnodgrass
-[patreon-shield]: https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fshieldsio-patreon.vercel.app%2Fapi%3Frsnodgrass%3Dendel%26type%3Dpatrons&style=for-the-badge
+[patreon-shield]: https://img.shields.io/badge/Patreon-F96854?style=for-the-badge&logo=patreon&logoColor=white
 [project-stage-shield]: https://img.shields.io/badge/project%20stage-production%20ready-brightgreen.svg
