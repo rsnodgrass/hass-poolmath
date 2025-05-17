@@ -221,7 +221,8 @@ class PoolMathServiceSensor(
             timestamp = await client.process_log_entry_callbacks(
                 json, self._update_sensor_callback
             )
-            self._attrs[ATTR_LAST_UPDATED_TIME] = timestamp
+            if timestamp:
+                self._attrs[ATTR_LAST_UPDATED_TIME] = str(timestamp)
         except Exception as e:
             LOG.error('Error updating PoolMath sensors', e)
 
