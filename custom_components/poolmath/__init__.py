@@ -14,15 +14,30 @@ from .const import (
     CONF_TIMEOUT,
     CONF_SHARE_ID,
     DEFAULT_TIMEOUT,
+    DEFAULT_TARGET,
     DOMAIN,
 )
 
 LOG = logging.getLogger(__name__)
 
+def get_config_options(entry: ConfigEntry, 
+                       keys: list,
+                       keys_with_defaults: dict = {}) -> dict:
+    """
+    Return set of config options where ConfigEntry options 
+    take precedence and override ConfigEntry data (which 
+    overrides any provided defaults).
+    """
+    options = {}
+    for key in keys + keys_with_defaults.keys():
+        options[key] = entry.options.get(key, entry.data.get(key, None))
+    return options
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Pool Math from a config entry."""
-    # If the config entry is using the old format with share_id, create a repair issue
+    return False # FIXME: force disable this integration for testing
+
+    # if config is using the old format with share_id, create a repair issue
     if CONF_SHARE_ID in entry.data and (
         CONF_USER_ID not in entry.data or CONF_POOL_ID not in entry.data
     ):
@@ -38,27 +53,26 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         return False
 
     try:
-        opt = entry.options
-        d = entry.data
         hass.config_entries.async_update_entry(
             entry,
-            options={
-                CONF_USER_ID: opt.get(CONF_USER_ID, d.get(CONF_USER_ID)),
-                CONF_POOL_ID: opt.get(CONF_POOL_ID, d.get(CONF_POOL_ID)),
-                CONF_NAME: opt.get(CONF_NAME, d.get(CONF_NAME)),
-                CONF_TIMEOUT: opt.get(
-                    CONF_TIMEOUT, d.get(CONF_TIMEOUT, DEFAULT_TIMEOUT)
-                ),
-                CONF_TARGET: opt.get(CONF_TARGET, d.get(CONF_TARGET)),
-            },
+            options=get_config_options(
+                entry,
+                [ CONF_USER_ID, CONF_POOL_ID, CONF_NAME ],
+                { CONF_TIMEOUT: DEFAULT_TIMEOUT,
+                  CONF_TARGET: DEFAULT_TARGET}
+            )
         )
 
+        # setup storage for this integration's data
         hass.data.setdefault(DOMAIN, {})[entry.entry_id] = {}
-
-        # listen for options updates
+        
+        # when config options are updated, dynamically reload the entry
         entry.async_on_unload(entry.add_update_listener(async_reload_entry))
 
-        await hass.config_entries.async_forward_entry_setups(entry, [Platform.SENSOR])
+        # initialize the platforms for this integration
+        platforms = [Platform.SENSOR]
+        await hass.config_entries.async_forward_entry_setups(entry, platforms)
+        
         return True
 
     except Exception as e:
@@ -73,11 +87,9 @@ async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a Pool Math config entry."""
-
     unload_ok = await hass.config_entries.async_unload_platforms(
         entry, [Platform.SENSOR]
     )
     if unload_ok:
         hass.data[DOMAIN].pop(entry.entry_id)
-
     return unload_ok

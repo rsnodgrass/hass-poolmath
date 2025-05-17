@@ -1,5 +1,6 @@
 import aiohttp
 import logging
+import re
 from typing import Any
 from collections.abc import Awaitable
 from collections.abc import Callable
@@ -63,12 +64,27 @@ class PoolMathClient:
         LOG.debug(f'Using PoolMathClient for {name} at {self._json_url}')
 
     @staticmethod
+    async def async_fetch_poolmath_data(url: str, timeout: int):
+        """Fetch latest json data from the Pool Math service"""
+        async with aiohttp.ClientSession() as session:
+            try:
+                LOG.info(f'GET {url} (timeout={timeout})')
+                async with session.get(url, timeout=timeout) as response:
+                    LOG.debug(f'GET {url} response: {response.status}')
+                    if response.status == 200:
+                        return await response.json()
+                raise UpdateFailed(
+                    f'Failed with status {response.status} from {url}'
+                )
+            except aiohttp.ClientError as e:
+                LOG.error(f'Failed fetching data from {url}: {e}')
+                raise
+
+    @staticmethod
     async def extract_ids_from_share_url(
         share_url: str, timeout: float = DEFAULT_TIMEOUT
     ) -> tuple[str | None, str | None]:
         """Extract user_id and pool_id from a Pool Math share URL."""
-        import re
-
         # Extract the share_id from the URL
         match = re.search(
             r'https://(?:api\.poolmathapp\.com|troublefreepool\.com)/(?:share/|mypool/)([a-zA-Z0-9]+)',
@@ -80,56 +96,34 @@ class PoolMathClient:
 
         share_id = match.group(1)
 
-        # Fetch the JSON data to extract user_id and pool_id
+        # call service to discover the user_id and pool_id
         json_url = f'https://api.poolmathapp.com/share/{share_id}.json'
         try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(json_url, timeout=timeout) as response:
-                    if response.status != 200:
-                        LOG.error(
-                            f'Error: Received status code {response.status} from API'
-                        )
-                        return None, None
+            data = await async_fetch_poolmath_data(json_url, timeout)
 
-                    data = await response.json()
+            # extract user_id and pool_id from the response
+            user_id = data.get('userId')
+            pool = next(iter(data.get('pools', [])), {}).get('pool', {})
+            pool_id = pool.get('id')
 
-                    # Extract user_id and pool_id from the response
-                    user_id = data.get('userId')
-                    pool = next(iter(data.get('pools', [])), {}).get('pool', {})
-                    pool_id = pool.get('id')
-
-                    if not user_id or not pool_id:
-                        LOG.error(
-                            'Could not extract user_id or pool_id from Pool Math API'
-                        )
-                        return None, None
-
-                    return user_id, pool_id
+            if not user_id or not pool_id:
+                LOG.error(f"Couldn't find user_id or pool_id: {data}")
+                return None, None
+            return user_id, pool_id
         except Exception as exc:
-            LOG.exception(f'Error fetching data from Pool Math API: {exc}')
+            LOG.exception('Error fetching data from Pool Math', exc)
             return None, None
+
 
     async def async_fetch_data(self):
         """Fetch latest json data from the Pool Math service"""
-
-        async with aiohttp.ClientSession() as session:
-            try:
-                LOG.info(
-                    f'GET {self._json_url} (timeout={self._timeout}; name={self._name}; user_id={self._user_id}; pool_id={self._pool_id})'
-                )
-                async with session.get(
-                    self._json_url, timeout=self._timeout
-                ) as response:
-                    LOG.debug(f'GET {self._json_url} response: {response.status}')
-                    if response.status == 200:
-                        return await response.json()
-                    else:
-                        raise UpdateFailed(
-                            f'Failed with status code {response.status} from {self._json_url}'
-                        )
-            except aiohttp.ClientError as e:
-                LOG.error(f'Failed fetching data from {self._json_url}: {e}')
-                raise
+        try:
+            if data := await async_fetch_poolmath_data(self._json_url, self._timeout):
+                return data
+            raise UpdateFailed(f'Failed updating {self._json_url}')
+        except aiohttp.ClientError as e:
+            LOG.error(f'Failed fetching data from {self._json_url}: {e}')
+            raise
 
     async def process_log_entry_callbacks(
         self,
