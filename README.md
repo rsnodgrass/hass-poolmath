@@ -11,11 +11,14 @@
 
 [![Community Forum][forum-shield]][forum]
 
-Creates sensors for pools being managed with Trouble Free Pools's [Pool Math](https://www.troublefreepool.com/blog/poolmath/) apps including [Pool Math iOS](https://apps.apple.com/us/app/pool-math-by-troublefreepool/id1228819359) and [Pool Math Android](https://play.google.com/store/apps/details?id=com.troublefreepool.poolmath&hl=en_US). From the [Trouble Free Pool](https://troublefreepool.com/) website:
+Creates sensors for pools being managed with Trouble Free Pools's [Pool Math](https://www.troublefreepool.com/blog/poolmath/) apps including [Pool Math iOS](https://apps.apple.com/us/app/pool-math-by-troublefreepool/id1228819359) and [Pool Math Android](https://play.google.com/store/apps/details?id=com.troublefreepool.poolmath&hl=en_US). Use something like the [Pool Exact EZ Pool Water Tester](https://amzn.to/4kqjHxI) to measure exact values and enter the data into Pool Math, and the data will automatically appear in Home Assistant.
+
+From the [Trouble Free Pool](https://troublefreepool.com/) website:
 
 * Pool Math makes swimming pool care, maintenance and management easy by tracking chlorine, pH, alkalinity and other  levels to help calculate how much salt, bleach and other chemicals to add.
 * Pool Math performs all the calculations you need to keep your chlorine, pH, calcium, alkalinity, and stabilizer levels balanced.
 * [Trouble Free Pool](https://www.troublefreepool.com/) is a registered 501(c)3 non-profit who displays NO advertising on our site nor is our advice compromised by financial incentives.
+
 
 #### Supported Pool Math Values
 
@@ -113,6 +116,8 @@ type: entities
 ![Lovelace Example](https://github.com/rsnodgrass/hass-poolmath/blob/master/img/example-multiple.png?raw=true)
 
 
+## Future Plans
+
 ### Feature Requests
 
 * move all communication/interfaces to Pool Math into separate pypoolmath package that can be maintained separately
@@ -129,15 +134,20 @@ ssh homeassistant.local "rm /config/*.log ; ha core restart"
 ```
 
 
-### See Also
+## See Also
 
 * [Trouble Free Pool Pool Math online calculator](https://www.troublefreepool.com/calc.html)
 * [Pool Math apps](https://www.troublefreepool.com/blog/poolmath/) ([iOS](https://apps.apple.com/us/app/pool-math-by-troublefreepool/id1228819359), [Android](https://play.google.com/store/apps/details?id=com.troublefreepool.poolmath&hl=en_US))
 * [ABC's of Pool Water Chemistry by Trouble Free Pool](https://www.troublefreepool.com/blog/2018/12/12/abcs-of-pool-water-chemistry/)
 * [PookMath calculator](https://www.troublefreepool.com/calc.html)
-* [PoolLab 1.0 Pool Chemical Tester with Bluetooth](https://www.amazon.com/Pool-Lab-1-0/dp/B0722ZD4G3?tag=rynoshark-20)
 
 
+### Pool Monitoring Tools
+
+* [Pool Exact EZ Photometer Entry Digital Pool Water Test Ki](https://amzn.to/4kqjHxI)
+* [Pentair EC-523317 IntelliConnect Pool Control and Monitoring System](https://amzn.to/3S9GJN5)
+* [Sutro Pool & Spa Water Smart Monitoring Device](https://amzn.to/4kovpss)
+* [PoolLab 1.0 Pool Chemical Tester with Bluetooth](https://amzn.to/4mmr6jg)
 
 
 [forum]: https://community.home-assistant.io/t/custom-component-pool-math-sensors-for-pool-chemicals-and-operations/435126
