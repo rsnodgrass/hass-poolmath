@@ -11,7 +11,7 @@
 
 [![Community Forum][forum-shield]][forum]
 
-Creates sensors for pools being managed with Trouble Free Pools's [Pool Math](https://www.troublefreepool.com/blog/poolmath/) apps including [Pool Math iOS](https://apps.apple.com/us/app/pool-math-by-troublefreepool/id1228819359) and [Pool Math Android](https://play.google.com/store/apps/details?id=com.troublefreepool.poolmath&hl=en_US). Use something like the [Pool Exact EZ Pool Water Tester](https://amzn.to/4kqjHxI) to measure exact values and enter the data into Pool Math, and the data will automatically appear in Home Assistant.
+Creates sensors for pools being managed with Trouble Free Pools's [Pool Math](https://www.troublefreepool.com/blog/poolmath/) apps ([iOS](https://apps.apple.com/us/app/pool-math-by-troublefreepool/id1228819359)/[Android](https://play.google.com/store/apps/details?id=com.troublefreepool.poolmath&hl=en_US)). Then use a device like [Pool Exact EZ Pool Water Tester](https://amzn.to/4kqjHxI) to measure exact values and enter the data into Pool Math, and your pool, spa, or hot tub data will automatically appear in Home Assistant.
 
 From the [Trouble Free Pool](https://troublefreepool.com/) website:
 
