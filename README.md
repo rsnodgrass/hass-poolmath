@@ -25,6 +25,7 @@ From the [Trouble Free Pool](https://troublefreepool.com/) website:
 * pH
 * Free Chlorine (FC)
 * Combined Chlorine (CC)
+* Total Chlorine (TC)
 * Total Alkalinity (TA)
 * Calcium Hardness (CH)
 * Cyanuric Acid (CYA)
