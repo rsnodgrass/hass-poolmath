@@ -1,6 +1,6 @@
 import aiohttp
 import logging
-from typing import Any
+from typing import Any, Awaitable
 from collections.abc import Callable
 from datetime import datetime
 
@@ -134,7 +134,7 @@ class PoolMathClient:
         self,
         poolmath_json: dict[str, Any],
         async_callback: Callable[
-            [str, datetime, float, dict[str, Any], dict[str, Any]], None
+            [str, datetime, float, dict[str, Any], dict[str, Any]], Awaitable[None]
         ],
     ) -> None:
         """Call provided async callback once for each type of log entry
