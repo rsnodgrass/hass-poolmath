@@ -1,6 +1,7 @@
 import aiohttp
 import logging
-from typing import Any, Awaitable
+from typing import Any
+from collections.abc import Awaitable
 from collections.abc import Callable
 from datetime import datetime
 

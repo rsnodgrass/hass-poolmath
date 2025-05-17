@@ -1,16 +1,11 @@
-[tool.isort]
-force_to_top = [ "logging" ]
-balanced_wrapping = true
-
 [tool.ruff]
 line-length = 88
 indent-width = 4
 lint.ignore = [
-       "F405",   # * imports
-       "FURB109" # Replace `not in [x, y, z]` with `not in (x, y, z)`
+       "F405"   # allow * imports
 ]
 
-# Import sorting settings (replaces isort)
+# import sorting settings (replaces isort)
 [tool.ruff.lint.isort]
 force-single-line = false
 force-sort-within-sections = true
@@ -28,4 +23,4 @@ all = true
 [tool.refurb]
 python_version = "3.11"
 quiet = true
-ignore = [ "FURB184" ]
+ignore = [ "FURB109","FURB184" ]

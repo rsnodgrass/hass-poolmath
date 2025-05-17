@@ -28,7 +28,9 @@ class PoolMathConfig:
         if self.timeout <= 0:
             raise ValueError('timeout must be positive')
         if self.target not in get_known_sensor_target_slugs():
-            raise ValueError(f"target must be one of: {', '.join(get_known_sensor_target_slugs())}")
+            raise ValueError(
+                f'target must be one of: {", ".join(get_known_sensor_target_slugs())}'
+            )
         if self.unit_of_measurement not in [
             UnitOfTemperature.FAHRENHEIT,
             UnitOfTemperature.CELSIUS,
