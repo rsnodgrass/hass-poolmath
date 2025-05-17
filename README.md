@@ -11,7 +11,7 @@
 
 [![Community Forum][forum-shield]][forum]
 
-Creates sensors for pools being managed with Trouble Free Pools's [Pool Math](https://www.troublefreepool.com/blog/poolmath/) apps ([iOS](https://apps.apple.com/us/app/pool-math-by-troublefreepool/id1228819359)/[Android](https://play.google.com/store/apps/details?id=com.troublefreepool.poolmath&hl=en_US)). Use a device like [Pool Exact EZ Pool Water Tester](https://amzn.to/4kqjHxI) to measure exact values and enter the data into Pool Math, and your pool, spa, or hot tub data will automatically appear in Home Assistant.
+Creates sensors for pools being managed with Trouble Free Pools's [Pool Math](https://www.troublefreepool.com/blog/poolmath/) apps ([iOS](https://apps.apple.com/us/app/pool-math-by-troublefreepool/id1228819359)/[Android](https://play.google.com/store/apps/details?id=com.troublefreepool.poolmath&hl=en_US)/[Fire](https://www.amazon.com/gp/product/B07F87V4SX/ref=mas_pm_Pool_Math)). Use a device like [Pool Exact EZ Pool Water Tester](https://amzn.to/4kqjHxI) to measure exact values and enter the data into Pool Math, and your pool, spa, or hot tub data will automatically appear in Home Assistant.
 
 [Pool Math](https://www.troublefreepool.com/blog/poolmath/) makes swimming pool care, maintenance and management easy by tracking chlorine, pH, alkalinity and other levels to help calculate how much salt, bleach and other chemicals to add. Note: this **requires a [Trouble Free Pool](https://www.troublefreepool.com/) Pool Math Premium subscription** to access your pool or spa's data from the Pool Math service.
 
@@ -50,11 +50,13 @@ Make sure [Home Assistant Community Store (HACS)](https://github.com/custom-comp
 
 ### Configuration
 
-Under Settings of the Pool Math iOS or Android application, find the Sharing section. Turn this on (and be sure to save the changes too), which allows anyone with access to the unique URL to be able to view data about your pool. Your pool's URL will be displayed, which you'll need for setting up this integration.
+1. Under Settings in the Pool Math app (iOS/Android/Fire), find the Sharing section: turn this on and **save changes**. Your pool's share URL will be displayed, which you'll need for setting up this integration. Anyone with the share URL will be able to view data about your pool.
 
-Configure `Pool Math (Trouble Free Pool)` via integrations page or press the blue button below, and enter your Pool Math share URL:
+2. Configure the `Pool Math (Trouble Free Pool)` integration via Home Assistant integrations page, or press the blue button below:
 
 [![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=poolmath)
+
+3. Enter your pool's share URL when asked during the configuration of the Pool Math integration. Multiple pools and hot tubs can be configured by adding additional integrations.
 
 NOTE: To protect the PoolMath service this integration only updates values **every 8 minutes** since PoolMath's cloud service caches data for 10 minutes AND rate limits to no more than once per minute.
 
