@@ -56,7 +56,7 @@ Configure `Pool Math (Trouble Free Pool)` via integrations page or press the blu
 
 [![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=poolmath)
 
-NOTE: This updates the state from PoolMath every 8 minutes (results are cached for 10 minutes already, and requests are rate limited to no more than once per minute) to keep from overwhelming their service, as the majority of Pool Math users update their data manual after testing rather than automated. The check interval can be changed in the configuration options.
+NOTE: To protect the PoolMath service this integration only updates values **every 8 minutes** since PoolMath's cloud service caches data for 10 minutes AND rate limits to no more than once per minute.
 
 ### Example Lovelace UI
 
@@ -117,19 +117,17 @@ type: entities
 
 ### Feature Requests
 
-* move all communication/interfaces to Pool Math into separate pypoolmath package that can be maintained separately
+* move all communication/interfaces to Pool Math into separate `pypoolmath` package that can be maintained separately
 * add [@berniedp's calculation to suggest SWG % setting](https://community.home-assistant.io/t/custom-component-pool-math-sensors-for-pool-chemicals-and-operations/435126/12?u=ryans)
 
+### Developer Testing
 
-### Testing
-
-Quick cheat sheet for testing changes on your instance of Home Assistant:
+Quick cheat sheet for developers testing changes on their own instance of Home Assistant:
 
 ```console
 scp -r custom_components/poolmath homeassistant.local:/config/custom_components
 ssh homeassistant.local "rm /config/*.log ; ha core restart"
 ```
-
 
 ## See Also
 
@@ -137,7 +135,6 @@ ssh homeassistant.local "rm /config/*.log ; ha core restart"
 * [Pool Math apps](https://www.troublefreepool.com/blog/poolmath/) ([iOS](https://apps.apple.com/us/app/pool-math-by-troublefreepool/id1228819359), [Android](https://play.google.com/store/apps/details?id=com.troublefreepool.poolmath&hl=en_US))
 * [ABC's of Pool Water Chemistry by Trouble Free Pool](https://www.troublefreepool.com/blog/2018/12/12/abcs-of-pool-water-chemistry/)
 * [PookMath calculator](https://www.troublefreepool.com/calc.html)
-
 
 ### Pool Monitoring Tools
 
