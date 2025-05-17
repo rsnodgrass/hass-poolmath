@@ -11,14 +11,9 @@
 
 [![Community Forum][forum-shield]][forum]
 
-Creates sensors for pools being managed with Trouble Free Pools's [Pool Math](https://www.troublefreepool.com/blog/poolmath/) apps ([iOS](https://apps.apple.com/us/app/pool-math-by-troublefreepool/id1228819359)/[Android](https://play.google.com/store/apps/details?id=com.troublefreepool.poolmath&hl=en_US)). Then use a device like [Pool Exact EZ Pool Water Tester](https://amzn.to/4kqjHxI) to measure exact values and enter the data into Pool Math, and your pool, spa, or hot tub data will automatically appear in Home Assistant.
+Creates sensors for pools being managed with Trouble Free Pools's [Pool Math](https://www.troublefreepool.com/blog/poolmath/) apps ([iOS](https://apps.apple.com/us/app/pool-math-by-troublefreepool/id1228819359)/[Android](https://play.google.com/store/apps/details?id=com.troublefreepool.poolmath&hl=en_US)). Use a device like [Pool Exact EZ Pool Water Tester](https://amzn.to/4kqjHxI) to measure exact values and enter the data into Pool Math, and your pool, spa, or hot tub data will automatically appear in Home Assistant.
 
-From the [Trouble Free Pool](https://troublefreepool.com/) website:
-
-* Pool Math makes swimming pool care, maintenance and management easy by tracking chlorine, pH, alkalinity and other  levels to help calculate how much salt, bleach and other chemicals to add.
-* Pool Math performs all the calculations you need to keep your chlorine, pH, calcium, alkalinity, and stabilizer levels balanced.
-* [Trouble Free Pool](https://www.troublefreepool.com/) is a registered 501(c)3 non-profit who displays NO advertising on our site nor is our advice compromised by financial incentives.
-
+[Pool Math](https://www.troublefreepool.com/blog/poolmath/) makes swimming pool care, maintenance and management easy by tracking chlorine, pH, alkalinity and other levels to help calculate how much salt, bleach and other chemicals to add. Note: this **requires a [Trouble Free Pool](https://www.troublefreepool.com/) Pool Math Premium subscription** to access your pool or spa's data from the Pool Math service.
 
 #### Supported Pool Math Values
 
@@ -37,15 +32,16 @@ From the [Trouble Free Pool](https://troublefreepool.com/) website:
 * Flow Rate
 * SWG Cell Percentage
 
-Note: this **requires a [Trouble Free Pool](https://www.troublefreepool.com/) Pool Math Premium subscription** to access your pool or spa's data from the Pool Math cloud service.
+
 
 ## Support
 
 ### Community Support
 
-* **For support, use the [official Home Assistant Pool Math discussion thread](https://community.home-assistant.io/t/custom-component-pool-math-sensors-for-pool-chemicals-and-operations/435126). The developers are just volunteers from the community and do not provide any support, so it is best to ask the entire community for help or questions. There is no support or dedicated development for this integration, thus GitHub issue tracking has been turned off. Please submit Pull Requests with bug fixes! **
+* **For support, use the [official Home Assistant Pool Math discussion thread](https://community.home-assistant.io/t/custom-component-pool-math-sensors-for-pool-chemicals-and-operations/435126). The developers are just volunteers from the community and do not provide any support, so it is best to ask the entire community for help or questions. There is no support or dedicated development for this integration, thus GitHub issue tracking has been turned off. Please submit Pull Requests with bug fixes!**
 
 * [How to use the Pool Math app?](https://www.troublefreepool.com/threads/how-to-use-the-pool-math-app.179282/)
+
 * For issues with the Pool Math apps, see forums or contact [poolmath@troublefreepool.com](mailto:poolmath@troublefreepool.com)
 
 ## Installation
