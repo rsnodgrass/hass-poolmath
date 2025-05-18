@@ -240,11 +240,11 @@ class PoolMathServiceSensor(
             )
             await sensor.inject_state(state, timestamp, attributes)
 
-        # If FC or CC is updated, update the calculated TC sensor as well
-        if measurement_type in ['fc', 'cc']:
-            await self._update_total_chlorine_sensor(
-                timestamp, attributes, poolmath_json
-            )
+            # if FC or CC is updated, update the calculated TC sensor as well
+            if measurement_type in ['fc', 'cc']:
+                await self._update_total_chlorine_sensor(
+                    timestamp, attributes, poolmath_json
+                )
 
     async def _update_total_chlorine_sensor(self, timestamp, attributes, poolmath_json):
         """
