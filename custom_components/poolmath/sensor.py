@@ -352,12 +352,13 @@ class UpdatableSensor(RestoreEntity, SensorEntity):
             name='Pool Math',
         )
 
-        self.determine_unit_of_measurement(poolmath_json)
+        self._set_unit_of_measurement(poolmath_json)
 
-    def determine_unit_of_measurement(self, poolmath_json: dict) -> None:
-        # TEMPORARY HACK to get correct unit of measurement for water temps (but this also
-        # applies to other units). No time to fix now, but perhaeps someone will submit a PR
-        # to fix this in future.
+    def _set_unit_of_measurement(self, poolmath_json: dict) -> None:
+        """
+        If this is a temp sensor, update the unit of measurement to the
+        units being used in the JSON response from Pool Math.
+        """
         self._unit_of_measurement = self._config[ATTR_UNIT_OF_MEASUREMENT]
         if self._unit_of_measurement in [
             UnitOfTemperature.FAHRENHEIT,
@@ -368,7 +369,6 @@ class UpdatableSensor(RestoreEntity, SensorEntity):
                     self._unit_of_measurement = UnitOfTemperature.CELSIUS
                 else:
                     self._unit_of_measurement = UnitOfTemperature.FAHRENHEIT
-
             LOG.info(f'Unit of temp measurement {self._unit_of_measurement}')
 
     @callback
