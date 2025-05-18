@@ -58,72 +58,60 @@ class PoolMathClient:
         self._pool_id = pool_id
         self._name = name
         self._timeout = timeout
-        self._json_url = (
+        self._url = (
             f'https://api.poolmathapp.com/share/pool?userId={user_id}&poolId={pool_id}'
         )
-        LOG.debug(f'Using PoolMathClient for {name} at {self._json_url}')
+        LOG.debug(f"PoolMathClient '{name}' connecting to {self._url}")
 
     @staticmethod
-    async def async_fetch_poolmath_data(url: str, timeout: int):
-        """Fetch latest json data from the Pool Math service"""
-        async with aiohttp.ClientSession() as session:
-            try:
+    async def async_fetch_data(url: str, timeout: float=DEFAULT_TIMEOUT) -> str:
+        """Fetch JSON data from the Pool Math service"""
+        try:
+            async with aiohttp.ClientSession() as session:
                 LOG.info(f'GET {url} (timeout={timeout})')
                 async with session.get(url, timeout=timeout) as response:
-                    LOG.debug(f'GET {url} response: {response.status}')
-                    if response.status == 200:
-                        return await response.json()
-                raise UpdateFailed(
-                    f'Failed with status {response.status} from {url}'
-                )
-            except aiohttp.ClientError as e:
-                LOG.error(f'Failed fetching data from {url}: {e}')
-                raise
+                    LOG.debug(f'GET {url} returned {response.status}')
+                    if response.status != 200:
+                        raise UpdateFailed(f'Failed with status {response.status} from {url}')
+ 
+                    return await response.json()
+        except aiohttp.ClientError as e:
+            LOG.error(f'Failed fetching data from {url}: {e}')
+            raise
 
     @staticmethod
     async def extract_ids_from_share_url(
         share_url: str, timeout: float = DEFAULT_TIMEOUT
     ) -> tuple[str | None, str | None]:
         """Extract user_id and pool_id from a Pool Math share URL."""
-        # Extract the share_id from the URL
         match = re.search(
             r'https://(?:api\.poolmathapp\.com|troublefreepool\.com)/(?:share/|mypool/)([a-zA-Z0-9]+)',
             share_url,
         )
         if not match:
-            LOG.error('Invalid Pool Math share URL format')
+            LOG.error(f'Invalid Pool Math share URL {share_url}')
             return None, None
 
         share_id = match.group(1)
 
         # call service to discover the user_id and pool_id
-        json_url = f'https://api.poolmathapp.com/share/{share_id}.json'
+        url = f'https://api.poolmathapp.com/share/{share_id}.json'
         try:
-            data = await async_fetch_poolmath_data(json_url, timeout)
+            data = await PoolMathClient.async_fetch_data(url, timeout=timeout)
 
             # extract user_id and pool_id from the response
             user_id = data.get('userId')
             pool = next(iter(data.get('pools', [])), {}).get('pool', {})
             pool_id = pool.get('id')
 
-            if not user_id or not pool_id:
+            if user_id and pool_id:
+                return user_id, pool_id
+            else:
                 LOG.error(f"Couldn't find user_id or pool_id: {data}")
-                return None, None
-            return user_id, pool_id
         except Exception as exc:
             LOG.exception('Error fetching data from Pool Math', exc)
-            return None, None
-
-
-    async def async_fetch_data(self):
-        """Fetch latest json data from the Pool Math service"""
-        try:
-            if data := await async_fetch_poolmath_data(self._json_url, self._timeout):
-                return data
-            raise UpdateFailed(f'Failed updating {self._json_url}')
-        except aiohttp.ClientError as e:
-            LOG.error(f'Failed fetching data from {self._json_url}: {e}')
-            raise
+            
+        return None, None
 
     async def process_log_entry_callbacks(
         self,
@@ -206,7 +194,7 @@ class PoolMathClient:
 
     @property
     def url(self):
-        return self._json_url
+        return self._url
 
     @staticmethod
     def _entry_timestamp(entry):
