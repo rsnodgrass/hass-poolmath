@@ -109,15 +109,13 @@ class PoolMathClient:
             data = await PoolMathClient.async_fetch_data(url, timeout=timeout)
 
             # extract user_id and pool_id from the response
-            # pool = next(iter(data.get('pools', [])), {}).get('pool', {})
-            if user_id := data.get('userId'):
-                if pool := parse_pool(data):
+            if pool := parse_pool(data):
+                if user_id := pool.get('userId'):
                     if pool_id := pool.get('id'):
                         return user_id, pool_id
-            
-            LOG.error(f"Couldn't fetch user_id or pool_id from {url}: {data}")
+            LOG.error(f"Couldn't parse user/pool id from {url}: {data}")
         except Exception as e:
-            LOG.exception(e)
+            LOG.exception(f"Failed GET {url}", e)
         return None, None
     
     @staticmethod
