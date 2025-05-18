@@ -284,7 +284,7 @@ class PoolMathServiceSensor(
         # just inject a 'tc' key/value into the response JSON rather than here.
         fc_sensor = await self.get_sensor_entity('fc', poolmath_json)
         cc_sensor = await self.get_sensor_entity('cc', poolmath_json)
-        if fc_sensor and fc_sensor.state and cc_sensor and cc_sensor.state:
+        if fc_sensor and cc_sensor:
             try:
                 if tc_sensor := await self.get_sensor_entity('tc', poolmath_json):
                     fc = float(fc_sensor.state)
@@ -444,8 +444,8 @@ class UpdatableSensor(RestoreEntity, SensorEntity):
             LOG.debug(f'Restored sensor {self._name} to previous state {self._state}')
 
             async_dispatcher_connect(
-             self.hass, DATA_UPDATED, self._schedule_immediate_update
-        )
+                self.hass, DATA_UPDATED, self._schedule_immediate_update
+            )
 
     @callback
     def _schedule_immediate_update(self):
