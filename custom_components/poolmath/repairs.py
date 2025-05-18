@@ -2,7 +2,6 @@
 
 import logging
 import re
-import aiohttp
 import voluptuous as vol
 
 from homeassistant.components.repairs import RepairsFlow
@@ -15,14 +14,11 @@ from .client import PoolMathClient, parse_pool
 from .const import (
     CONF_USER_ID,
     CONF_POOL_ID,
+    CONF_SHARE_URL,
+    SHARE_URL_PATTERN
 )
 
 LOG = logging.getLogger(__name__)
-
-CONF_SHARE_URL = 'share_url'
-
-URL_PATTERN = r'https://(?:api\.poolmathapp\.com|troublefreepool\.com)/(?:share/|mypool/)([a-zA-Z0-9]+)'
-
 
 class PoolMathRepairFlow(RepairsFlow):
     """Handler for an issue fixing flow."""
@@ -36,6 +32,8 @@ class PoolMathRepairFlow(RepairsFlow):
         """Handle the first step of a fix flow."""
         return await self.async_step_share_url()
 
+
+
     async def async_step_share_url(self, user_input=None) -> FlowResult:
         """Ask for the share URL to extract user_id and pool_id."""
         data_schema = vol.Schema({vol.Required(CONF_SHARE_URL): cv.string})
@@ -44,13 +42,16 @@ class PoolMathRepairFlow(RepairsFlow):
             share_url = user_input[CONF_SHARE_URL]
 
             # validate and extract share_id from the URL
-            match = re.search(URL_PATTERN, share_url)
+            match = re.search(SHARE_URL_PATTERN, share_url)
             if not match:
                 return self.async_show_form(
                     step_id='share_url',
                     data_schema=data_schema,
                     errors={'base': 'invalid_url'},
                 )
+
+            # FIXME: can't we replace a bunch of this code with the following?
+            # user_id, pool_id = await PoolMathClient.extract_ids_from_share_url(share_url)
 
             share_id = match.group(1)
 

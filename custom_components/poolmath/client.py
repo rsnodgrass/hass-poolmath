@@ -92,10 +92,7 @@ class PoolMathClient:
         share_url: str, timeout: float = DEFAULT_TIMEOUT
     ) -> tuple[str | None, str | None]:
         """Extract user_id and pool_id from a Pool Math share URL."""
-        match = re.search(
-            r'https://(?:api\.poolmathapp\.com|troublefreepool\.com)/(?:share/|mypool/)([a-zA-Z0-9]+)',
-            share_url,
-        )
+        match = re.search(SHARE_URL_PATTERN, share_url)
         if not match:
             LOG.error(f'Invalid Pool Math share URL {share_url}')
             return None, None
@@ -109,16 +106,14 @@ class PoolMathClient:
 
             # extract user_id and pool_id from the response
             user_id = data.get('userId')
-            pool = next(iter(data.get('pools', [])), {}).get('pool', {})
-            pool_id = pool.get('id')
-
-            if user_id and pool_id:
+            # pool = next(iter(data.get('pools', [])), {}).get('pool', {})
+            if user_id and pool := parse_pool(data):
+                pool_id = pool.get('id')
                 return user_id, pool_id
-            else:
-                LOG.error(f"Couldn't find user_id or pool_id: {data}")
+            
+            LOG.error(f"Couldn't find user_id or pool_id: {data}")
         except Exception as e:
             LOG.exception(e)
-            
         return None, None
     
     @staticmethod
@@ -144,7 +139,6 @@ class PoolMathClient:
 
         return attributes 
     
-        
     async def process_log_entry_callbacks(
         self,
         poolmath_json: dict[str, Any],
@@ -161,7 +155,7 @@ class PoolMathClient:
         if not poolmath_json:
             return
 
-        pool = parse_pool(poolmath_json):
+        pool = parse_pool(poolmath_json)
         if not pool:
             return
 

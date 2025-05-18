@@ -5,6 +5,8 @@ DOMAIN = 'poolmath'
 
 ATTRIBUTION = 'Data by PoolMath (Trouble Free Pool)'
 
+SHARE_URL_PATTERN = r'https://(?:api\.poolmathapp\.com|troublefreepool\.com)/(?:share/|mypool/)([a-zA-Z0-9]+)'
+
 ATTR_DESCRIPTION = 'description'
 ATTR_LAST_UPDATED_TIME = 'last_updated'
 ATTR_NAME = 'name'
