@@ -82,7 +82,7 @@ class PoolMathClient:
  
                     return await response.json()
         except aiohttp.ClientError as e:
-            LOG.error(f'Failed fetching data from {url}: {e}')
+            LOG.exception(f'Failed fetching data from {url}', e)
             raise
 
     @staticmethod
@@ -114,8 +114,8 @@ class PoolMathClient:
                 return user_id, pool_id
             else:
                 LOG.error(f"Couldn't find user_id or pool_id: {data}")
-        except Exception as exc:
-            LOG.exception('Error fetching data from Pool Math', exc)
+        except Exception as e:
+            LOG.exception(e)
             
         return None, None
 

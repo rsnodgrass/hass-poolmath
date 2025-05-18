@@ -118,7 +118,7 @@ class PoolMathUpdateCoordinator(DataUpdateCoordinator[PoolMathState]):
             # callbacks on all associated entities
             return PoolMathState(json=json, last_updated=json.get('last_updated'))
         except Exception as e:
-            LOG.error(f"Error updating Pool Math: {e}")
+            LOG.exception(e)
             raise UpdateFailed(e) from e
 
 
@@ -223,7 +223,7 @@ class PoolMathServiceSensor(
             if timestamp:
                 self._attrs[ATTR_LAST_UPDATED_TIME] = str(timestamp)
         except Exception as e:
-            LOG.error('Error updating PoolMath sensors', e)
+            LOG.exception(e)
 
     @property
     def should_poll(self) -> bool:
