@@ -10,8 +10,7 @@ from homeassistant.const import (
     CONF_SCAN_INTERVAL,
     ATTR_ATTRIBUTION,
     UnitOfTemperature,
-    ATTR_UNIT_OF_MEASUREMENT,
-    PLATFORM_UPDATE,
+    ATTR_UNIT_OF_MEASUREMENT
 )
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
@@ -33,6 +32,7 @@ from .const import (
     CONF_POOL_ID,
     CONF_TARGET,
     CONF_TIMEOUT,
+    DATA_UPDATED,
     DEFAULT_TIMEOUT,
     DOMAIN,
 )
@@ -464,8 +464,7 @@ class UpdatableSensor(RestoreEntity, SensorEntity):
 
             # signal HA that the data for this sensor has been updated
             async_dispatcher_connect(
-                self.hass, PLATFORM_UPDATE,
-                self._schedule_immediate_update
+                self.hass, DATA_UPDATED, self._schedule_immediate_update
             )
 
     @callback

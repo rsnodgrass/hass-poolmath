@@ -21,6 +21,8 @@ CONF_SHARE_URL = 'share_url'  # Share URL for simple setup
 CONF_TARGET = 'target'
 CONF_TIMEOUT = 'timeout'
 
+DATA_UPDATED = "poolmath_data_updated"
+
 DEFAULT_NAME = 'Pool'
 DEFAULT_TIMEOUT = 15.0
 DEFAULT_TARGET = 'tfp'
