@@ -110,7 +110,7 @@ class PoolMathClient:
                     if pool_id := pool.get('id'):
                         return user_id, pool_id
             
-            LOG.error(f"Couldn't find user_id or pool_id: {data}")
+            LOG.error(f"Couldn't fetch user_id or pool_id from {url}: {data}")
         except Exception as e:
             LOG.exception(e)
         return None, None

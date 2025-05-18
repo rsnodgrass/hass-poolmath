@@ -29,8 +29,9 @@ def get_config_options(entry: ConfigEntry,
     overrides any provided defaults).
     """
     options = {}
-    for key in keys + keys_with_defaults.keys():
-        options[key] = entry.options.get(key, entry.data.get(key, None))
+    for key in keys + list(keys_with_defaults.keys()):
+        options[key] = entry.options.get(
+            key, entry.data.get(key, keys_with_defaults.get(key)))
     return options
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
