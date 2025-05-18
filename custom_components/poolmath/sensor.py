@@ -42,6 +42,11 @@ from .targets import POOL_MATH_SENSOR_SETTINGS, get_sensor_targets
 
 LOG = logging.getLogger(__name__)
 
+def parse_pool(json: str) -> dict:
+    """Convenience function to extract pool sub-data from JSON"""
+    if pools := json.get('pools'):
+        return pools[0].get('pool')
+    return None
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -111,11 +116,11 @@ class PoolMathUpdateCoordinator(DataUpdateCoordinator[PoolMathState]):
         an asynchronous update of data from Pool Math service.
         """
         try:
-            data = await self._client.async_fetch_data()
+            json = await self._client.async_fetch_data()
 
             # returning state triggers HA to call _handle_coordinator_update() 
             # callbacks on all associated entities
-            return PoolMathState(json=data, last_updated=data.get('last_updated'))
+            return PoolMathState(json=json, last_updated=json.get('last_updated'))
         except Exception as e:
             LOG.error(f"Error updating Pool Math: {e}")
             raise UpdateFailed(e) from e
@@ -195,8 +200,7 @@ class PoolMathServiceSensor(
         self._state = self._coordinator.data.last_updated
 
         json = self._coordinator.data.json
-        if pools := json.get('pools'):
-            pool = pools[0].get('pool')
+        if pool := parse_pool(json):
             self._attrs |= {
                 'name': pool.get('name', 'Unknown Pool'),
                 'volume': pool.get('volume', 0),
@@ -317,10 +321,12 @@ class UpdatableSensor(RestoreEntity, SensorEntity):
 
         self.hass = hass
         self._name = name
-        self._entry = entry
-        self._config = config
         self._sensor_type = sensor_type
         self._state = None
+
+        self._entry = entry
+        self._config = config
+        
         self._attrs = {
             ATTR_ATTRIBUTION: ATTRIBUTION,
             CONF_POOL_ID: config.pool_id,
@@ -346,8 +352,7 @@ class UpdatableSensor(RestoreEntity, SensorEntity):
             UnitOfTemperature.FAHRENHEIT,
             UnitOfTemperature.CELSIUS,
         ]:
-            if pools := poolmath_json.get('pools'):
-                pool = pools[0].get('pool')
+            if pool := parse_pool(poolmath_json):
                 if pool.get('waterTempUnitDefault') == 1:
                     self._unit_of_measurement = UnitOfTemperature.CELSIUS
                 else:
@@ -361,12 +366,13 @@ class UpdatableSensor(RestoreEntity, SensorEntity):
         if not self._coordinator:
             return
 
-        # FIXME: update the appropriate key from poolmath_data
+        # FIXME: update the appropriate key from poolmath_json
         # which is likely self._sensor_type (but may not be)
         #
-        # poolmath_data = self._coordinator.data.data
-        # if pools := poolmath_data.get("pools"):
-        #    pool = pools[0].get("pool")
+        # poolmath_json = self._coordinator.data.json
+        # if pool := parse_pool(poolmath_json):
+        #   extract the appropriate key for this sensor
+        #    self.inject_state(pool)
         #    self.async_write_ha_state()
 
     @property
