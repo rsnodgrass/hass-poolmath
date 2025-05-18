@@ -69,7 +69,7 @@ class PoolMathRepairFlow(RepairsFlow):
                     user_id = pool.get('userId')
                     pool_id = pool.get('id')
                     
-                if not user_id or not pool_id:
+                if not pool or not user_id or not pool_id:
                     LOG.error(
                         f'Missing user_id={user_id}, pool_id={pool_id} from {url}'
                     )

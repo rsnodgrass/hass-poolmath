@@ -328,17 +328,21 @@ class UpdatableSensor(RestoreSensor, SensorEntity):
         If this is a temp sensor, update the unit of measurement to the
         units being used in the JSON response from Pool Math.
         """
-        self._unit_of_measurement = self._config[ATTR_UNIT_OF_MEASUREMENT]
-        if self._unit_of_measurement in [
+        units = self._config[ATTR_UNIT_OF_MEASUREMENT]
+        
+        # set units for temperature sensors to the units returned by Pool Math
+        if units in [
             UnitOfTemperature.FAHRENHEIT,
             UnitOfTemperature.CELSIUS,
         ]:
             if pool := parse_pool(poolmath_json):
                 if pool.get('waterTempUnitDefault') == 1:
-                    self._unit_of_measurement = UnitOfTemperature.CELSIUS
+                    units = UnitOfTemperature.CELSIUS
                 else:
-                    self._unit_of_measurement = UnitOfTemperature.FAHRENHEIT
-            LOG.info(f'Unit of temp measurement {self._unit_of_measurement}')
+                    units = UnitOfTemperature.FAHRENHEIT
+            LOG.info(f'{self._name} temp units = {units}')
+        
+        self._unit_of_measurement = units
 
     @callback
     def _handle_coordinator_update(self) -> None:
