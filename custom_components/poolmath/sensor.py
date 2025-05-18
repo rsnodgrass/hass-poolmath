@@ -98,7 +98,7 @@ class PoolMathServiceSensor(
         coordinator: PoolMathUpdateCoordinator,
         entry: ConfigEntry,
         config: PoolMathConfig,
-        async_add_entities_callback
+        add_entities_callback
     ) -> None:
         """Initialize the Pool Math service sensor."""
         super().__init__(coordinator)
@@ -127,7 +127,7 @@ class PoolMathServiceSensor(
         )
 
         self._managed_sensors = {}
-        self._async_add_entities_callback = async_add_entities_callback
+        self._add_entities_callback = add_entities_callback
 
     @property
     def state(self) -> str | None:
@@ -225,7 +225,7 @@ class PoolMathServiceSensor(
         self._managed_sensors[sensor_type] = sensor
 
         # register sensor with Home Assistant (async callback requires passing to loop)
-        self._async_add_entities_callback([sensor], True)
+        self._add_entities_callback([sensor], True)
 
         return sensor
 
@@ -255,7 +255,7 @@ class PoolMathServiceSensor(
         # just inject a 'tc' key/value into the response JSON rather than here.
         fc_sensor = await self.get_sensor_entity('fc', poolmath_json)
         cc_sensor = await self.get_sensor_entity('cc', poolmath_json)
-        if fc_sensor and cc_sensor:
+        if fc_sensor and cc_sensor and fc_sensor.state is not None and cc_sensor.state is not None:
             try:
                 if tc_sensor := await self.get_sensor_entity('tc', poolmath_json):
                     fc = float(fc_sensor.state)
@@ -286,7 +286,7 @@ class UpdatableSensor(RestoreSensor, SensorEntity):
     def __init__(self,
                  hass: HomeAssistant, 
                  coordinator: PoolMathUpdateCoordinator, 
-                 entry, 
+                 entry,
                  config: PoolMathConfig, 
                  name: str, 
                  sensor_type: str, 
@@ -347,8 +347,6 @@ class UpdatableSensor(RestoreSensor, SensorEntity):
             return
         
         # FIXME: update the appropriate key from poolmath_json
-        # which is likely self._sensor_type (but may not be)
-        #
         # measurement_key = self._sensor_type
         # poolmath_json = self._coordinator.data.json
         # value = None
@@ -391,9 +389,9 @@ class UpdatableSensor(RestoreSensor, SensorEntity):
         Inject the current state externally (since an external coordinator is
         calling the service to retrieve multiple sensors at once).
         """
-        self._attrs[ATTR_LAST_UPDATED] = datetime.fromtimestamp(
-            timestamp / 1000.0
-        ).strftime('%Y-%m-%d %H:%M:%S')
+        #self._attrs[ATTR_LAST_UPDATED] = datetime.fromtimestamp(
+        #    timestamp / 1000.0
+        #).strftime('%Y-%m-%d %H:%M:%S')
 
         if attributes:
             self._attrs |= attributes
