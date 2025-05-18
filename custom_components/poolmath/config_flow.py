@@ -21,7 +21,7 @@ from .const import (
     DOMAIN,
     INTEGRATION_NAME,
 )
- from .client import PoolMathClient
+from .client import PoolMathClient
 
 LOG = logging.getLogger(__name__)
 
@@ -43,7 +43,6 @@ def _build_share_url_schema(share_url=None, name=None, target=None, scan_interva
         {
             vol.Required(CONF_SHARE_URL, default=share_url): cv.string,
             vol.Optional(CONF_NAME, default=name or DEFAULT_NAME): cv.string,
-            # NOTE: targets are not really implemented, other than tfp
             vol.Optional(CONF_TARGET, default=target or DEFAULT_TARGET): TARGET_OPTIONS,
             vol.Optional(
                 CONF_SCAN_INTERVAL, default=scan_interval or DEFAULT_UPDATE_INTERVAL
