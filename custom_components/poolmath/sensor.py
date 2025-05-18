@@ -279,24 +279,21 @@ class PoolMathServiceSensor(
     async def _update_total_chlorine_sensor(self, timestamp, attributes, poolmath_json):
         """
         Update Total Chlorine sensor calculated from FC and CC measurements
-        since PoolMath JSON API does not include a tc value.
+        since PoolMath JSON response does not include a tc value.
         """
         # NOTE: If a pypoolmath client is ever created, it may be better to
         # just inject a 'tc' key/value into the response JSON rather than here.
         fc_sensor = await self.get_sensor_entity('fc', poolmath_json)
         cc_sensor = await self.get_sensor_entity('cc', poolmath_json)
-        if fc_sensor and cc_sensor:
+        if fc_sensor and fc_sensor.state and cc_sensor and cc_sensor.state:
             try:
-                fc_value = float(fc_sensor.state) if fc_sensor.state else 0
-                cc_value = float(cc_sensor.state) if cc_sensor.state else 0
-                tc_value = fc_value + cc_value
+                if tc_sensor := await self.get_sensor_entity('tc', poolmath_json):
+                    fc = float(fc_sensor.state)
+                    cc = float(cc_sensor.state)
+                    tc = fc + cc
 
-                tc_sensor = await self.get_sensor_entity('tc', poolmath_json)
-                if tc_sensor:
-                    LOG.info(
-                        f'Calculating Total Chlorine sensor: FC={fc_value} + CC={cc_value} = TC={tc_value} mg/L'
-                    )
-                    await tc_sensor.inject_state(tc_value, timestamp, attributes)
+                    LOG.info(f'{self._name} Total Chlorine: FC {fc} + CC {cc} = TC {tc} mg/L')
+                    await tc_sensor.inject_state(tc, timestamp, attributes)
             except (ValueError, TypeError) as e:
                 LOG.warning(f'Error calculating Total Chlorine: {e}')
 
@@ -314,7 +311,6 @@ class UpdatableSensor(RestoreEntity, SensorEntity):
     NOTE: This should move to a CoordinatorEntity[PoolMathUpdateCoordinator] 
     eventually (this did not exist at the time hass-poolmath was created).
     """
-
     def __init__(self, hass, entry, name, config, sensor_type, poolmath_json):
         """Initialize the sensor."""
         super().__init__()
@@ -350,9 +346,6 @@ class UpdatableSensor(RestoreEntity, SensorEntity):
             UnitOfTemperature.FAHRENHEIT,
             UnitOfTemperature.CELSIUS,
         ]:
-            # inspect the first JSON response to determine things that are not specified
-            # with sensor values (since units/update timestamps are in separate keys
-            # within the JSON doc)
             if pools := poolmath_json.get('pools'):
                 pool = pools[0].get('pool')
                 if pool.get('waterTempUnitDefault') == 1:
@@ -441,20 +434,17 @@ class UpdatableSensor(RestoreEntity, SensorEntity):
 
     async def async_added_to_hass(self) -> None:
         await super().async_added_to_hass()
-
         if self._state:
             return
 
         # on restart, attempt to restore previous state using RestoreEntity
         # (see https://aarongodfrey.dev/programming/restoring-an-entity-in-home-assistant/)
-        state = await self.async_get_last_state()
-        if not state:
+        self._state = await self.async_get_last_state()
+        if not self._state:
             return
+        LOG.debug(f'Restored sensor {self._name} to previous state {self._state}')
 
-        self._state = state.state
-        LOG.debug(f'Restored sensor {self._name} previous state {self._state}')
-
-        # restore any useful attributes
+        # restore attributes
         for attr in [ATTR_LAST_UPDATED_TIME, ATTR_LAST_UPDATED]:
             if attr in state.attributes:
                 self._attrs[attr] = state.attributes[attr]
