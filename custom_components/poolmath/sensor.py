@@ -45,7 +45,8 @@ LOG = logging.getLogger(__name__)
 def parse_pool(json: str) -> dict:
     """Convenience function to extract pool sub-data from JSON"""
     if pools := json.get('pools'):
-        return pools[0].get('pool')
+        if len(pools) > 0:
+            return pools[0].get('pool')
     return None
 
 async def async_setup_entry(
@@ -63,6 +64,7 @@ async def async_setup_entry(
         target=entry.options[CONF_TARGET],
         update_interval=timedelta(minutes=entry.options.get(CONF_SCAN_INTERVAL, 8)),
     )
+    LOG.info(f"Setting up Pool Math sensor for {config.name} / {config.pool_id}")
 
     client = PoolMathClient(
         user_id=config.user_id,
@@ -94,7 +96,6 @@ class PoolMathUpdateCoordinator(DataUpdateCoordinator[PoolMathState]):
     Coordinator that HA calls to periodically fetch Pool Math data and
     update associated entities.
     """
-
     def __init__(
         self,
         hass: HomeAssistant,
