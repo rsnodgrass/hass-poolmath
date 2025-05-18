@@ -156,7 +156,7 @@ class PoolMathServiceSensor(
         self._attr_unique_id = f'poolmath_{config.user_id}_{config.pool_id}'
         self._attr_icon = 'mdi:water'
         self._attr_device_info = DeviceInfo(
-            configuration_url='https://www.troublefreepool.com/blog/poolmath/',
+            configuration_url='https://troublefreepool.com/blog/poolmath/',
             entry_type=DeviceEntryType.SERVICE,
             identifiers={(DOMAIN, f'pool_math_{config.user_id}_{config.pool_id}')},
             manufacturer='Pool Math (Trouble Free Pool)',
@@ -354,7 +354,7 @@ class UpdatableSensor(RestoreEntity, SensorEntity):
                 else:
                     self._unit_of_measurement = UnitOfTemperature.FAHRENHEIT
 
-            LOG.info(f'Unit of temperature measurement {self._unit_of_measurement}')
+            LOG.info(f'Unit of temp measurement {self._unit_of_measurement}')
 
     @callback
     def _handle_coordinator_update(self) -> None:
