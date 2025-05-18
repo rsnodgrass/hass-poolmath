@@ -12,6 +12,7 @@ from .const import (
     ATTR_TARGET_MAX,
     ATTR_TARGET_MIN,
     ATTR_TARGET_SOURCE,
+    ATTR_LAST_UPDATED_TIME,
     DEFAULT_NAME,
     DEFAULT_TIMEOUT,
 )
@@ -45,9 +46,10 @@ ONLY_INCLUDE_IF_TRACKED = {
 
 def parse_pool(json: str) -> dict:
     """Convenience function to extract pool sub-data from JSON"""
-    if pools := json.get('pools'):
-        if len(pools) > 0:
-            return pools[0].get('pool')
+    if json:
+        if pools := json.get('pools'):
+            if len(pools) > 0:
+                return pools[0].get('pool')
     return None
 
 class PoolMathClient:
@@ -118,7 +120,31 @@ class PoolMathClient:
             LOG.exception(e)
             
         return None, None
+    
+    @staticmethod
+    def parse_attributes_for_measurement(json, measurement):
+        """
+        Parse any extra attributes returned from Pool Math for this measurement
+        """
+        attributes = {}
+        if pool := parse_pool(json):
+            overview = pool.get('overview')
+            if timestamp := overview.get(f'{measurement}Ts'):
+                attributes[ATTR_LAST_UPDATED_TIME] = timestamp
 
+            if target := pool.get(f'{measurement}Target'):
+                attributes['target'] = target
+                attributes[ATTR_TARGET_SOURCE] = 'tfp'
+
+            if value_min := pool.get(f'{measurement}Min'):
+                attributes[ATTR_TARGET_MIN] = value_min
+
+            if value_max := pool.get(f'{measurement}Max'):
+                attributes[ATTR_TARGET_MAX] = value_max
+
+        return attributes 
+    
+        
     async def process_log_entry_callbacks(
         self,
         poolmath_json: dict[str, Any],
@@ -135,14 +161,12 @@ class PoolMathClient:
         if not poolmath_json:
             return
 
-        pools = poolmath_json.get('pools')
-        if not pools:
+        pool = parse_pool(poolmath_json):
+        if not pool:
             return
 
-        pool = pools[0].get('pool')
-        overview = pool.get('overview')
-
         latest_timestamp = None
+        overview = pool.get('overview')
 
         for measurement in KNOWN_SENSOR_KEYS:
             value = overview.get(measurement)
@@ -158,30 +182,16 @@ class PoolMathClient:
                     )
                     continue
 
-            timestamp = overview.get(f'{measurement}Ts')
+            attr = parse_attributes_for_measurement(poolmath_json, measurement)
 
             # find the timestamp of the most recent measurement update
+            timestamp = attr.get(ATTR_LAST_UPDATED_TIME)
             if not latest_timestamp or timestamp > latest_timestamp:
                 latest_timestamp = timestamp
 
-            # add any attributes relevent to this measurement
-            attributes = {}
-            value_min = pool.get(f'{measurement}Min')
-            if value_min:
-                attributes[ATTR_TARGET_MIN] = value_min
-
-            value_max = pool.get(f'{measurement}Max')
-            if value_max:
-                attributes[ATTR_TARGET_MAX] = value_max
-
-            target = pool.get(f'{measurement}Target')
-            if target:
-                attributes['target'] = target
-                attributes[ATTR_TARGET_SOURCE] = 'PoolMath'
-
             # update the sensor
             await async_callback(
-                measurement, timestamp, value, attributes, poolmath_json
+                measurement, timestamp, value, attr, poolmath_json
             )
 
         return latest_timestamp

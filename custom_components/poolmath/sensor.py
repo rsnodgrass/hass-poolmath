@@ -131,7 +131,8 @@ class PoolMathServiceSensor(
     Sensor monitoring the Pool Math cloud service.
     This is effectively a DataCoordinator pattern implementation
     that was implemented before Home Assistant added a standard
-    DataUpdateCoordinator.
+    DataUpdateCoordinator...with a bit more attribute handling and
+    extraction of targets from JSON data.
     """
     def __init__(
         self,
@@ -144,10 +145,11 @@ class PoolMathServiceSensor(
         super().__init__(coordinator)
 
         self.hass = hass
-        self._config = config
         self._coordinator = coordinator
-        self._name = config.name
+        self._config = config
         self._entry = entry
+
+        self._name = config.name
 
         self._attrs = {
             ATTR_ATTRIBUTION: ATTRIBUTION,
@@ -212,8 +214,8 @@ class PoolMathServiceSensor(
         """
         Update all managed sensors from coordinator data.
 
-        FIXME: Eventually this can go away once the UpdatableSensor class is updated to inherit from
-        CoordinatorEntity[PoolMathUpdateCoordinator].
+        FIXME: Eventually this can go away once the UpdatableSensor class is 
+        updated to inherit from CoordinatorEntity[PoolMathUpdateCoordinator].
         """
         try:
             # Iterate through all log entries and update sensor states
@@ -308,14 +310,15 @@ class PoolMathServiceSensor(
         return self._managed_sensors.keys()
 
 
-# FIXME: should also eventually inherit from CoordinatorEntity[PoolMathUpdateCoordinator]
 class UpdatableSensor(RestoreEntity, SensorEntity):
     """
     Representation of a sensor whose state is kept up-to-date by an external 
-    data source.
+    data source (the PoolMathServiceSensor acting as a specialized coordinator)
     
     NOTE: This should move to a CoordinatorEntity[PoolMathUpdateCoordinator] 
-    eventually (this did not exist at the time hass-poolmath was created).
+    eventually (this did not exist at the time hass-poolmath was created),
+    if all the attribute and min/max/target handling is moved into this from
+    the process_log_entry_callbacks() method.
     """
     def __init__(self, 
                  hass: HomeAssistant, 
@@ -457,10 +460,12 @@ class UpdatableSensor(RestoreEntity, SensorEntity):
         if last_state := await self.async_get_last_state():
             self._state = last_state.state
             self._attrs = last_state.attributes
-            LOG.debug(f'Restored sensor {self._name} to previous state {self._state}')
+            LOG.debug(f'Restored sensor {self._name} from prior state {self._state}')
 
+            # signal HA that the data for this sensor has been updated
             async_dispatcher_connect(
-                self.hass, DATA_UPDATED, self._schedule_immediate_update
+                self.hass, DATA_UPDATED,
+                self._schedule_immediate_update
             )
 
     @callback
