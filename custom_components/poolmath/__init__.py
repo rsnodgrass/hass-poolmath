@@ -6,6 +6,7 @@ from homeassistant.config_entries import ConfigEntry, ConfigEntryNotReady
 from homeassistant.const import CONF_NAME, Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import issue_registry as ir
+from .sensor import PoolMathServiceSensor
 
 from .const import (
     CONF_USER_ID,
@@ -69,8 +70,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         entry.async_on_unload(entry.add_update_listener(async_reload_entry))
 
         # initialize the platforms for this integration
-        platforms = [Platform.SENSOR]
-        await hass.config_entries.async_forward_entry_setups(entry, platforms)
+        await hass.config_entries.async_forward_entry_setups(entry, [Platform.SENSOR])
         
         return True
 
