@@ -196,7 +196,7 @@ class PoolMathFlowHandler(ConfigFlow, domain=DOMAIN):
                 return result
 
             except Exception as exc:
-                LOG.exception(f'Error processing Pool Math share URL: {exc}')
+                LOG.exception(f'Error processing Pool Math share URL: {result}', e)
                 return self.async_show_form(
                     step_id='user',
                     data_schema=_build_share_url_schema(

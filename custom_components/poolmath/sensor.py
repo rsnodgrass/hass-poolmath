@@ -98,7 +98,7 @@ class PoolMathServiceSensor(
         coordinator: PoolMathUpdateCoordinator,
         entry: ConfigEntry,
         config: PoolMathConfig,
-        add_entities_callback
+        add_entities_callback: AddEntitiesCallback
     ) -> None:
         """Initialize the Pool Math service sensor."""
         super().__init__(coordinator)

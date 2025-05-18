@@ -15,6 +15,7 @@ from .const import (
     ATTR_LAST_UPDATED,
     DEFAULT_NAME,
     DEFAULT_TIMEOUT,
+    SHARE_URL_PATTERN
 )
 
 LOG = logging.getLogger(__name__)
