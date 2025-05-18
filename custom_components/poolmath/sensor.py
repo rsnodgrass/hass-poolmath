@@ -182,8 +182,7 @@ class PoolMathServiceSensor(
         await super().async_added_to_hass()
 
         # restore state using RestoreEntity functionality
-        last_state = await self.async_get_last_state()
-        if last_state:
+        if last_state := await self.async_get_last_state():
             self._state = last_state.state
             self._attrs = last_state.attributes
 
@@ -436,23 +435,16 @@ class UpdatableSensor(RestoreEntity, SensorEntity):
 
     async def async_added_to_hass(self) -> None:
         await super().async_added_to_hass()
-        if self._state:
-            return
 
         # on restart, attempt to restore previous state using RestoreEntity
         # (see https://aarongodfrey.dev/programming/restoring-an-entity-in-home-assistant/)
-        self._state = await self.async_get_last_state()
-        if not self._state:
-            return
-        LOG.debug(f'Restored sensor {self._name} to previous state {self._state}')
+        if last_state := await self.async_get_last_state():
+            self._state = last_state.state
+            self._attrs = last_state.attributes
+            LOG.debug(f'Restored sensor {self._name} to previous state {self._state}')
 
-        # restore attributes
-        for attr in [ATTR_LAST_UPDATED_TIME, ATTR_LAST_UPDATED]:
-            if attr in state.attributes:
-                self._attrs[attr] = state.attributes[attr]
-
-        async_dispatcher_connect(
-            self.hass, DATA_UPDATED, self._schedule_immediate_update
+            async_dispatcher_connect(
+             self.hass, DATA_UPDATED, self._schedule_immediate_update
         )
 
     @callback
