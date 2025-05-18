@@ -10,6 +10,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import config_validation as cv
+from .client import PoolMathClient, parse_pool
 
 from .const import (
     CONF_USER_ID,
@@ -37,6 +38,8 @@ class PoolMathRepairFlow(RepairsFlow):
 
     async def async_step_share_url(self, user_input=None) -> FlowResult:
         """Ask for the share URL to extract user_id and pool_id."""
+        data_schema = vol.Schema({vol.Required(CONF_SHARE_URL): cv.string})
+        
         if user_input is not None:
             share_url = user_input[CONF_SHARE_URL]
 
@@ -45,90 +48,61 @@ class PoolMathRepairFlow(RepairsFlow):
             if not match:
                 return self.async_show_form(
                     step_id='share_url',
-                    data_schema=vol.Schema(
-                        {
-                            vol.Required(CONF_SHARE_URL): cv.string,
-                        }
-                    ),
+                    data_schema=data_schema,
                     errors={'base': 'invalid_url'},
                 )
 
             share_id = match.group(1)
 
             # Fetch the JSON data to extract user_id and pool_id
-            json_url = f'https://api.poolmathapp.com/share/{share_id}.json'
+            url = f'https://api.poolmathapp.com/share/{share_id}.json'
             try:
-                async with aiohttp.ClientSession() as session:
-                    async with session.get(json_url, timeout=10) as response:
-                        if response.status != 200:
-                            LOG.error(
-                                f'Error: Received status code {response.status} from API'
-                            )
-                            return self.async_show_form(
-                                step_id='share_url',
-                                data_schema=vol.Schema(
-                                    {
-                                        vol.Required(CONF_SHARE_URL): cv.string,
-                                    }
-                                ),
-                                errors={'base': 'api_error'},
-                            )
+                data = await PoolMathClient.async_fetch_data(url, timeout=10)
+                if not data:
+                    return self.async_show_form(
+                        step_id='share_url',
+                        data_schema=data_schema,
+                        errors={'base': 'api_error'},
+                    )
 
-                        # extract the required user_id/pool_id from the JSON response
-                        data = await response.json()
-                        pool = next(iter(data.get('pools', [])), {}).get('pool', {})
-                        user_id = pool.get('userId')
-                        pool_id = pool.get('id')
+                # extract the required user_id/pool_id from the JSON response
+                if pool := parse_pool(data):
+                    user_id = pool.get('userId')
+                    pool_id = pool.get('id')
+                    
+                if not user_id or not pool_id:
+                    LOG.error(
+                        f'Missing user_id={user_id}, pool_id={pool_id} from {url}'
+                    )
+                    LOG.debug(f'API response data: {data}')
+                    return self.async_show_form(
+                        step_id='share_url',
+                        data_schema=data_schema,
+                        errors={'base': 'missing_data'},
+                    )
 
-                        LOG.debug(f'Extracted user_id: {user_id}, pool_id: {pool_id}')
+                # update config entry with the new data
+                new_data = dict(self.config_entry.data)
+                new_data[CONF_USER_ID] = user_id
+                new_data[CONF_POOL_ID] = pool_id
 
-                        if not user_id or not pool_id:
-                            LOG.error(
-                                f'Missing data in API response: user_id={user_id}, pool_id={pool_id}'
-                            )
-                            LOG.debug(f'API response data: {data}')
-
-                            return self.async_show_form(
-                                step_id='share_url',
-                                data_schema=vol.Schema(
-                                    {
-                                        vol.Required(CONF_SHARE_URL): cv.string,
-                                    }
-                                ),
-                                errors={'base': 'missing_data'},
-                            )
-
-                        # update config entry with the new data
-                        new_data = dict(self.config_entry.data)
-                        new_data[CONF_USER_ID] = user_id
-                        new_data[CONF_POOL_ID] = pool_id
-
-                        self.hass.config_entries.async_update_entry(
-                            self.config_entry, data=new_data
-                        )
-                        return self.async_create_entry(title='', data={})
+                self.hass.config_entries.async_update_entry(
+                    self.config_entry, data=new_data
+                )
+                return self.async_create_entry(title='', data={})
 
             except Exception as exc:
                 LOG.exception('Error fetching data from Pool Math API: %s', exc)
                 return self.async_show_form(
                     step_id='share_url',
-                    data_schema=vol.Schema(
-                        {
-                            vol.Required(CONF_SHARE_URL): cv.string,
-                        }
-                    ),
+                    data_schema=data_schema,
                     errors={'base': 'unknown'},
                 )
 
         return self.async_show_form(
             step_id='share_url',
-            data_schema=vol.Schema(
-                {
-                    vol.Required(CONF_SHARE_URL): cv.string,
-                }
-            ),
+            data_schema=data_schema,
         )
-
 
 async def async_create_fix_flow(
     hass: HomeAssistant, issue_id: str, data: dict

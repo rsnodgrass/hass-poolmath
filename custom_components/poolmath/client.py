@@ -43,6 +43,12 @@ ONLY_INCLUDE_IF_TRACKED = {
     'csi': 'trackCSI',
 }
 
+def parse_pool(json: str) -> dict:
+    """Convenience function to extract pool sub-data from JSON"""
+    if pools := json.get('pools'):
+        if len(pools) > 0:
+            return pools[0].get('pool')
+    return None
 
 class PoolMathClient:
     """Client for interacting with the Pool Math API."""

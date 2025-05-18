@@ -25,7 +25,7 @@ from homeassistant.helpers.update_coordinator import (
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 
-from .client import PoolMathClient
+from .client import PoolMathClient, parse_pool
 from .const import (
     ATTRIBUTION,
     ATTR_NAME,
@@ -42,12 +42,7 @@ from .targets import POOL_MATH_SENSOR_SETTINGS, get_sensor_targets
 
 LOG = logging.getLogger(__name__)
 
-def parse_pool(json: str) -> dict:
-    """Convenience function to extract pool sub-data from JSON"""
-    if pools := json.get('pools'):
-        if len(pools) > 0:
-            return pools[0].get('pool')
-    return None
+
 
 async def async_setup_entry(
     hass: HomeAssistant,
