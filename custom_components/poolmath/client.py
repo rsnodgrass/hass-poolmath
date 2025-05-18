@@ -88,7 +88,7 @@ class PoolMathClient:
             raise
 
     @staticmethod
-    async def extract_ids_from_share_url(
+    async def fetch_ids_using_share_url(
         share_url: str, timeout: float = DEFAULT_TIMEOUT
     ) -> tuple[str | None, str | None]:
         """Extract user_id and pool_id from a Pool Math share URL."""
@@ -96,10 +96,9 @@ class PoolMathClient:
         if not match:
             LOG.error(f'Invalid Pool Math share URL {share_url}')
             return None, None
-
         share_id = match.group(1)
 
-        # call service to discover the user_id and pool_id
+        # call JSON service to discover the user_id and pool_id
         url = f'https://api.poolmathapp.com/share/{share_id}.json'
         try:
             data = await PoolMathClient.async_fetch_data(url, timeout=timeout)
@@ -131,11 +130,11 @@ class PoolMathClient:
                 attributes['target'] = target
                 attributes[ATTR_TARGET_SOURCE] = 'tfp'
 
-            if value_min := pool.get(f'{measurement}Min'):
-                attributes[ATTR_TARGET_MIN] = value_min
+            if target_min := pool.get(f'{measurement}Min'):
+                attributes[ATTR_TARGET_MIN] = target_min
 
-            if value_max := pool.get(f'{measurement}Max'):
-                attributes[ATTR_TARGET_MAX] = value_max
+            if target_max := pool.get(f'{measurement}Max'):
+                attributes[ATTR_TARGET_MAX] = target_max
 
         return attributes 
     

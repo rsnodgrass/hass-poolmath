@@ -68,7 +68,7 @@ async def _process_share_url(
     from .client import PoolMathClient
 
     try:
-        user_id, pool_id = await PoolMathClient.extract_ids_from_share_url(share_url)
+        user_id, pool_id = await PoolMathClient.fetch_ids_using_share_url(share_url)
 
         if not user_id or not pool_id:
             return flow.async_show_form(
