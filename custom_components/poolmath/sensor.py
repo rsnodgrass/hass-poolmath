@@ -113,12 +113,11 @@ class PoolMathUpdateCoordinator(DataUpdateCoordinator[PoolMathState]):
         try:
             data = await self._client.async_fetch_data()
 
-            # returning state will trigger HA to call
-            # _handle_coordinator_update() callbacks on all
-            # associated entities
+            # returning state triggers HA to call _handle_coordinator_update() 
+            # callbacks on all associated entities
             return PoolMathState(json=data, last_updated=data.get('last_updated'))
         except Exception as e:
-            LOG.error('Error updating Pool Math: %s', e)
+            LOG.error(f"Error updating Pool Math: {e}")
             raise UpdateFailed(e) from e
 
 
@@ -131,7 +130,6 @@ class PoolMathServiceSensor(
     that was implemented before Home Assistant added a standard
     DataUpdateCoordinator.
     """
-
     def __init__(
         self,
         hass: HomeAssistant,
@@ -204,7 +202,8 @@ class PoolMathServiceSensor(
                 'volume': pool.get('volume', 0),
             }
 
-        # schedule update of all sensors based on this pool's data
+        # schedule update for all sensors based on this pool's data
+        # (remove once Updata)
         self.hass.async_create_task(self._update_sensors_from_coordinator_data(json))
         self.async_write_ha_state()
 
@@ -308,7 +307,13 @@ class PoolMathServiceSensor(
 
 # FIXME: should also eventually inherit from CoordinatorEntity[PoolMathUpdateCoordinator]
 class UpdatableSensor(RestoreEntity, SensorEntity):
-    """Representation of a sensor whose state is kept up-to-date by an external data source."""
+    """
+    Representation of a sensor whose state is kept up-to-date by an external 
+    data source.
+    
+    NOTE: This should move to a CoordinatorEntity[PoolMathUpdateCoordinator] 
+    eventually (this did not exist at the time hass-poolmath was created).
+    """
 
     def __init__(self, hass, entry, name, config, sensor_type, poolmath_json):
         """Initialize the sensor."""
@@ -338,7 +343,7 @@ class UpdatableSensor(RestoreEntity, SensorEntity):
 
     def determine_unit_of_measurement(self, poolmath_json: dict) -> None:
         # TEMPORARY HACK to get correct unit of measurement for water temps (but this also
-        # applies to other units). No time to fix now, but perhaps someone will submit a PR
+        # applies to other units). No time to fix now, but perhaeps someone will submit a PR
         # to fix this in future.
         self._unit_of_measurement = self._config[ATTR_UNIT_OF_MEASUREMENT]
         if self._unit_of_measurement in [
@@ -449,11 +454,10 @@ class UpdatableSensor(RestoreEntity, SensorEntity):
         self._state = state.state
         LOG.debug(f'Restored sensor {self._name} previous state {self._state}')
 
-        # restore attributes
-        if ATTR_LAST_UPDATED_TIME in state.attributes:
-            self._attrs[ATTR_LAST_UPDATED_TIME] = state.attributes[
-                ATTR_LAST_UPDATED_TIME
-            ]
+        # restore any useful attributes
+        for attr in [ATTR_LAST_UPDATED_TIME, ATTR_LAST_UPDATED]:
+            if attr in state.attributes:
+                self._attrs[attr] = state.attributes[attr]
 
         async_dispatcher_connect(
             self.hass, DATA_UPDATED, self._schedule_immediate_update
