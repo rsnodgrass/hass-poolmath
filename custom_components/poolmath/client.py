@@ -71,6 +71,10 @@ class PoolMathClient:
         )
         LOG.debug(f"PoolMathClient '{name}' connecting to {self._url}")
 
+    async def async_get_json(self, timeout: float=DEFAULT_TIMEOUT) -> str:
+        """Fetch JSON data from the Pool Math service"""
+        return await PoolMathClient.async_fetch_data(self._url, timeout=timeout)
+
     @staticmethod
     async def async_fetch_data(url: str, timeout: float=DEFAULT_TIMEOUT) -> str:
         """Fetch JSON data from the Pool Math service"""
@@ -116,7 +120,7 @@ class PoolMathClient:
         return None, None
     
     @staticmethod
-    def parse_attributes_for_measurement(json, measurement):
+    def parse_attributes(json: dict[str, Any], measurement: str) -> dict[str, Any]:
         """
         Parse any extra attributes returned from Pool Math for this measurement
         """
@@ -175,7 +179,7 @@ class PoolMathClient:
                     )
                     continue
 
-            attr = parse_attributes_for_measurement(poolmath_json, measurement)
+            attr = PoolMathClient.parse_attributes(poolmath_json, measurement)
 
             # find the timestamp of the most recent measurement update
             timestamp = attr.get(ATTR_LAST_UPDATED)
