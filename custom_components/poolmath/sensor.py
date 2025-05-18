@@ -105,6 +105,7 @@ class PoolMathUpdateCoordinator(DataUpdateCoordinator[PoolMathState]):
             update_interval=config.update_interval,
         )
         self._client = client
+        self._config = config
 
     async def _async_update_data(self) -> PoolMathState:
         """
@@ -116,7 +117,8 @@ class PoolMathUpdateCoordinator(DataUpdateCoordinator[PoolMathState]):
 
             # returning state triggers HA to call _handle_coordinator_update() 
             # callbacks on all associated entities
-            return PoolMathState(json=json, last_updated=json.get('last_updated'))
+            return PoolMathState(json=json,
+                                 last_updated=json.get('last_updated'))
         except Exception as e:
             LOG.exception(e)
             raise UpdateFailed(e) from e
@@ -239,6 +241,10 @@ class PoolMathServiceSensor(
     async def get_sensor_entity(
         self, sensor_type: str, poolmath_json: dict
     ) -> UpdatableSensor | None:
+        """
+        Caches all the UpdatableSensors so can be updated when the coordinator
+        PoolMathServiceSensor has new JSON.
+        """
         if sensor := self._managed_sensors.get(sensor_type, None):
             return sensor
 
@@ -249,7 +255,8 @@ class PoolMathServiceSensor(
 
         name = f'{self._name} {config[ATTR_NAME]}'
         sensor = UpdatableSensor(
-            self.hass, self._entry, name, config, sensor_type, poolmath_json
+            self.hass, self._coordinator, self._entry, config, 
+            name, sensor_type, poolmath_json
         )
         self._managed_sensors[sensor_type] = sensor
 
@@ -310,11 +317,20 @@ class UpdatableSensor(RestoreEntity, SensorEntity):
     NOTE: This should move to a CoordinatorEntity[PoolMathUpdateCoordinator] 
     eventually (this did not exist at the time hass-poolmath was created).
     """
-    def __init__(self, hass, entry, name, config, sensor_type, poolmath_json):
+    def __init__(self, 
+                 hass: HomeAssistant, 
+                 coordinator: PoolMathUpdateCoordinator, 
+                 entry: ConfigEntry, 
+                 config: PoolMathConfig, 
+                 name: str, 
+                 sensor_type: str, 
+                 poolmath_json:dict):
         """Initialize the sensor."""
         super().__init__()
 
         self.hass = hass
+        self._coordinator = coordinator
+
         self._name = name
         self._sensor_type = sensor_type
         self._state = None
