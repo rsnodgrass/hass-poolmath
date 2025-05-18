@@ -35,8 +35,6 @@ def get_config_options(entry: ConfigEntry,
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Pool Math from a config entry."""
-    return False # FIXME: force disable this integration for testing
-
     # if config is using the old format with share_id, create a repair issue
     if CONF_SHARE_ID in entry.data and (
         CONF_USER_ID not in entry.data or CONF_POOL_ID not in entry.data
