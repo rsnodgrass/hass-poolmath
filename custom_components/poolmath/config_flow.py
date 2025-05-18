@@ -21,6 +21,7 @@ from .const import (
     DOMAIN,
     INTEGRATION_NAME,
 )
+ from .client import PoolMathClient
 
 LOG = logging.getLogger(__name__)
 
@@ -29,8 +30,8 @@ TARGET_OPTIONS = vol.All(
     vol.In(
         {
             'tfp': 'Trouble Free Pools',
-            'bioguard': 'Bio Guard',
-            'robert_lowry': 'Robert Lowry',
+            #'bioguard': 'Bio Guard',
+            #'robert_lowry': 'Robert Lowry',
         }
     )
 )
@@ -65,7 +66,6 @@ async def _process_share_url(
     Returns:
         A FlowResult with either an error form or the extracted IDs
     """
-    from .client import PoolMathClient
 
     try:
         user_id, pool_id = await PoolMathClient.fetch_ids_using_share_url(share_url)
@@ -193,9 +193,10 @@ class PoolMathFlowHandler(ConfigFlow, domain=DOMAIN):
                     self._abort_if_unique_id_configured()
 
                     return self.async_create_entry(title=INTEGRATION_NAME, data=result)
+
                 return result
 
-            except Exception as exc:
+            except Exception as e:
                 LOG.exception(f'Error processing Pool Math share URL: {result}', e)
                 return self.async_show_form(
                     step_id='user',
