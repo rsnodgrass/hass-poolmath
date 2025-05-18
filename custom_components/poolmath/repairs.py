@@ -32,8 +32,6 @@ class PoolMathRepairFlow(RepairsFlow):
         """Handle the first step of a fix flow."""
         return await self.async_step_share_url()
 
-
-
     async def async_step_share_url(self, user_input=None) -> FlowResult:
         """Ask for the share URL to extract user_id and pool_id."""
         data_schema = vol.Schema({vol.Required(CONF_SHARE_URL): cv.string})

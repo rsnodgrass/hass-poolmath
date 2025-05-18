@@ -12,7 +12,7 @@ from .const import (
     ATTR_TARGET_MAX,
     ATTR_TARGET_MIN,
     ATTR_TARGET_SOURCE,
-    ATTR_LAST_UPDATED_TIME,
+    ATTR_LAST_UPDATED,
     DEFAULT_NAME,
     DEFAULT_TIMEOUT,
 )
@@ -124,7 +124,7 @@ class PoolMathClient:
         if pool := parse_pool(json):
             overview = pool.get('overview')
             if timestamp := overview.get(f'{measurement}Ts'):
-                attributes[ATTR_LAST_UPDATED_TIME] = timestamp
+                attributes[ATTR_LAST_UPDATED] = timestamp
 
             if target := pool.get(f'{measurement}Target'):
                 attributes['target'] = target
@@ -178,7 +178,7 @@ class PoolMathClient:
             attr = parse_attributes_for_measurement(poolmath_json, measurement)
 
             # find the timestamp of the most recent measurement update
-            timestamp = attr.get(ATTR_LAST_UPDATED_TIME)
+            timestamp = attr.get(ATTR_LAST_UPDATED)
             if not latest_timestamp or timestamp > latest_timestamp:
                 latest_timestamp = timestamp
 

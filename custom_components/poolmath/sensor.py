@@ -11,7 +11,6 @@ from homeassistant.const import (
     ATTR_ATTRIBUTION,
     UnitOfTemperature,
     ATTR_LAST_UPDATED,
-    ATTR_LAST_UPDATED_TIME,
     ATTR_UNIT_OF_MEASUREMENT,
     DATA_UPDATED,
 )
@@ -224,7 +223,7 @@ class PoolMathServiceSensor(
                 json, self._update_sensor_callback
             )
             if timestamp:
-                self._attrs[ATTR_LAST_UPDATED_TIME] = str(timestamp)
+                self._attrs[ATTR_LAST_UPDATED] = str(timestamp)
         except Exception as e:
             LOG.exception(e)
 
@@ -379,15 +378,17 @@ class UpdatableSensor(RestoreEntity, SensorEntity):
         """Handle updated data from the coordinator."""
         if not self._coordinator:
             return
-
+        
         # FIXME: update the appropriate key from poolmath_json
         # which is likely self._sensor_type (but may not be)
         #
+        # measurement_key = self._sensor_type
         # poolmath_json = self._coordinator.data.json
-        # if pool := parse_pool(poolmath_json):
-        #   extract the appropriate key for this sensor
-        #    self.inject_state(pool)
-        #    self.async_write_ha_state()
+        # value = None
+        # attr = get_attributes_for_measurement(poolmath_json, measurement_key)
+        # timestamp = attr.get[ATTR_LAST_UPDATED]
+        # self.inject_state(self, value, timestamp, attributes=attr)
+        # self.async_write_ha_state()
 
     @property
     def name(self):
@@ -423,7 +424,6 @@ class UpdatableSensor(RestoreEntity, SensorEntity):
         Inject the current state externally (since an external coordinator is
         calling the service to retrieve multiple sensors at once).
         """
-        self._attrs[ATTR_LAST_UPDATED_TIME] = timestamp
         self._attrs[ATTR_LAST_UPDATED] = datetime.fromtimestamp(
             timestamp / 1000.0
         ).strftime('%Y-%m-%d %H:%M:%S')
