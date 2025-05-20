@@ -83,6 +83,19 @@ async def async_setup_entry(
     await coordinator.async_config_entry_first_refresh()
 
 
+def get_device_info(config: PoolMathConfig) -> DeviceInfo:
+    return DeviceInfo(
+        identifiers={(DOMAIN, config.pool_id)},
+        # configuration_url="https://troublefreepool.com/blog/poolmath/",
+        configuration_url=f"https://api.poolmathapp.com/share/pool?userId={config.user_id}&poolId={config.pool_id}",
+        entry_type=DeviceEntryType.SERVICE,
+        manufacturer="Pool Math",
+        model="Pool",  # FIXME: Translate
+        name=f"Pool {config.pool_id}",  # FIXME: this should probably come from JSON name for this pool
+        # name_by_user=  ... the name set by the user in Home Assistant
+    )
+
+
 class PoolMathServiceSensor(
     CoordinatorEntity[PoolMathUpdateCoordinator], RestoreSensor, SensorEntity
 ):
@@ -92,6 +105,10 @@ class PoolMathServiceSensor(
     that was implemented before Home Assistant added a standard
     DataUpdateCoordinator...with a bit more attribute handling and
     extraction of targets from JSON data.
+
+    NOTE: Once the DataCoordinator also direcly updates the UpdatableSensors,
+    we could get rid of the sensor that tracks the PoolMathServiceSensor
+    entirely, just leaving the actual data sensors.
     """
 
     def __init__(
@@ -111,25 +128,24 @@ class PoolMathServiceSensor(
         self._entry = entry
 
         self._name = config.name
+        self._attr_icon = "mdi:water"
 
         self._attrs = {
             ATTR_ATTRIBUTION: ATTRIBUTION,
             CONF_POOL_ID: config.pool_id,
             CONF_USER_ID: config.user_id,
+            "url": f"https://api.poolmathapp.com/share/?userId={config.user_id}&poolId={config.pool_id}",
         }
-        self._attr_name = f"Pool: {config.name}"
+        self._attr_name = f"Pool Math Service: {config.name}"
         self._attr_unique_id = f"poolmath_{config.user_id}_{config.pool_id}"
-        self._attr_icon = "mdi:water"
-        self._attr_device_info = DeviceInfo(
-            configuration_url="https://troublefreepool.com/blog/poolmath/",
-            entry_type=DeviceEntryType.SERVICE,
-            identifiers={(DOMAIN, f"pool_math_{config.user_id}_{config.pool_id}")},
-            manufacturer="Pool Math (Trouble Free Pool)",
-            name=f"Pool Math {config.pool_id}",
-        )
 
         self._managed_sensors = {}
         self._add_entities_callback = add_entities_callback
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        """Return the device info."""
+        return get_device_info(self._config)
 
     @property
     def state(self) -> str | None:
@@ -164,7 +180,7 @@ class PoolMathServiceSensor(
         json = self._coordinator.data.json
         if pool := parse_pool(json):
             self._attrs |= {
-                "name": pool.get("name", "Unknown Pool"),
+                "name": pool.get("name", "Unknown Pool"),  # FIXME: translate
                 "volume": pool.get("volume", 0),
             }
 
@@ -213,17 +229,18 @@ class PoolMathServiceSensor(
         if sensor := self._managed_sensors.get(sensor_type, None):
             return sensor
 
-        config = POOL_MATH_SENSOR_SETTINGS.get(sensor_type, None)
-        if config is None:
+        defaults = POOL_MATH_SENSOR_SETTINGS.get(sensor_type, None)
+        if defaults is None:
             LOG.warning(f"Unknown sensor '{sensor_type}' discovered for {self.name}")
             return None
 
-        name = f"{self._name} {config[ATTR_NAME]}"
+        name = f"{self._name} {defaults[ATTR_NAME]}"
         sensor = UpdatableSensor(
             self.hass,
             self._coordinator,
             self._entry,
-            config,
+            self._config,
+            defaults,
             name,
             sensor_type,
             poolmath_json,
@@ -302,6 +319,7 @@ class UpdatableSensor(RestoreSensor, SensorEntity):
         coordinator: PoolMathUpdateCoordinator,
         entry,
         config: PoolMathConfig,
+        defaults,
         name: str,
         sensor_type: str,
         poolmath_json: dict,
@@ -318,32 +336,30 @@ class UpdatableSensor(RestoreSensor, SensorEntity):
 
         self._entry = entry
         self._config = config
+        self._defaults = defaults
 
-        pool_id = config.get(CONF_POOL_ID)
-
+        self._attr_unique_id = f"poolmath_{config.pool_id}_{sensor_type}"
         self._attrs = {
             ATTR_ATTRIBUTION: ATTRIBUTION,
-            CONF_POOL_ID: pool_id,
-            CONF_USER_ID: config.get(CONF_USER_ID),
+            CONF_POOL_ID: config.pool_id,
+            CONF_USER_ID: config.user_id,
+            ATTR_DESCRIPTION: defaults.get(ATTR_DESCRIPTION),  # FIXME: translate!
         }
 
-        self._attr_unique_id = f"poolmath_{pool_id}_{sensor_type}"
-        self._attr_device_info = DeviceInfo(
-            configuration_url="https://www.troublefreepool.com/blog/poolmath/",
-            entry_type=DeviceEntryType.SERVICE,
-            identifiers={(DOMAIN, self._entry.entry_id)},
-            manufacturer="Pool Math (Trouble Free Pool)",
-            name="Pool Math",
-        )
-
         self._set_unit_of_measurement(poolmath_json)
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        """Return the device info."""
+        return get_device_info(self._config)
+
 
     def _set_unit_of_measurement(self, poolmath_json: dict) -> None:
         """
         If this is a temp sensor, update the unit of measurement to the
         units being used in the JSON response from Pool Math.
         """
-        units = self._config[ATTR_UNIT_OF_MEASUREMENT]
+        units = self._defaults[ATTR_UNIT_OF_MEASUREMENT]
 
         # set units for temperature sensors to the units returned by Pool Math
         if units in [
@@ -401,7 +417,7 @@ class UpdatableSensor(RestoreSensor, SensorEntity):
 
     @property
     def icon(self):
-        return self._config["icon"]
+        return self._defaults["icon"]
 
     async def inject_state(self, state, timestamp, attributes=None) -> None:
         """
@@ -419,7 +435,8 @@ class UpdatableSensor(RestoreSensor, SensorEntity):
         # ancillary data (e.g. targets)
         if self._state != state:
             self._state = state
-            await self.update_sensor_targets()
+
+        await self.update_sensor_targets()
 
     async def update_sensor_targets(self) -> None:
         """
