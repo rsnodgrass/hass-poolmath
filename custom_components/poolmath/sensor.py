@@ -10,7 +10,7 @@ from homeassistant.const import (
     CONF_SCAN_INTERVAL,
     ATTR_ATTRIBUTION,
     UnitOfTemperature,
-    ATTR_UNIT_OF_MEASUREMENT
+    ATTR_UNIT_OF_MEASUREMENT,
 )
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
@@ -38,6 +38,7 @@ from .targets import POOL_MATH_SENSOR_SETTINGS, get_sensor_targets
 
 LOG = logging.getLogger(__name__)
 
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
@@ -63,7 +64,7 @@ async def async_setup_entry(
     )
     coordinator = PoolMathUpdateCoordinator(hass, client, config)
 
-# create the core PoolMathServiceSensor, which is responsible for updating all other sensors
+    # create the core PoolMathServiceSensor, which is responsible for updating all other sensors
     # FIXME: We should move all the UpdatableSensors to just be
     # updated by the PoolMathUpdateCoordinator directly. The DataUpdateCoordinator
     # pattern didn't exist within HA when hass-poolmath was created, but basically
@@ -92,13 +93,14 @@ class PoolMathServiceSensor(
     DataUpdateCoordinator...with a bit more attribute handling and
     extraction of targets from JSON data.
     """
+
     def __init__(
         self,
         hass: HomeAssistant,
         coordinator: PoolMathUpdateCoordinator,
         entry: ConfigEntry,
         config: PoolMathConfig,
-        add_entities_callback: AddEntitiesCallback
+        add_entities_callback: AddEntitiesCallback,
     ) -> None:
         """Initialize the Pool Math service sensor."""
         super().__init__(coordinator)
@@ -115,15 +117,15 @@ class PoolMathServiceSensor(
             CONF_POOL_ID: config.pool_id,
             CONF_USER_ID: config.user_id,
         }
-        self._attr_name = f'Pool: {config.name}'
-        self._attr_unique_id = f'poolmath_{config.user_id}_{config.pool_id}'
-        self._attr_icon = 'mdi:water'
+        self._attr_name = f"Pool: {config.name}"
+        self._attr_unique_id = f"poolmath_{config.user_id}_{config.pool_id}"
+        self._attr_icon = "mdi:water"
         self._attr_device_info = DeviceInfo(
-            configuration_url='https://troublefreepool.com/blog/poolmath/',
+            configuration_url="https://troublefreepool.com/blog/poolmath/",
             entry_type=DeviceEntryType.SERVICE,
-            identifiers={(DOMAIN, f'pool_math_{config.user_id}_{config.pool_id}')},
-            manufacturer='Pool Math (Trouble Free Pool)',
-            name='Pool Math',
+            identifiers={(DOMAIN, f"pool_math_{config.user_id}_{config.pool_id}")},
+            manufacturer="Pool Math (Trouble Free Pool)",
+            name=f"Pool Math {config.pool_id}",
         )
 
         self._managed_sensors = {}
@@ -147,10 +149,9 @@ class PoolMathServiceSensor(
         if last_state := await self.async_get_last_sensor_data():
             self._state = last_state.native_value
             self._attr_native_value = last_state.native_value
-            LOG.debug(f'Restored sensor {self._name} from prior state {self._state}')
+            LOG.debug(f"Restored sensor {self._name} from prior state {self._state}")
 
         await super().async_added_to_hass()
-            
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -163,8 +164,8 @@ class PoolMathServiceSensor(
         json = self._coordinator.data.json
         if pool := parse_pool(json):
             self._attrs |= {
-                'name': pool.get('name', 'Unknown Pool'),
-                'volume': pool.get('volume', 0),
+                "name": pool.get("name", "Unknown Pool"),
+                "volume": pool.get("volume", 0),
             }
 
         # schedule update for all sensors based on this pool's data
@@ -176,7 +177,7 @@ class PoolMathServiceSensor(
         """
         Update all managed sensors from coordinator data.
 
-        FIXME: Eventually this can go away once the UpdatableSensor class is 
+        FIXME: Eventually this can go away once the UpdatableSensor class is
         updated to inherit from CoordinatorEntity[PoolMathUpdateCoordinator].
         """
         try:
@@ -217,10 +218,15 @@ class PoolMathServiceSensor(
             LOG.warning(f"Unknown sensor '{sensor_type}' discovered for {self.name}")
             return None
 
-        name = f'{self._name} {config[ATTR_NAME]}'
+        name = f"{self._name} {config[ATTR_NAME]}"
         sensor = UpdatableSensor(
-            self.hass, self._coordinator, self._entry, config, 
-            name, sensor_type, poolmath_json
+            self.hass,
+            self._coordinator,
+            self._entry,
+            config,
+            name,
+            sensor_type,
+            poolmath_json,
         )
         self._managed_sensors[sensor_type] = sensor
 
@@ -236,12 +242,12 @@ class PoolMathServiceSensor(
         sensor = await self.get_sensor_entity(measurement_type, poolmath_json)
         if sensor and sensor.state != state:
             LOG.info(
-                f'{sensor.name} {measurement_type}={state} {sensor.unit_of_measurement} (timestamp={timestamp})'
+                f"{sensor.name} {measurement_type}={state} {sensor.unit_of_measurement} (timestamp={timestamp})"
             )
             await sensor.inject_state(state, timestamp, attributes)
 
             # if FC or CC is updated, update the calculated TC sensor as well
-            if measurement_type in ['fc', 'cc']:
+            if measurement_type in ["fc", "cc"]:
                 await self._update_total_chlorine_sensor(
                     timestamp, attributes, poolmath_json
                 )
@@ -253,44 +259,53 @@ class PoolMathServiceSensor(
         """
         # NOTE: If a pypoolmath client is ever created, it may be better to
         # just inject a 'tc' key/value into the response JSON rather than here.
-        fc_sensor = await self.get_sensor_entity('fc', poolmath_json)
-        cc_sensor = await self.get_sensor_entity('cc', poolmath_json)
-        if fc_sensor and cc_sensor and fc_sensor.state is not None and cc_sensor.state is not None:
+        fc_sensor = await self.get_sensor_entity("fc", poolmath_json)
+        cc_sensor = await self.get_sensor_entity("cc", poolmath_json)
+        if (
+            fc_sensor
+            and cc_sensor
+            and fc_sensor.state is not None
+            and cc_sensor.state is not None
+        ):
             try:
-                if tc_sensor := await self.get_sensor_entity('tc', poolmath_json):
+                if tc_sensor := await self.get_sensor_entity("tc", poolmath_json):
                     fc = float(fc_sensor.state)
                     cc = float(cc_sensor.state)
                     tc = fc + cc
 
-                    LOG.info(f'{self._name} Total Chlorine: FC {fc} + CC {cc} = TC {tc} mg/L')
+                    LOG.info(
+                        f"{self._name} Total Chlorine: FC {fc} + CC {cc} = TC {tc} mg/L"
+                    )
                     await tc_sensor.inject_state(tc, timestamp, attributes)
             except (ValueError, TypeError) as e:
-                LOG.warning(f'Error calculating Total Chlorine: {e}')
+                LOG.warning(f"Error calculating Total Chlorine: {e}")
 
     @property
     def sensor_names(self):
         return self._managed_sensors.keys()
 
 
-
 class UpdatableSensor(RestoreSensor, SensorEntity):
     """
-    Representation of a sensor whose state is kept up-to-date by an external 
+    Representation of a sensor whose state is kept up-to-date by an external
     data source (the PoolMathServiceSensor acting as a specialized coordinator)
-    
-    NOTE: This should move to a CoordinatorEntity[PoolMathUpdateCoordinator] 
+
+    NOTE: This should move to a CoordinatorEntity[PoolMathUpdateCoordinator]
     eventually (this did not exist at the time hass-poolmath was created),
     if all the attribute and min/max/target handling is moved into this from
     the process_log_entry_callbacks() method.
     """
-    def __init__(self,
-                 hass: HomeAssistant, 
-                 coordinator: PoolMathUpdateCoordinator, 
-                 entry,
-                 config: PoolMathConfig, 
-                 name: str, 
-                 sensor_type: str, 
-                 poolmath_json:dict):
+
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        coordinator: PoolMathUpdateCoordinator,
+        entry,
+        config: PoolMathConfig,
+        name: str,
+        sensor_type: str,
+        poolmath_json: dict,
+    ):
         """Initialize the sensor."""
         super().__init__()
 
@@ -303,22 +318,22 @@ class UpdatableSensor(RestoreSensor, SensorEntity):
 
         self._entry = entry
         self._config = config
-        
+
         pool_id = config.get(CONF_POOL_ID)
-        
+
         self._attrs = {
             ATTR_ATTRIBUTION: ATTRIBUTION,
             CONF_POOL_ID: pool_id,
-            CONF_USER_ID: config.get(CONF_USER_ID)
+            CONF_USER_ID: config.get(CONF_USER_ID),
         }
-        
-        self._attr_unique_id = f'poolmath_{pool_id}_{sensor_type}'
+
+        self._attr_unique_id = f"poolmath_{pool_id}_{sensor_type}"
         self._attr_device_info = DeviceInfo(
-            configuration_url='https://www.troublefreepool.com/blog/poolmath/',
+            configuration_url="https://www.troublefreepool.com/blog/poolmath/",
             entry_type=DeviceEntryType.SERVICE,
             identifiers={(DOMAIN, self._entry.entry_id)},
-            manufacturer='Pool Math (Trouble Free Pool)',
-            name='Pool Math',
+            manufacturer="Pool Math (Trouble Free Pool)",
+            name="Pool Math",
         )
 
         self._set_unit_of_measurement(poolmath_json)
@@ -329,19 +344,19 @@ class UpdatableSensor(RestoreSensor, SensorEntity):
         units being used in the JSON response from Pool Math.
         """
         units = self._config[ATTR_UNIT_OF_MEASUREMENT]
-        
+
         # set units for temperature sensors to the units returned by Pool Math
         if units in [
             UnitOfTemperature.FAHRENHEIT,
             UnitOfTemperature.CELSIUS,
         ]:
             if pool := parse_pool(poolmath_json):
-                if pool.get('waterTempUnitDefault') == 1:
+                if pool.get("waterTempUnitDefault") == 1:
                     units = UnitOfTemperature.CELSIUS
                 else:
                     units = UnitOfTemperature.FAHRENHEIT
-            LOG.info(f'{self._name} temp units = {units}')
-        
+            LOG.info(f"{self._name} temp units = {units}")
+
         self._unit_of_measurement = units
 
     @callback
@@ -349,7 +364,7 @@ class UpdatableSensor(RestoreSensor, SensorEntity):
         """Handle updated data from the coordinator."""
         if not self._coordinator:
             return
-        
+
         # FIXME: update the appropriate key from poolmath_json
         # measurement_key = self._sensor_type
         # poolmath_json = self._coordinator.data.json
@@ -386,16 +401,16 @@ class UpdatableSensor(RestoreSensor, SensorEntity):
 
     @property
     def icon(self):
-        return self._config['icon']
+        return self._config["icon"]
 
     async def inject_state(self, state, timestamp, attributes=None) -> None:
         """
         Inject the current state externally (since an external coordinator is
         calling the service to retrieve multiple sensors at once).
         """
-        #self._attrs[ATTR_LAST_UPDATED] = datetime.fromtimestamp(
+        # self._attrs[ATTR_LAST_UPDATED] = datetime.fromtimestamp(
         #    timestamp / 1000.0
-        #).strftime('%Y-%m-%d %H:%M:%S')
+        # ).strftime('%Y-%m-%d %H:%M:%S')
 
         if attributes:
             self._attrs |= attributes
@@ -417,7 +432,7 @@ class UpdatableSensor(RestoreSensor, SensorEntity):
         the correct target values for a given sensor.
         """
         if targets := get_sensor_targets():
-            self._attrs[ATTR_TARGET_SOURCE] = 'tfp'
+            self._attrs[ATTR_TARGET_SOURCE] = "tfp"
             if target_val := targets.get(self._sensor_type):
                 self._attrs.update(target_val)
 
@@ -426,6 +441,6 @@ class UpdatableSensor(RestoreSensor, SensorEntity):
         if last_state := await self.async_get_last_sensor_data():
             self._state = last_state.native_value
             self._attr_native_value = last_state.native_value
-            LOG.debug(f'Restored sensor {self._name} from prior state {self._state}')
+            LOG.debug(f"Restored sensor {self._name} from prior state {self._state}")
 
         await super().async_added_to_hass()
