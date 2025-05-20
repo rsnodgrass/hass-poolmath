@@ -23,6 +23,7 @@ from .coordinator import PoolMathUpdateCoordinator
 from .client import PoolMathClient, parse_pool
 from .const import (
     ATTRIBUTION,
+    ATTR_DESCRIPTION,
     ATTR_NAME,
     ATTR_LAST_UPDATED,
     ATTR_TARGET_SOURCE,
@@ -54,7 +55,7 @@ async def async_setup_entry(
         target=entry.options[CONF_TARGET],
         update_interval=timedelta(minutes=entry.options.get(CONF_SCAN_INTERVAL, 8)),
     )
-    LOG.info(f"Setting up Pool Math sensor for {config.name} / {config.pool_id}")
+    LOG.info(f"Setting up Pool Math sensor '{config.name}' ({config.pool_id})")
 
     client = PoolMathClient(
         user_id=config.user_id,
@@ -86,7 +87,6 @@ async def async_setup_entry(
 def get_device_info(config: PoolMathConfig) -> DeviceInfo:
     return DeviceInfo(
         identifiers={(DOMAIN, config.pool_id)},
-        # configuration_url="https://troublefreepool.com/blog/poolmath/",
         configuration_url=f"https://api.poolmathapp.com/share/pool?userId={config.user_id}&poolId={config.pool_id}",
         entry_type=DeviceEntryType.SERVICE,
         manufacturer="Pool Math",
@@ -144,7 +144,7 @@ class PoolMathServiceSensor(
 
     @property
     def device_info(self) -> DeviceInfo:
-        """Return the device info."""
+        """Return the device info."""        
         return get_device_info(self._config)
 
     @property
@@ -179,8 +179,10 @@ class PoolMathServiceSensor(
 
         json = self._coordinator.data.json
         if pool := parse_pool(json):
+            remote_name = pool.get("name", "Unknown Pool")  # FIXME: translate
+            self._name = remote_name
             self._attrs |= {
-                "name": pool.get("name", "Unknown Pool"),  # FIXME: translate
+                "name": remote_name,
                 "volume": pool.get("volume", 0),
             }
 
@@ -231,7 +233,7 @@ class PoolMathServiceSensor(
 
         defaults = POOL_MATH_SENSOR_SETTINGS.get(sensor_type, None)
         if defaults is None:
-            LOG.warning(f"Unknown sensor '{sensor_type}' discovered for {self.name}")
+            LOG.warning(f"Unknown sensor '{sensor_type}' discovered for {self._name}")
             return None
 
         name = f"{self._name} {defaults[ATTR_NAME]}"
@@ -338,7 +340,7 @@ class UpdatableSensor(RestoreSensor, SensorEntity):
         self._config = config
         self._defaults = defaults
 
-        self._attr_unique_id = f"poolmath_{config.pool_id}_{sensor_type}"
+        self._attr_unique_id = f"poolmath_{config.pool_id}_{sensor_type}"        
         self._attrs = {
             ATTR_ATTRIBUTION: ATTRIBUTION,
             CONF_POOL_ID: config.pool_id,
@@ -352,7 +354,6 @@ class UpdatableSensor(RestoreSensor, SensorEntity):
     def device_info(self) -> DeviceInfo:
         """Return the device info."""
         return get_device_info(self._config)
-
 
     def _set_unit_of_measurement(self, poolmath_json: dict) -> None:
         """

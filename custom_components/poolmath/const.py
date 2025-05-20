@@ -3,7 +3,7 @@
 INTEGRATION_NAME = "Pool Math"
 DOMAIN = "poolmath"
 
-ATTRIBUTION = "Data by PoolMath (Trouble Free Pool)"
+ATTRIBUTION = "Data from Pool Math (Trouble Free Pool)"
 
 SHARE_URL_PATTERN = r"https://(?:api\.poolmathapp\.com|troublefreepool\.com)/(?:share/|mypool/)([a-zA-Z0-9]+)"
 
