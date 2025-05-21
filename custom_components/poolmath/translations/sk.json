@@ -4,10 +4,8 @@
       "user": {
         "description": "Pripojiť k Pool Math",
         "data": {
-          "user_id": "ID používateľa z URL zdieľania PoolMath (napr. api.poolmathapp.com/share/?userId=XXX)",
-          "pool_id": "ID bazéna z URL zdieľania PoolMath",
+          "share_url": "URL adresa pre zdieľanie aplikácie Pool Math z aplikácie Pool Math (Nastavenia > Zdieľanie)",
           "name": "Pool názov",
-          "timeout": "Časový limit aktualizácie",
           "target": "Zdroj cieľových úrovní",
           "scan_interval": "Ako často sa majú aktualizovať údaje o bazéne (v minútkach)"
         }
@@ -16,6 +14,8 @@
     "error": {
       "cannot_connect": "Nepodarilo sa pripojiť, skúste to znova",
       "invalid_auth": "Neplatné overenie",
+      "invalid_share_url": "Zadaná URL adresa nie je platnou URL adresou zdieľania Pool Math alebo sa nám z nej nepodarilo extrahovať informácie o fonde.",
+      "unknown_error": "Pri spracovaní zdieľanej adresy URL sa vyskytla neočakávaná chyba. Ďalšie podrobnosti nájdete v protokoloch.",
       "unknown": "Neočakávaná chyba"
     },
     "abort": {
@@ -26,12 +26,41 @@
     "step": {
       "init": {
         "data": {
-          "user_id": "ID používateľa z URL zdieľania PoolMath (napr. api.poolmathapp.com/share/?userId=XXX)",
-          "pool_id": "ID bazéna z URL zdieľania PoolMath",
+          "share_url": "URL adresa pre zdieľanie aplikácie Pool Math z aplikácie Pool Math (Nastavenia > Zdieľanie)",
           "name": "Pool názov",
-          "timeout": "Časový limit aktualizácie",
           "target": "Zdroj cieľových úrovní",
-          "scan_interval": "Ako často sa majú aktualizovať údaje o bazéne (v minútkach)"
+          "scan_interval": "Interval aktualizácie (minúty; predvolené = 8) – nenastavujte nižšiu hodnotu, aby ste chránili servery Pool Math."
+        }
+      }
+    },
+    "error": {
+      "invalid_share_url": "Zadaná URL adresa nie je platnou URL adresou zdieľania Pool Math alebo sa nám z nej nepodarilo extrahovať informácie o fonde.",
+      "unknown_error": "Pri spracovaní zdieľanej adresy URL sa vyskytla neočakávaná chyba. Ďalšie podrobnosti nájdete v protokoloch."
+    }
+  },
+  "issues": {
+    "config_migration_needed": {
+      "title": "Matematika bazéna: Vyžaduje sa aktualizácia konfigurácie",
+      "description": "Integrácia Pool Math bola aktualizovaná a teraz vyžaduje user_id a pool_id namiesto share_id. Odošlite opravu na aktualizáciu konfigurácie.",
+      "fix_flow": {
+        "step": {
+          "share_url": {
+            "title": "Aktualizácia konfigurácie matematických údajov fondu",
+            "description": "Vložte svoju URL adresu na zdieľanie aplikácie Pool Math z aplikácie Pool Math. Nájdete ju v časti Nastavenia > Zdieľanie. URL adresa by mala vyzerať takto: https://api.poolmathapp.com/share/XXXXXXX alebo https://troublefreepool.com/mypool/XXXXXXX.",
+            "data": {
+              "share_url": "URL adresa pre zdieľanie aplikácie Pool Math z aplikácie Pool Math (Nastavenia > Zdieľanie)"
+            }
+          }
+        },
+        "abort": {
+          "not_supported": "Táto oprava problému nie je podporovaná",
+          "already_fixed": "Konfigurácia už bola aktualizovaná"
+        },
+        "error": {
+          "invalid_url": "Zadaná URL adresa nie je platnou URL adresou zdieľania Pool Math.",
+          "api_error": "Nepodarilo sa pripojiť k službe Pool Math. Skontrolujte URL adresu a skúste to znova.",
+          "missing_data": "Nepodarilo sa extrahovať požadované údaje z odpovede API.",
+          "unknown": "Vyskytla sa neočakávaná chyba. Ďalšie podrobnosti nájdete v protokoloch."
         }
       }
     }
