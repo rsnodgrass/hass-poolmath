@@ -344,8 +344,7 @@ class UpdatableSensor(RestoreSensor, SensorEntity):
         self._attrs = {
             ATTR_ATTRIBUTION: ATTRIBUTION,
             CONF_POOL_ID: config.pool_id,
-            CONF_USER_ID: config.user_id,
-            ATTR_DESCRIPTION: defaults.get(ATTR_DESCRIPTION),  # FIXME: translate!
+            ATTR_DESCRIPTION: defaults.get(ATTR_DESCRIPTION),  # FIXME: translate!?
         }
 
         self._set_unit_of_measurement(poolmath_json)
