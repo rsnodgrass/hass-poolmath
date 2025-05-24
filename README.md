@@ -120,7 +120,7 @@ type: entities
 ### Feature Requests
 
 * move all communication/interfaces to Pool Math into separate `pypoolmath` package that can be maintained separately
-* add [@berniedp's calculation to suggest SWG % setting](https://community.home-assistant.io/t/custom-component-pool-math-sensors-for-pool-chemicals-and-operations/435126/12?u=ryans)
+* add [@berniedp's calculation to suggest SWG % setting](https://community.home-assistant.io/t/custom-component-pool-math-sensors-for-pool-chemicals-and-operations/435126/12?u=ryans) See [https://community.home-assistant.io/t/custom-component-pool-math-sensors-for-pool-chemicals-and-operations/435126/17](calculations here).
 
 ### Developer Testing
 
