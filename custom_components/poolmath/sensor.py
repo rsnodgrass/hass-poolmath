@@ -438,6 +438,9 @@ class UpdatableSensor(RestoreSensor, SensorEntity):
 
         await self.update_sensor_targets()
 
+        # Notify Home Assistant that the sensor state has changed
+        self.async_write_ha_state()
+
     async def update_sensor_targets(self) -> None:
         """
         Update attributes for the sensor to include targets if
