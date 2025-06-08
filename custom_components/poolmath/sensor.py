@@ -260,9 +260,9 @@ class PoolMathServiceSensor(
         """Update the sensor with the details from the measurement"""
         sensor = await self.get_sensor_entity(measurement_type, poolmath_json)
         if sensor and sensor.state != state:
-            LOG.info(
-                f"{sensor.name} {measurement_type}={state} {sensor.unit_of_measurement} (timestamp={timestamp})"
-            )
+            #LOG.info(
+            #    f"{sensor.name} {measurement_type}={state} {sensor.unit_of_measurement} (@ {timestamp})"
+            #)
             await sensor.inject_state(state, timestamp, attributes)
 
             # if FC or CC is updated, update the calculated TC sensor as well
@@ -434,9 +434,15 @@ class UpdatableSensor(RestoreSensor, SensorEntity):
         # if state actually changed, notify HA and update any
         # ancillary data (e.g. targets)
         if self._state != state:
-            self._state = state
+            LOG.info(f"Updating {self._name} ({self._sensor_type}) {self._state} -> {state} {self.unit_of_measurement} (@ {timestamp})")
 
+        self._state = state
+ 
         await self.update_sensor_targets()
+
+        # notify HA that the state has actually changed
+        self.async_write_ha_state()
+
 
     async def update_sensor_targets(self) -> None:
         """
