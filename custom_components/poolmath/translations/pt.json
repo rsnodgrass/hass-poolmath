@@ -1,0 +1,59 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "description": "Ligar ao Pool Math",
+                "data": {
+                    "user_id": "ID do Utilizador do PoolMath (exemplo: api.poolmathapp.com/share/?userId=XXX)",
+                    "pool_id": "ID da Piscina do PoolMath",
+                    "name": "Nome da Piscina",
+                    "timeout": "Tempo limite de atualização",
+                    "target": "Origem dos níveis de alvo",
+                    "scan_interval": "Com que frequência os dados da piscina devem ser atualizados (em minutos)"
+                }
+            }
+        },
+        "error": {
+            "cannot_connect": "Falha na conexão, por favor tente novamente",
+            "invalid_auth": "Autenticação inválida",
+            "unknown": "Erro inesperado"
+        },
+        "abort": {
+            "already_configured": "Dispositivo já configurado"
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "data": {
+                    "user_id": "ID do Utilizador do PoolMath (exemplo: api.poolmathapp.com/share/?userId=XXX)",
+                    "pool_id": "ID da Piscina do PoolMath",
+                    "name": "Nome da Piscina",
+                    "timeout": "Tempo limite de atualização",
+                    "target": "Origem dos níveis de alvo",
+                    "scan_interval": "Intervalo de atualização (minutos; predefinição=8) - evite definir um valor mais baixo para proteger os servidores do Pool Math"
+                }
+            }
+        }
+    },
+    "issues": {
+        "config_migration_needed": {
+            "title": "Pool Math: Atualização de Configuração Necessária",
+            "description": "A integração Pool Math foi atualizada e agora requer um user_id e pool_id em vez de share_id. Por favor, envie uma correção para atualizar a sua configuração.",
+            "fix_flow": {
+                "step": {
+                    "share_url": {
+                        "title": "Atualizar Configuração do Pool Math",
+                        "description": "Por favor, cole o seu URL de partilha do Pool Math a partir da aplicação Pool Math. Pode encontrá-lo em Definições > Partilha. O URL deverá ser algo como: https://api.poolmathapp.com/share/XXXXXXX ou https://troublefreepool.com/mypool/XXXXXXX.",
+                        "data": {
+                            "share_url": "URL de Partilha do Pool Math"
+                        }
+                    }
+                },
+                "abort": {
+                    "already_configured": "Configuração já atualizada"
+                }
+            }
+        }
+    }
+}
