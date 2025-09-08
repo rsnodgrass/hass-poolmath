@@ -1,8 +1,12 @@
+"""Data models for Pool Math integration."""
+
+from __future__ import annotations
+
 from dataclasses import dataclass
 from datetime import timedelta
 from typing import Any
+
 from homeassistant.const import UnitOfTemperature
-from .targets import get_known_sensor_target_slugs
 
 
 @dataclass
@@ -27,20 +31,18 @@ class PoolMathConfig:
             raise ValueError('user_id and pool_id are required')
         if self.timeout <= 0:
             raise ValueError('timeout must be positive')
-        if self.target not in get_known_sensor_target_slugs():
-            raise ValueError(
-                f'target must be one of: {", ".join(get_known_sensor_target_slugs())}'
-            )
+        if self.target != 'tfp':
+            raise ValueError(f"target must be 'tfp', got '{self.target}'")
         if self.unit_of_measurement not in [
             UnitOfTemperature.FAHRENHEIT,
             UnitOfTemperature.CELSIUS,
         ]:
-            raise ValueError("unit_of_measurement must be 'F' or 'C'")
+            raise ValueError('unit_of_measurement must be F or C')
 
 
 @dataclass
 class PoolMathState:
     """State data for Pool Math service."""
 
-    json: dict[str, Any] = None
+    json: dict[str, Any] | None = None
     last_updated: str | None = None

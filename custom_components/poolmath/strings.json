@@ -48,6 +48,58 @@
       }
     }
   },
+  "entity": {
+    "sensor": {
+      "fc": {
+        "name": "Free Chlorine"
+      },
+      "cc": {
+        "name": "Combined Chlorine"
+      },
+      "tc": {
+        "name": "Total Chlorine"
+      },
+      "ph": {
+        "name": "pH"
+      },
+      "ta": {
+        "name": "Total Alkalinity"
+      },
+      "ch": {
+        "name": "Calcium Hardness"
+      },
+      "cya": {
+        "name": "Cyanuric Acid"
+      },
+      "salt": {
+        "name": "Salt"
+      },
+      "bor": {
+        "name": "Borate"
+      },
+      "borate": {
+        "name": "Borate"
+      },
+      "csi": {
+        "name": "Calcite Saturation Index"
+      },
+      "temp": {
+        "name": "Temperature"
+      },
+      "waterTemp": {
+        "name": "Water Temperature"
+      },
+      "pressure": {
+        "name": "Filter Pressure"
+      },
+      "flowRate": {
+        "name": "Flow Rate"
+      },
+      "swgCellPercent": {
+        "name": "SWG Cell Percentage"
+      }
+    }
+  },
   "options": {
     "step": {
       "init": {

@@ -11,14 +11,10 @@ from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import config_validation as cv
 from .client import PoolMathClient, parse_pool
 
-from .const import (
-    CONF_USER_ID,
-    CONF_POOL_ID,
-    CONF_SHARE_URL,
-    SHARE_URL_PATTERN
-)
+from .const import CONF_USER_ID, CONF_POOL_ID, CONF_SHARE_URL, SHARE_URL_PATTERN
 
 LOG = logging.getLogger(__name__)
+
 
 class PoolMathRepairFlow(RepairsFlow):
     """Handler for an issue fixing flow."""
@@ -35,7 +31,7 @@ class PoolMathRepairFlow(RepairsFlow):
     async def async_step_share_url(self, user_input=None) -> FlowResult:
         """Ask for the share URL to extract user_id and pool_id."""
         data_schema = vol.Schema({vol.Required(CONF_SHARE_URL): cv.string})
-        
+
         if user_input is not None:
             share_url = user_input[CONF_SHARE_URL]
 
@@ -68,7 +64,7 @@ class PoolMathRepairFlow(RepairsFlow):
                 if pool := parse_pool(data):
                     user_id = pool.get('userId')
                     pool_id = pool.get('id')
-                    
+
                 if not pool or not user_id or not pool_id:
                     LOG.error(
                         f'Missing user_id={user_id}, pool_id={pool_id} from {url}'
@@ -102,6 +98,7 @@ class PoolMathRepairFlow(RepairsFlow):
             step_id='share_url',
             data_schema=data_schema,
         )
+
 
 async def async_create_fix_flow(
     hass: HomeAssistant, issue_id: str, data: dict

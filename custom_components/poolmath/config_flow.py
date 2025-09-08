@@ -29,7 +29,7 @@ TARGET_OPTIONS = vol.All(
     vol.In(
         {
             # FIXME: this should be in the translations
-            "tfp": "Trouble Free Pools",
+            'tfp': 'Trouble Free Pools',
             #'bioguard': 'Bio Guard',
             #'robert_lowry': 'Robert Lowry',
         }
@@ -83,7 +83,7 @@ async def _process_share_url(
                         CONF_SCAN_INTERVAL, DEFAULT_UPDATE_INTERVAL
                     ),
                 ),
-                errors={"base": "invalid_share_url"},
+                errors={'base': 'invalid_share_url'},
             )
 
         # Return the extracted IDs along with other options
@@ -98,7 +98,7 @@ async def _process_share_url(
         }
 
     except Exception as exc:
-        LOG.exception(f"Error processing Pool Math share URL: {exc}")
+        LOG.exception(f'Error processing Pool Math share URL: {exc}')
         return flow.async_show_form(
             step_id=step_id,
             data_schema=_build_share_url_schema(
@@ -109,13 +109,13 @@ async def _process_share_url(
                     CONF_SCAN_INTERVAL, DEFAULT_UPDATE_INTERVAL
                 ),
             ),
-            errors={"base": "unknown_error"},
+            errors={'base': 'unknown_error'},
         )
 
 
 def _initial_form(flow: ConfigFlow | OptionsFlow):
     """Return flow form for init/user step id."""
-    step_id = "user" if isinstance(flow, ConfigFlow) else "init"
+    step_id = 'user' if isinstance(flow, ConfigFlow) else 'init'
 
     # FIXME: default name should be translated
     default_name = DEFAULT_NAME
@@ -125,7 +125,7 @@ def _initial_form(flow: ConfigFlow | OptionsFlow):
     scan_interval = DEFAULT_UPDATE_INTERVAL
 
     # Get current values from options if available
-    if isinstance(flow, OptionsFlow) and hasattr(flow, "config_entry"):
+    if isinstance(flow, OptionsFlow) and hasattr(flow, 'config_entry'):
         options = flow.config_entry.options
         name = options.get(CONF_NAME, default_name)
         target = options.get(CONF_TARGET, DEFAULT_TARGET)
@@ -146,7 +146,6 @@ class PoolMathOptionsFlow(OptionsFlow):
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-
         # FIXME: default name should be translated
         default_name = DEFAULT_NAME
 
@@ -156,7 +155,7 @@ class PoolMathOptionsFlow(OptionsFlow):
 
             # If share URL is provided, extract user_id and pool_id
             if share_url:
-                result = await _process_share_url(self, "init", share_url, user_input)
+                result = await _process_share_url(self, 'init', share_url, user_input)
 
                 # If result is a dictionary (not a form), it contains the extracted data
                 if isinstance(result, dict):
@@ -192,14 +191,14 @@ class PoolMathFlowHandler(ConfigFlow, domain=DOMAIN):
 
             # Extract user_id and pool_id from the share URL
             try:
-                result = await _process_share_url(self, "user", share_url, user_input)
+                result = await _process_share_url(self, 'user', share_url, user_input)
 
                 # If result is a dictionary (not a form), it contains the extracted data
                 if isinstance(result, dict):
                     user_id = result[CONF_USER_ID]
                     pool_id = result[CONF_POOL_ID]
 
-                    await self.async_set_unique_id(f"{user_id}-{pool_id}")
+                    await self.async_set_unique_id(f'{user_id}-{pool_id}')
                     self._abort_if_unique_id_configured()
 
                     return self.async_create_entry(title=INTEGRATION_NAME, data=result)
@@ -207,9 +206,9 @@ class PoolMathFlowHandler(ConfigFlow, domain=DOMAIN):
                 return result
 
             except Exception as e:
-                LOG.exception(f"Error processing Pool Math share URL: {result}", e)
+                LOG.exception(f'Error processing Pool Math share URL: {result}', e)
                 return self.async_show_form(
-                    step_id="user",
+                    step_id='user',
                     data_schema=_build_share_url_schema(
                         share_url=share_url,
                         name=user_input.get(CONF_NAME, default_name),
@@ -218,7 +217,7 @@ class PoolMathFlowHandler(ConfigFlow, domain=DOMAIN):
                             CONF_SCAN_INTERVAL, DEFAULT_UPDATE_INTERVAL
                         ),
                     ),
-                    errors={"base": "unknown_error"},
+                    errors={'base': 'unknown_error'},
                 )
 
         return _initial_form(self)
@@ -238,3 +237,4 @@ class PoolMathFlowHandler(ConfigFlow, domain=DOMAIN):
         flow = PoolMathOptionsFlow()
         flow.config_entry = config_entry
         return flow
+

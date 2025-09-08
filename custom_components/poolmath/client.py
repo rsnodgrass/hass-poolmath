@@ -1,11 +1,13 @@
-import aiohttp
+"""Pool Math API client for fetching pool chemistry data."""
+
+from __future__ import annotations
+
 import logging
 import re
+from collections.abc import Awaitable, Callable
 from typing import Any
-from collections.abc import Awaitable
-from collections.abc import Callable
-from datetime import datetime
 
+import aiohttp
 from homeassistant.helpers.update_coordinator import UpdateFailed
 
 from .const import (
@@ -15,10 +17,27 @@ from .const import (
     ATTR_LAST_UPDATED,
     DEFAULT_NAME,
     DEFAULT_TIMEOUT,
-    SHARE_URL_PATTERN
+    SHARE_URL_PATTERN,
 )
 
 LOG = logging.getLogger(__name__)
+
+
+class PoolMathError(Exception):
+    """Base exception for Pool Math client."""
+
+
+class PoolMathConnectionError(PoolMathError):
+    """Connection-related errors."""
+
+
+class PoolMathTimeoutError(PoolMathError):
+    """Timeout errors."""
+
+
+class PoolMathValidationError(PoolMathError):
+    """Data validation errors."""
+
 
 # Constants for sensor keys and tracking
 KNOWN_SENSOR_KEYS = [
@@ -45,13 +64,29 @@ ONLY_INCLUDE_IF_TRACKED = {
     'csi': 'trackCSI',
 }
 
-def parse_pool(json: str) -> dict:
-    """Convenience function to extract pool sub-data from JSON"""
-    if json:
-        if pools := json.get('pools'):
-            if len(pools) > 0:
-                return pools[0].get('pool')
-    return None
+
+def parse_pool(json_data: dict[str, Any]) -> dict[str, Any] | None:
+    """Convenience function to extract pool sub-data from JSON.
+
+    Args:
+        json_data: Pool Math API response data
+
+    Returns:
+        Pool data dictionary or None if not found
+    """
+    if not json_data:
+        return None
+
+    pools = json_data.get('pools')
+    if not pools or not isinstance(pools, list) or len(pools) == 0:
+        return None
+
+    first_pool = pools[0]
+    if not isinstance(first_pool, dict):
+        return None
+
+    return first_pool.get('pool')
+
 
 class PoolMathClient:
     """Client for interacting with the Pool Math API."""
@@ -70,33 +105,102 @@ class PoolMathClient:
         self._url = (
             f'https://api.poolmathapp.com/share/pool?userId={user_id}&poolId={pool_id}'
         )
+        self._session: aiohttp.ClientSession | None = None
         LOG.debug(f"PoolMathClient '{name}' connecting to {self._url}")
 
-    async def async_get_json(self, timeout: float=DEFAULT_TIMEOUT) -> str:
-        """Fetch JSON data from the Pool Math service"""
-        return await PoolMathClient.async_fetch_data(self._url, timeout=timeout)
+    async def _get_session(self) -> aiohttp.ClientSession:
+        """Get or create aiohttp session."""
+        if self._session is None or self._session.closed:
+            timeout = aiohttp.ClientTimeout(total=self._timeout)
+            self._session = aiohttp.ClientSession(timeout=timeout)
+        return self._session
+
+    async def close(self) -> None:
+        """Close the client session."""
+        if self._session and not self._session.closed:
+            await self._session.close()
+            self._session = None
+
+    async def __aenter__(self):
+        """Async context manager entry."""
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """Async context manager exit."""
+        await self.close()
+
+    async def async_get_json(self, timeout: float = DEFAULT_TIMEOUT) -> dict[str, Any]:
+        """Fetch JSON data from the Pool Math service.
+
+        Args:
+            timeout: Request timeout in seconds
+
+        Returns:
+            Pool Math API response data
+        """
+        session = await self._get_session()
+        try:
+            LOG.info(f'GET {self._url} (timeout={timeout})')
+            async with session.get(self._url) as response:
+                LOG.debug(f'GET {self._url} returned {response.status}')
+                if response.status != 200:
+                    raise UpdateFailed(f'Failed with status {response.status} from {self._url}')
+                return await response.json()
+        except aiohttp.ClientTimeout as e:
+            LOG.error(f'Timeout fetching data from {self._url}')
+            raise PoolMathTimeoutError(f'Timeout accessing {self._url}') from e
+        except aiohttp.ClientError as e:
+            LOG.exception(f'Failed fetching data from {self._url}')
+            raise PoolMathConnectionError(f'Network error accessing {self._url}: {e}') from e
 
     @staticmethod
-    async def async_fetch_data(url: str, timeout: float=DEFAULT_TIMEOUT) -> str:
-        """Fetch JSON data from the Pool Math service"""
+    async def async_fetch_data(
+        url: str, timeout: float = DEFAULT_TIMEOUT
+    ) -> dict[str, Any]:
+        """Fetch JSON data from the Pool Math service.
+
+        Args:
+            url: API endpoint URL
+            timeout: Request timeout in seconds
+
+        Returns:
+            API response data
+
+        Raises:
+            UpdateFailed: If the request fails
+        """
         try:
-            async with aiohttp.ClientSession() as session:
+            timeout_obj = aiohttp.ClientTimeout(total=timeout)
+            async with aiohttp.ClientSession(timeout=timeout_obj) as session:
                 LOG.info(f'GET {url} (timeout={timeout})')
-                async with session.get(url, timeout=timeout) as response:
+                async with session.get(url) as response:
                     LOG.debug(f'GET {url} returned {response.status}')
                     if response.status != 200:
-                        raise UpdateFailed(f'Failed with status {response.status} from {url}')
- 
+                        raise UpdateFailed(
+                            f'Failed with status {response.status} from {url}'
+                        )
+
                     return await response.json()
+        except aiohttp.ClientTimeout as e:
+            LOG.error(f'Timeout fetching data from {url}')
+            raise PoolMathTimeoutError(f'Timeout accessing {url}') from e
         except aiohttp.ClientError as e:
-            LOG.exception(f'Failed fetching data from {url}', e)
-            raise
+            LOG.exception(f'Failed fetching data from {url}')
+            raise PoolMathConnectionError(f'Network error accessing {url}: {e}') from e
 
     @staticmethod
     async def fetch_ids_using_share_url(
         share_url: str, timeout: float = DEFAULT_TIMEOUT
     ) -> tuple[str | None, str | None]:
-        """Extract user_id and pool_id from a Pool Math share URL."""
+        """Extract user_id and pool_id from a Pool Math share URL.
+
+        Args:
+            share_url: Pool Math share URL from troublefreepool.com
+            timeout: Request timeout in seconds
+
+        Returns:
+            Tuple of (user_id, pool_id) or (None, None) if extraction fails
+        """
         match = re.search(SHARE_URL_PATTERN, share_url)
         if not match:
             LOG.error(f'Invalid Pool Math share URL {share_url}')
@@ -110,14 +214,16 @@ class PoolMathClient:
 
             # extract user_id and pool_id from the response
             if pool := parse_pool(data):
-                if user_id := pool.get('userId'):
-                    if pool_id := pool.get('id'):
-                        return user_id, pool_id
+                user_id = pool.get('userId')
+                pool_id = pool.get('id')
+                if user_id and pool_id:
+                    return user_id, pool_id
+
             LOG.error(f"Couldn't parse user/pool id from {url}: {data}")
-        except Exception as e:
-            LOG.exception(f"Failed GET {url}", e)
+        except Exception:
+            LOG.exception(f'Failed GET {url}')
         return None, None
-    
+
     @staticmethod
     def parse_attributes(json: dict[str, Any], measurement: str) -> dict[str, Any]:
         """
@@ -139,27 +245,30 @@ class PoolMathClient:
             if target_max := pool.get(f'{measurement}Max'):
                 attributes[ATTR_TARGET_MAX] = target_max
 
-        return attributes 
-    
+        return attributes
+
     async def process_log_entry_callbacks(
         self,
         poolmath_json: dict[str, Any],
         async_callback: Callable[
-            [str, datetime, float, dict[str, Any], dict[str, Any]], Awaitable[None]
+            [str, int | None, float, dict[str, Any], dict[str, Any]], Awaitable[None]
         ],
-    ) -> None:
-        """Call provided async callback once for each type of log entry
+    ) -> int | None:
+        """Call provided async callback once for each type of log entry.
 
         Args:
             poolmath_json: JSON response from Pool Math API
             async_callback: Callback function to process each measurement
+
+        Returns:
+            Timestamp of the most recent measurement or None
         """
         if not poolmath_json:
-            return
+            return None
 
         pool = parse_pool(poolmath_json)
         if not pool:
-            return
+            return None
 
         latest_timestamp = None
         overview = pool.get('overview')
@@ -186,28 +295,26 @@ class PoolMathClient:
                 latest_timestamp = timestamp
 
             # update the sensor
-            await async_callback(
-                measurement, timestamp, value, attr, poolmath_json
-            )
+            await async_callback(measurement, timestamp, value, attr, poolmath_json)
 
         return latest_timestamp
 
     @property
-    def pool_id(self):
+    def pool_id(self) -> str:
+        """Return the pool ID."""
         return self._pool_id
 
     @property
-    def user_id(self):
+    def user_id(self) -> str:
+        """Return the user ID."""
         return self._user_id
 
     @property
-    def name(self):
+    def name(self) -> str:
+        """Return the pool name."""
         return self._name
 
     @property
-    def url(self):
+    def url(self) -> str:
+        """Return the API URL."""
         return self._url
-
-    @staticmethod
-    def _entry_timestamp(entry):
-        return entry.find('time', class_='timestamp timereal').text

@@ -1,13 +1,17 @@
 """Integration with Pool Math by Trouble Free Pool"""
 
+from __future__ import annotations
+
 import logging
+from datetime import timedelta
+from typing import Any
 
 from homeassistant.config_entries import ConfigEntry, ConfigEntryNotReady
-from homeassistant.const import CONF_NAME, Platform
+from homeassistant.const import CONF_NAME, CONF_SCAN_INTERVAL, Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import issue_registry as ir
-from .sensor import PoolMathServiceSensor
 
+from .client import PoolMathClient
 from .const import (
     CONF_USER_ID,
     CONF_POOL_ID,
@@ -18,22 +22,37 @@ from .const import (
     DEFAULT_TARGET,
     DOMAIN,
 )
+from .coordinator import PoolMathUpdateCoordinator
+from .models import PoolMathConfig
 
 LOG = logging.getLogger(__name__)
 
-def get_config_options(entry: ConfigEntry, 
-                       keys: list,
-                       keys_with_defaults: dict = {}) -> dict:
+
+def get_config_options(
+    entry: ConfigEntry,
+    keys: list[str],
+    keys_with_defaults: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Return set of config options where ConfigEntry options take precedence.
+
+    Args:
+        entry: Config entry
+        keys: Required keys to extract
+        keys_with_defaults: Optional keys with default values
+
+    Returns:
+        Dictionary of configuration options
     """
-    Return set of config options where ConfigEntry options 
-    take precedence and override ConfigEntry data (which 
-    overrides any provided defaults).
-    """
+    if keys_with_defaults is None:
+        keys_with_defaults = {}
+
     options = {}
     for key in keys + list(keys_with_defaults.keys()):
         options[key] = entry.options.get(
-            key, entry.data.get(key, keys_with_defaults.get(key)))
+            key, entry.data.get(key, keys_with_defaults.get(key))
+        )
     return options
+
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Pool Math from a config entry."""
@@ -53,29 +72,58 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         return False
 
     try:
+        # Update entry with proper options
         hass.config_entries.async_update_entry(
             entry,
             options=get_config_options(
                 entry,
-                [ CONF_USER_ID, CONF_POOL_ID, CONF_NAME ],
-                { CONF_TIMEOUT: DEFAULT_TIMEOUT,
-                  CONF_TARGET: DEFAULT_TARGET}
-            )
+                [CONF_USER_ID, CONF_POOL_ID, CONF_NAME],
+                {
+                    CONF_TIMEOUT: DEFAULT_TIMEOUT,
+                    CONF_TARGET: DEFAULT_TARGET,
+                    CONF_SCAN_INTERVAL: 8,
+                },
+            ),
         )
 
-        # setup storage for this integration's data
-        hass.data.setdefault(DOMAIN, {})[entry.entry_id] = {}
-        
+        # Create configuration object
+        config = PoolMathConfig(
+            user_id=entry.options[CONF_USER_ID],
+            pool_id=entry.options[CONF_POOL_ID],
+            name=entry.options[CONF_NAME],
+            timeout=entry.options.get(CONF_TIMEOUT, DEFAULT_TIMEOUT),
+            target=entry.options[CONF_TARGET],
+            update_interval=timedelta(minutes=entry.options.get(CONF_SCAN_INTERVAL, 8)),
+        )
+
+        # Create client and coordinator
+        client = PoolMathClient(
+            user_id=config.user_id,
+            pool_id=config.pool_id,
+            name=config.name,
+            timeout=config.timeout,
+        )
+        coordinator = PoolMathUpdateCoordinator(hass, client, config)
+
+        # Store coordinator for platform setup
+        hass.data.setdefault(DOMAIN, {})[entry.entry_id] = {
+            'coordinator': coordinator,
+            'config': config,
+        }
+
         # when config options are updated, dynamically reload the entry
         entry.async_on_unload(entry.add_update_listener(async_reload_entry))
 
         # initialize the platforms for this integration
         await hass.config_entries.async_forward_entry_setups(entry, [Platform.SENSOR])
-        
+
+        LOG.info(
+            f"Pool Math integration setup completed for '{config.name}' ({config.pool_id})"
+        )
         return True
 
     except Exception as e:
-        LOG.error(f'Error setting up Pool Math integration: {e}')
+        LOG.exception(f'Error setting up Pool Math integration: {e}')
         raise ConfigEntryNotReady from e
 
 
@@ -90,5 +138,10 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         entry, [Platform.SENSOR]
     )
     if unload_ok:
+        # Clean up client session
+        coordinator = hass.data[DOMAIN][entry.entry_id]['coordinator']
+        if hasattr(coordinator, '_client'):
+            await coordinator._client.close()
         hass.data[DOMAIN].pop(entry.entry_id)
     return unload_ok
+
