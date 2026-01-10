@@ -5,16 +5,17 @@ from __future__ import annotations
 import logging
 import re
 from collections.abc import Awaitable, Callable
-from typing import Any
+from types import TracebackType
+from typing import Any, Self
 
 import aiohttp
 from homeassistant.helpers.update_coordinator import UpdateFailed
 
 from .const import (
+    ATTR_LAST_UPDATED,
     ATTR_TARGET_MAX,
     ATTR_TARGET_MIN,
     ATTR_TARGET_SOURCE,
-    ATTR_LAST_UPDATED,
     DEFAULT_NAME,
     DEFAULT_TIMEOUT,
     SHARE_URL_PATTERN,
@@ -39,8 +40,7 @@ class PoolMathValidationError(PoolMathError):
     """Data validation errors."""
 
 
-# Constants for sensor keys and tracking
-KNOWN_SENSOR_KEYS = [
+KNOWN_SENSOR_KEYS: list[str] = [
     'fc',
     'cc',
     'cya',
@@ -57,7 +57,7 @@ KNOWN_SENSOR_KEYS = [
     'swgCellPercent',
 ]
 
-ONLY_INCLUDE_IF_TRACKED = {
+ONLY_INCLUDE_IF_TRACKED: dict[str, str] = {
     'salt': 'trackSalt',
     'bor': 'trackBor',
     'cc': 'trackCC',
@@ -66,7 +66,7 @@ ONLY_INCLUDE_IF_TRACKED = {
 
 
 def parse_pool(json_data: dict[str, Any]) -> dict[str, Any] | None:
-    """Convenience function to extract pool sub-data from JSON.
+    """Extract pool sub-data from JSON response.
 
     Args:
         json_data: Pool Math API response data
@@ -98,6 +98,14 @@ class PoolMathClient:
         name: str = DEFAULT_NAME,
         timeout: float = DEFAULT_TIMEOUT,
     ) -> None:
+        """Initialize the client.
+
+        Args:
+            user_id: Pool Math user ID
+            pool_id: Pool Math pool ID
+            name: Pool name for logging
+            timeout: Request timeout in seconds
+        """
         self._user_id = user_id
         self._pool_id = pool_id
         self._name = name
@@ -106,7 +114,7 @@ class PoolMathClient:
             f'https://api.poolmathapp.com/share/pool?userId={user_id}&poolId={pool_id}'
         )
         self._session: aiohttp.ClientSession | None = None
-        LOG.debug(f"PoolMathClient '{name}' connecting to {self._url}")
+        LOG.debug('PoolMathClient initialized: name=%s, url=%s', name, self._url)
 
     async def _get_session(self) -> aiohttp.ClientSession:
         """Get or create aiohttp session."""
@@ -121,11 +129,16 @@ class PoolMathClient:
             await self._session.close()
             self._session = None
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> Self:
         """Async context manager entry."""
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         """Async context manager exit."""
         await self.close()
 
@@ -137,27 +150,36 @@ class PoolMathClient:
 
         Returns:
             Pool Math API response data
+
+        Raises:
+            PoolMathTimeoutError: If request times out
+            PoolMathConnectionError: If connection fails
+            UpdateFailed: If response status is not 200
         """
         session = await self._get_session()
         try:
-            LOG.info(f'GET {self._url} (timeout={timeout})')
+            LOG.debug('GET %s', self._url)
             async with session.get(self._url) as response:
-                LOG.debug(f'GET {self._url} returned {response.status}')
+                LOG.debug('GET %s status=%s', self._url, response.status)
                 if response.status != 200:
-                    raise UpdateFailed(f'Failed with status {response.status} from {self._url}')
+                    raise UpdateFailed(
+                        f'Failed with status {response.status} from {self._url}'
+                    )
                 return await response.json()
-        except aiohttp.ClientTimeout as e:
-            LOG.error(f'Timeout fetching data from {self._url}')
-            raise PoolMathTimeoutError(f'Timeout accessing {self._url}') from e
-        except aiohttp.ClientError as e:
-            LOG.exception(f'Failed fetching data from {self._url}')
-            raise PoolMathConnectionError(f'Network error accessing {self._url}: {e}') from e
+        except aiohttp.ClientTimeout as exc:
+            LOG.error('Timeout fetching data from %s', self._url)
+            raise PoolMathTimeoutError(f'Timeout accessing {self._url}') from exc
+        except aiohttp.ClientError as exc:
+            LOG.exception('Failed fetching data from Pool Math API')
+            raise PoolMathConnectionError(
+                f'Network error accessing {self._url}'
+            ) from exc
 
     @staticmethod
     async def async_fetch_data(
         url: str, timeout: float = DEFAULT_TIMEOUT
     ) -> dict[str, Any]:
-        """Fetch JSON data from the Pool Math service.
+        """Fetch JSON data from a Pool Math URL.
 
         Args:
             url: API endpoint URL
@@ -167,26 +189,27 @@ class PoolMathClient:
             API response data
 
         Raises:
-            UpdateFailed: If the request fails
+            PoolMathTimeoutError: If request times out
+            PoolMathConnectionError: If connection fails
+            UpdateFailed: If response status is not 200
         """
         try:
             timeout_obj = aiohttp.ClientTimeout(total=timeout)
             async with aiohttp.ClientSession(timeout=timeout_obj) as session:
-                LOG.info(f'GET {url} (timeout={timeout})')
+                LOG.debug('GET %s', url)
                 async with session.get(url) as response:
-                    LOG.debug(f'GET {url} returned {response.status}')
+                    LOG.debug('GET %s status=%s', url, response.status)
                     if response.status != 200:
                         raise UpdateFailed(
                             f'Failed with status {response.status} from {url}'
                         )
-
                     return await response.json()
-        except aiohttp.ClientTimeout as e:
-            LOG.error(f'Timeout fetching data from {url}')
-            raise PoolMathTimeoutError(f'Timeout accessing {url}') from e
-        except aiohttp.ClientError as e:
-            LOG.exception(f'Failed fetching data from {url}')
-            raise PoolMathConnectionError(f'Network error accessing {url}: {e}') from e
+        except aiohttp.ClientTimeout as exc:
+            LOG.error('Timeout fetching data from %s', url)
+            raise PoolMathTimeoutError(f'Timeout accessing {url}') from exc
+        except aiohttp.ClientError as exc:
+            LOG.exception('Failed fetching data from Pool Math API')
+            raise PoolMathConnectionError(f'Network error accessing {url}') from exc
 
     @staticmethod
     async def fetch_ids_using_share_url(
@@ -203,7 +226,7 @@ class PoolMathClient:
         """
         match = re.search(SHARE_URL_PATTERN, share_url)
         if not match:
-            LOG.error(f'Invalid Pool Math share URL {share_url}')
+            LOG.error('Invalid Pool Math share URL: %s', share_url)
             return None, None
         share_id = match.group(1)
 
@@ -212,27 +235,32 @@ class PoolMathClient:
         try:
             data = await PoolMathClient.async_fetch_data(url, timeout=timeout)
 
-            # extract user_id and pool_id from the response
             if pool := parse_pool(data):
                 user_id = pool.get('userId')
                 pool_id = pool.get('id')
                 if user_id and pool_id:
                     return user_id, pool_id
 
-            LOG.error(f"Couldn't parse user/pool id from {url}: {data}")
+            LOG.error("Couldn't parse user/pool id from %s", url)
         except Exception:
-            LOG.exception(f'Failed GET {url}')
+            LOG.exception('Failed to fetch data from Pool Math API')
         return None, None
 
     @staticmethod
-    def parse_attributes(json: dict[str, Any], measurement: str) -> dict[str, Any]:
+    def parse_attributes(json_data: dict[str, Any], measurement: str) -> dict[str, Any]:
+        """Parse extra attributes returned from Pool Math for a measurement.
+
+        Args:
+            json_data: Pool Math API response data
+            measurement: Measurement key
+
+        Returns:
+            Dictionary of parsed attributes
         """
-        Parse any extra attributes returned from Pool Math for this measurement
-        """
-        attributes = {}
-        if pool := parse_pool(json):
+        attributes: dict[str, Any] = {}
+        if pool := parse_pool(json_data):
             overview = pool.get('overview')
-            if timestamp := overview.get(f'{measurement}Ts'):
+            if overview and (timestamp := overview.get(f'{measurement}Ts')):
                 attributes[ATTR_LAST_UPDATED] = timestamp
 
             if target := pool.get(f'{measurement}Target'):
@@ -270,20 +298,24 @@ class PoolMathClient:
         if not pool:
             return None
 
-        latest_timestamp = None
+        latest_timestamp: int | None = None
         overview = pool.get('overview')
+        if not overview:
+            return None
 
         for measurement in KNOWN_SENSOR_KEYS:
             value = overview.get(measurement)
             if value is None:
                 continue
 
-            # if a measurement can be disabled for tracking in PoolMath, skip adding this
-            # sensor if the user has marked it to not be tracked
+            # if a measurement can be disabled for tracking in PoolMath, skip adding
+            # this sensor if the user has marked it to not be tracked
             if measurement in ONLY_INCLUDE_IF_TRACKED:
-                if not pool.get(ONLY_INCLUDE_IF_TRACKED.get(measurement)):
+                track_key = ONLY_INCLUDE_IF_TRACKED.get(measurement)
+                if track_key and not pool.get(track_key):
                     LOG.info(
-                        f'Ignoring measurement {measurement} since tracking is disable in PoolMath'
+                        'Ignoring measurement %s - tracking disabled in Pool Math',
+                        measurement,
                     )
                     continue
 
@@ -291,7 +323,7 @@ class PoolMathClient:
 
             # find the timestamp of the most recent measurement update
             timestamp = attr.get(ATTR_LAST_UPDATED)
-            if not latest_timestamp or timestamp > latest_timestamp:
+            if timestamp and (not latest_timestamp or timestamp > latest_timestamp):
                 latest_timestamp = timestamp
 
             # update the sensor

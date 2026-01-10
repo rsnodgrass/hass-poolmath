@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import timedelta
 from typing import Any
 
 from homeassistant.const import UnitOfTemperature
 
 
-@dataclass
+@dataclass(frozen=True, slots=True)
 class PoolMathConfig:
     """Configuration data for Pool Math integration."""
 
@@ -18,7 +18,7 @@ class PoolMathConfig:
     name: str = 'Pool'
     timeout: float = 15.0
     target: str = 'tfp'
-    update_interval: timedelta = timedelta(minutes=8)
+    update_interval: timedelta = field(default_factory=lambda: timedelta(minutes=8))
     unit_of_measurement: str = UnitOfTemperature.FAHRENHEIT
 
     def validate(self) -> None:
@@ -33,14 +33,14 @@ class PoolMathConfig:
             raise ValueError('timeout must be positive')
         if self.target != 'tfp':
             raise ValueError(f"target must be 'tfp', got '{self.target}'")
-        if self.unit_of_measurement not in [
+        if self.unit_of_measurement not in (
             UnitOfTemperature.FAHRENHEIT,
             UnitOfTemperature.CELSIUS,
-        ]:
+        ):
             raise ValueError('unit_of_measurement must be F or C')
 
 
-@dataclass
+@dataclass(slots=True)
 class PoolMathState:
     """State data for Pool Math service."""
 

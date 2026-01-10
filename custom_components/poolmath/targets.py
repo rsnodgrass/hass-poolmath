@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import logging
-from enum import Enum
-from typing import Any
+from enum import StrEnum
+from typing import Any, Final
 
 from homeassistant.const import (
     ATTR_ICON,
@@ -23,8 +23,9 @@ from .const import (
 LOG = logging.getLogger(__name__)
 
 
-class SensorType(str, Enum):
+class SensorType(StrEnum):
     """Pool Math sensor types."""
+
     COMBINED_CHLORINE = 'cc'
     FREE_CHLORINE = 'fc'
     PH = 'ph'
@@ -33,30 +34,32 @@ class SensorType(str, Enum):
     CYANURIC_ACID = 'cya'
     SALT = 'salt'
     BORATE = 'bor'
-    BORATE_ALT = 'borate'  # Alternative name
+    BORATE_ALT = 'borate'
     CSI = 'csi'
     TEMPERATURE = 'temp'
     WATER_TEMPERATURE = 'waterTemp'
     SWG_CELL_PERCENTAGE = 'swgCellPercentage'
-    TOTAL_CHLORINE = 'tc'  # Calculated
+    TOTAL_CHLORINE = 'tc'
     PRESSURE = 'pressure'
     FLOW_RATE = 'flowRate'
 
 
-class TargetType(str, Enum):
+class TargetType(StrEnum):
     """Pool Math target types."""
+
     TFP = 'tfp'
 
 
 class Units:
     """Measurement units."""
-    MG_PER_L = 'mg/L'
-    PPM = 'ppm'
-    PH = 'pH'
-    CSI = 'CSI'
-    PERCENT = '%'
-    GPM = 'gpm'
-    PSI = 'psi'
+
+    MG_PER_L: Final = 'mg/L'
+    PPM: Final = 'ppm'
+    PH: Final = 'pH'
+    CSI: Final = 'CSI'
+    PERCENT: Final = '%'
+    GPM: Final = 'gpm'
+    PSI: Final = 'psi'
 
 
 POOL_MATH_SENSOR_SETTINGS: dict[str, dict[str, Any]] = {
@@ -158,7 +161,7 @@ POOL_MATH_SENSOR_SETTINGS: dict[str, dict[str, Any]] = {
     },
 }
 
-TFP_TARGET_NAME = 'tfp'
+TFP_TARGET_NAME: Final = 'tfp'
 
 TFP_RECOMMENDED_TARGET_LEVELS: dict[str, dict[str, float]] = {
     'cc': {ATTR_TARGET_MIN: 0, ATTR_TARGET_MAX: 0.1},
@@ -167,7 +170,7 @@ TFP_RECOMMENDED_TARGET_LEVELS: dict[str, dict[str, float]] = {
     'salt': {ATTR_TARGET_MIN: 3000, ATTR_TARGET_MAX: 3200, 'target': 3100},
 }
 
-DEFAULT_TARGETS = TFP_TARGET_NAME
+DEFAULT_TARGETS: Final = TFP_TARGET_NAME
 
 
 def get_sensor_targets(
@@ -185,7 +188,8 @@ def get_sensor_targets(
         return TFP_RECOMMENDED_TARGET_LEVELS
 
     LOG.error(
-        f"Only '{TFP_TARGET_NAME}' targets currently supported, ignoring "
-        f"'{target_name}'"
+        "Only '%s' targets currently supported, ignoring '%s'",
+        TFP_TARGET_NAME,
+        target_name,
     )
     return None

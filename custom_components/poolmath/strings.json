@@ -5,31 +5,56 @@
         "description": "Connect to Pool Math",
         "data": {
           "share_url": "Pool Math Share URL",
-          "name": "[%key:common::config_flow::data::name%]",
-          "target": "[%key:common::config_flow::data::target%]",
-          "scan_interval": "How often to check for pool data updates (in minutes)"
+          "name": "Pool Name",
+          "target": "Target levels source",
+          "scan_interval": "Update interval (minutes)"
+        },
+        "data_description": {
+          "share_url": "Find this in the Pool Math app under Settings > Sharing",
+          "scan_interval": "How often to check for updates (minimum 5 minutes)"
         }
       }
     },
     "error": {
       "cannot_connect": "Failed to connect, please try again",
       "invalid_auth": "Invalid authentication",
-      "invalid_share_url": "Invalid Pool Math share URL or could not extract pool information from it",
+      "invalid_share_url": "Invalid Pool Math share URL or could not extract pool information",
       "unknown_error": "Unexpected error processing the share URL",
       "unknown": "Unexpected error"
     },
     "abort": {
-      "already_configured": "Device is already configured"
+      "already_configured": "This pool is already configured"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "share_url": "Pool Math Share URL (optional, to change pool)",
+          "name": "Pool Name",
+          "target": "Target levels source",
+          "scan_interval": "Update interval (minutes)"
+        },
+        "data_description": {
+          "share_url": "Leave empty to keep current pool, or enter new URL to change",
+          "scan_interval": "How often to check for updates (minimum 5 minutes)"
+        }
+      }
+    },
+    "error": {
+      "invalid_share_url": "Invalid Pool Math share URL or could not extract pool information",
+      "unknown_error": "Unexpected error processing the share URL"
     }
   },
   "issues": {
     "config_migration_needed": {
-      "title": "Pool Math configuration needs to be updated",
+      "title": "Pool Math: Configuration Update Required",
+      "description": "The Pool Math integration requires updated configuration. Please provide your Pool Math share URL.",
       "fix_flow": {
         "step": {
           "share_url": {
-            "title": "Update Pool Math configuration",
-            "description": "Please enter your Pool Math Share URL to update your configuration from share_id to user_id and pool_id.",
+            "title": "Update Pool Math Configuration",
+            "description": "Enter your Pool Math share URL from the app (Settings > Sharing)",
             "data": {
               "share_url": "Pool Math Share URL"
             }
@@ -41,8 +66,8 @@
         },
         "error": {
           "invalid_url": "Invalid Pool Math share URL",
-          "api_error": "Error connecting to Pool Math API",
-          "missing_data": "Could not extract user_id or pool_id from the API response",
+          "api_error": "Error connecting to Pool Math service",
+          "missing_data": "Could not extract required data from the API response",
           "unknown": "Unexpected error occurred"
         }
       }
@@ -100,20 +125,11 @@
       }
     }
   },
-  "options": {
-    "step": {
-      "init": {
-        "data": {
-          "share_url": "Pool Math Share URL",
-          "name": "[%key:common::config_flow::data::name%]",
-          "target": "[%key:common::config_flow::data::target%]",
-          "scan_interval": "How often to check for pool data updates (in minutes)"
-        }
+  "selector": {
+    "target": {
+      "options": {
+        "tfp": "Trouble Free Pools"
       }
-    },
-    "error": {
-      "invalid_share_url": "Invalid Pool Math share URL or could not extract pool information from it",
-      "unknown_error": "Unexpected error processing the share URL"
     }
   }
 }
