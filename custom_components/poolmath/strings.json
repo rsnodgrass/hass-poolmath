@@ -2,47 +2,51 @@
   "config": {
     "step": {
       "user": {
-        "description": "Connect to Pool Math",
+        "description": "Add your pool's water chemistry data from Pool Math. You'll need your share URL from the app.",
         "data": {
           "share_url": "Pool Math Share URL",
-          "name": "Pool Name",
-          "target": "Target levels source",
-          "scan_interval": "Update interval (minutes)"
+          "name": "Display name",
+          "target": "Chemistry guidelines",
+          "scan_interval": "Update frequency"
         },
         "data_description": {
-          "share_url": "Find this in the Pool Math app under Settings > Sharing",
-          "scan_interval": "How often to check for updates (minimum 5 minutes)"
+          "share_url": "Find this in Pool Math app: Settings > Sharing (looks like troublefreepool.com/mypool/...)",
+          "name": "A friendly name for this pool in Home Assistant",
+          "target": "Standards used to determine ideal chemistry ranges",
+          "scan_interval": "How often to check for new readings (minimum 5 minutes)"
         }
       }
     },
     "error": {
-      "cannot_connect": "Failed to connect, please try again",
+      "cannot_connect": "Could not reach Pool Math. Check your internet connection and try again.",
       "invalid_auth": "Invalid authentication",
-      "invalid_share_url": "Invalid Pool Math share URL or could not extract pool information",
+      "invalid_share_url": "This doesn't look like a Pool Math share URL. Check that you copied the full URL from Settings > Sharing in the app.",
       "unknown_error": "Unexpected error processing the share URL",
       "unknown": "Unexpected error"
     },
     "abort": {
-      "already_configured": "This pool is already configured"
+      "already_configured": "This pool is already set up. To change settings, use the integration options."
     }
   },
   "options": {
     "step": {
       "init": {
         "data": {
-          "share_url": "Pool Math Share URL (optional, to change pool)",
-          "name": "Pool Name",
-          "target": "Target levels source",
-          "scan_interval": "Update interval (minutes)"
+          "share_url": "Pool Math Share URL (optional)",
+          "name": "Display name",
+          "target": "Chemistry guidelines",
+          "scan_interval": "Update frequency"
         },
         "data_description": {
-          "share_url": "Leave empty to keep current pool, or enter new URL to change",
-          "scan_interval": "How often to check for updates (minimum 5 minutes)"
+          "share_url": "Only enter a URL if switching to a different pool",
+          "name": "A friendly name for this pool in Home Assistant",
+          "target": "Standards used to determine ideal chemistry ranges",
+          "scan_interval": "How often to check for new readings (minimum 5 minutes)"
         }
       }
     },
     "error": {
-      "invalid_share_url": "Invalid Pool Math share URL or could not extract pool information",
+      "invalid_share_url": "This doesn't look like a Pool Math share URL. Check that you copied the full URL from Settings > Sharing in the app.",
       "unknown_error": "Unexpected error processing the share URL"
     }
   },
