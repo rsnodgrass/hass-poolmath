@@ -4,51 +4,59 @@
       "user": {
         "description": "Connect to Pool Math",
         "data": {
-          "share_url": "Pool Math Share URL from the Pool Math app (Settings > Sharing)",
+          "share_url": "Pool Math Share URL",
           "name": "Pool Name",
           "target": "Target levels source",
-          "scan_interval": "How often to check for pool data updates (in minutes)"
+          "scan_interval": "Update interval (minutes)"
+        },
+        "data_description": {
+          "share_url": "Find this in the Pool Math app under Settings > Sharing",
+          "scan_interval": "How often to check for updates (minimum 5 minutes)"
         }
       }
     },
     "error": {
       "cannot_connect": "Failed to connect, please try again",
       "invalid_auth": "Invalid authentication",
-      "invalid_share_url": "The provided URL is not a valid Pool Math share URL or we could not extract the pool information from it.",
-      "unknown_error": "An unexpected error occurred while processing the share URL. Please check the logs for more details.",
+      "invalid_share_url": "Invalid Pool Math share URL or could not extract pool information",
+      "unknown_error": "Unexpected error processing the share URL",
       "unknown": "Unexpected error"
     },
     "abort": {
-      "already_configured": "Device is already configured"
+      "already_configured": "This pool is already configured"
     }
   },
   "options": {
     "step": {
       "init": {
         "data": {
-          "share_url": "Pool Math Share URL from the Pool Math app (Settings > Sharing)",
+          "share_url": "Pool Math Share URL (optional, to change pool)",
           "name": "Pool Name",
           "target": "Target levels source",
-          "scan_interval": "Update interval (minutes; default=8) - please avoid setting lower to protect Pool Math servers"
+          "scan_interval": "Update interval (minutes)"
+        },
+        "data_description": {
+          "share_url": "Leave empty to keep current pool, or enter new URL to change",
+          "scan_interval": "How often to check for updates (minimum 5 minutes)"
         }
       }
     },
     "error": {
-      "invalid_share_url": "The provided URL is not a valid Pool Math share URL or we could not extract the pool information from it.",
-      "unknown_error": "An unexpected error occurred while processing the share URL. Please check the logs for more details."
+      "invalid_share_url": "Invalid Pool Math share URL or could not extract pool information",
+      "unknown_error": "Unexpected error processing the share URL"
     }
   },
   "issues": {
     "config_migration_needed": {
       "title": "Pool Math: Configuration Update Required",
-      "description": "The Pool Math integration has been updated and now requires a user_id and pool_id instead of a share_id. Please submit a repair to update your configuration.",
+      "description": "The Pool Math integration requires updated configuration. Please provide your Pool Math share URL.",
       "fix_flow": {
         "step": {
           "share_url": {
             "title": "Update Pool Math Configuration",
-            "description": "Please paste your Pool Math share URL from the Pool Math app. You can find this under Settings > Sharing. The URL should look like: https://api.poolmathapp.com/share/XXXXXXX or https://troublefreepool.com/mypool/XXXXXXX.",
+            "description": "Enter your Pool Math share URL from the app (Settings > Sharing)",
             "data": {
-              "share_url": "Pool Math Share URL from the Pool Math app (Settings > Sharing)"
+              "share_url": "Pool Math Share URL"
             }
           }
         },
@@ -57,11 +65,70 @@
           "already_fixed": "Configuration has already been updated"
         },
         "error": {
-          "invalid_url": "The provided URL is not a valid Pool Math share URL.",
-          "api_error": "Failed to connect to the Pool Math service. Please check the URL and try again.",
-          "missing_data": "Could not extract the required data from the API response.",
-          "unknown": "An unexpected error occurred. Please check the logs for more details."
+          "invalid_url": "Invalid Pool Math share URL",
+          "api_error": "Error connecting to Pool Math service",
+          "missing_data": "Could not extract required data from the API response",
+          "unknown": "Unexpected error occurred"
         }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "fc": {
+        "name": "Free Chlorine"
+      },
+      "cc": {
+        "name": "Combined Chlorine"
+      },
+      "tc": {
+        "name": "Total Chlorine"
+      },
+      "ph": {
+        "name": "pH"
+      },
+      "ta": {
+        "name": "Total Alkalinity"
+      },
+      "ch": {
+        "name": "Calcium Hardness"
+      },
+      "cya": {
+        "name": "Cyanuric Acid"
+      },
+      "salt": {
+        "name": "Salt"
+      },
+      "bor": {
+        "name": "Borate"
+      },
+      "borate": {
+        "name": "Borate"
+      },
+      "csi": {
+        "name": "Calcite Saturation Index"
+      },
+      "temp": {
+        "name": "Temperature"
+      },
+      "waterTemp": {
+        "name": "Water Temperature"
+      },
+      "pressure": {
+        "name": "Filter Pressure"
+      },
+      "flowRate": {
+        "name": "Flow Rate"
+      },
+      "swgCellPercent": {
+        "name": "SWG Cell Percentage"
+      }
+    }
+  },
+  "selector": {
+    "target": {
+      "options": {
+        "tfp": "Trouble Free Pools"
       }
     }
   }

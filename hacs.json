@@ -1,6 +1,5 @@
 {
-    "name": "Pool Math (Trouble Free Pool)",
-    "render_readme": true,
-    "homeassistant": "2025.8.0",
-    "hide_default_branch": false
+  "name": "Pool Math (Trouble Free Pool)",
+  "render_readme": true,
+  "homeassistant": "2024.12.0"
 }
