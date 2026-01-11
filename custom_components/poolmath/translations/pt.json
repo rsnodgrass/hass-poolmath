@@ -39,7 +39,6 @@
     "issues": {
         "config_migration_needed": {
             "title": "Pool Math: Atualização de Configuração Necessária",
-            "description": "A integração Pool Math foi atualizada e agora requer um user_id e pool_id em vez de share_id. Por favor, envie uma correção para atualizar a sua configuração.",
             "fix_flow": {
                 "step": {
                     "share_url": {

@@ -39,7 +39,6 @@
     "issues": {
         "config_migration_needed": {
             "title": "Pool Math: 設定の更新が必要です",
-            "description": "Pool Mathの統合が更新され、share_idの代わりにuser_idとpool_idが必要になりました。設定を更新するために、修復を送信してください。",
             "fix_flow": {
                 "step": {
                     "share_url": {

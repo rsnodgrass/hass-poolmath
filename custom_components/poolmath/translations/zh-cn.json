@@ -39,7 +39,6 @@
     "issues": {
         "config_migration_needed": {
             "title": "Pool Math：需要更新配置",
-            "description": "Pool Math集成已更新，现在需要使用user_id和pool_id而不是share_id。请提交修复以更新您的配置。",
             "fix_flow": {
                 "step": {
                     "share_url": {

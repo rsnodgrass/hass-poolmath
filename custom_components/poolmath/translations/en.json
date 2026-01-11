@@ -53,7 +53,6 @@
   "issues": {
     "config_migration_needed": {
       "title": "Pool Math: Configuration Update Required",
-      "description": "The Pool Math integration requires updated configuration. Please provide your Pool Math share URL.",
       "fix_flow": {
         "step": {
           "share_url": {
@@ -115,16 +114,16 @@
       "temp": {
         "name": "Temperature"
       },
-      "waterTemp": {
+      "water_temp": {
         "name": "Water Temperature"
       },
       "pressure": {
         "name": "Filter Pressure"
       },
-      "flowRate": {
+      "flow_rate": {
         "name": "Flow Rate"
       },
-      "swgCellPercent": {
+      "swg_cell_percent": {
         "name": "SWG Cell Percentage"
       }
     }

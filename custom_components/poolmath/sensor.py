@@ -137,7 +137,7 @@ SENSOR_DESCRIPTIONS: dict[str, SensorEntityDescription] = {
     ),
     'waterTemp': SensorEntityDescription(
         key='waterTemp',
-        translation_key='waterTemp',
+        translation_key='water_temp',
         native_unit_of_measurement=UnitOfTemperature.FAHRENHEIT,
         device_class=SensorDeviceClass.TEMPERATURE,
         icon='mdi:coolant-temperature',
@@ -153,14 +153,14 @@ SENSOR_DESCRIPTIONS: dict[str, SensorEntityDescription] = {
     ),
     'flowRate': SensorEntityDescription(
         key='flowRate',
-        translation_key='flowRate',
+        translation_key='flow_rate',
         native_unit_of_measurement=UnitOfVolumeFlowRate.GALLONS_PER_MINUTE,
         icon='mdi:water-pump',
         state_class=SensorStateClass.MEASUREMENT,
     ),
     'swgCellPercent': SensorEntityDescription(
         key='swgCellPercent',
-        translation_key='swgCellPercent',
+        translation_key='swg_cell_percent',
         native_unit_of_measurement='%',
         icon='mdi:battery-charging',
         state_class=SensorStateClass.MEASUREMENT,

@@ -41,7 +41,6 @@
   "issues": {
     "config_migration_needed": {
       "title": "Matematika bazéna: Vyžaduje sa aktualizácia konfigurácie",
-      "description": "Integrácia Pool Math bola aktualizovaná a teraz vyžaduje user_id a pool_id namiesto share_id. Odošlite opravu na aktualizáciu konfigurácie.",
       "fix_flow": {
         "step": {
           "share_url": {
