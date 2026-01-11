@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+import voluptuous as vol
 from homeassistant.config_entries import (
     ConfigEntry,
     ConfigFlow,
@@ -45,41 +46,38 @@ TARGET_OPTIONS = [
 ]
 
 
-def _build_share_url_schema(
-    share_url: str | None = None,
-    name: str | None = None,
-    target: str | None = None,
-    scan_interval: int | None = None,
-) -> dict[str, Any]:
+def _build_share_url_schema() -> vol.Schema:
     """Build the data schema for share URL configuration using Selectors."""
-    return {
-        CONF_SHARE_URL: TextSelector(
-            TextSelectorConfig(
-                type=TextSelectorType.URL,
-            )
-        ),
-        CONF_NAME: TextSelector(
-            TextSelectorConfig(
-                type=TextSelectorType.TEXT,
-            )
-        ),
-        CONF_TARGET: SelectSelector(
-            SelectSelectorConfig(
-                options=TARGET_OPTIONS,
-                mode=SelectSelectorMode.DROPDOWN,
-                translation_key='target',
-            )
-        ),
-        CONF_SCAN_INTERVAL: NumberSelector(
-            NumberSelectorConfig(
-                min=5,
-                max=60,
-                step=1,
-                mode=NumberSelectorMode.BOX,
-                unit_of_measurement='minutes',
-            )
-        ),
-    }
+    return vol.Schema(
+        {
+            vol.Required(CONF_SHARE_URL): TextSelector(
+                TextSelectorConfig(
+                    type=TextSelectorType.URL,
+                )
+            ),
+            vol.Optional(CONF_NAME): TextSelector(
+                TextSelectorConfig(
+                    type=TextSelectorType.TEXT,
+                )
+            ),
+            vol.Optional(CONF_TARGET): SelectSelector(
+                SelectSelectorConfig(
+                    options=TARGET_OPTIONS,
+                    mode=SelectSelectorMode.DROPDOWN,
+                    translation_key='target',
+                )
+            ),
+            vol.Optional(CONF_SCAN_INTERVAL): NumberSelector(
+                NumberSelectorConfig(
+                    min=5,
+                    max=60,
+                    step=1,
+                    mode=NumberSelectorMode.BOX,
+                    unit_of_measurement='minutes',
+                )
+            ),
+        }
+    )
 
 
 def _build_suggested_values(
