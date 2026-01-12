@@ -4,12 +4,8 @@
 ![release_date](https://img.shields.io/github/release-date/rsnodgrass/hass-poolmath.svg)
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/hacs/integration)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-
-[![Buy Me A Coffee](https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg)](https://buymeacoffee.com/DYks67r)
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=WREP29UDAMB6G)
-[![Support on Patreon][patreon-shield]][patreon]
-
 [![Community Forum][forum-shield]][forum]
+[![Buy Me A Coffee](https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg)](https://buymeacoffee.com/DYks67r)
 
 Creates sensors for pools being managed with Trouble Free Pools's [Pool Math](https://www.troublefreepool.com/blog/poolmath/) apps ([iOS](https://apps.apple.com/us/app/pool-math-by-troublefreepool/id1228819359)/[Android](https://play.google.com/store/apps/details?id=com.troublefreepool.poolmath&hl=en_US)/[Fire](https://www.amazon.com/gp/product/B07F87V4SX/ref=mas_pm_Pool_Math)). Use a device like [Pool Exact EZ Pool Water Tester](https://amzn.to/4kqjHxI) to measure exact values and enter the data into Pool Math, and your pool, spa, or hot tub data will automatically appear in Home Assistant.
 
@@ -35,6 +31,10 @@ Creates sensors for pools being managed with Trouble Free Pools's [Pool Math](ht
 
 
 ## Support
+
+This integration is maintained in my free time. Sponsorship directly funds new device support and faster updates.
+
+[![Buy Me a Coffee](https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg)](https://buymeacoffee.com/DYks67r)
 
 ### Community Support
 
@@ -148,6 +148,4 @@ ssh homeassistant.local "rm /config/*.log ; ha core restart"
 
 [forum]: https://community.home-assistant.io/t/custom-component-pool-math-sensors-for-pool-chemicals-and-operations/435126
 [forum-shield]: https://img.shields.io/badge/community-forum-brightgreen.svg
-[patreon]: https://www.patreon.com/rsnodgrass
-[patreon-shield]: https://img.shields.io/badge/Patreon-F96854?style=for-the-badge&logo=patreon&logoColor=white
 [project-stage-shield]: https://img.shields.io/badge/project%20stage-production%20ready-brightgreen.svg
