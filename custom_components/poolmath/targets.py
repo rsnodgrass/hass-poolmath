@@ -163,12 +163,34 @@ POOL_MATH_SENSOR_SETTINGS: dict[str, dict[str, Any]] = {
 
 TFP_TARGET_NAME: Final = 'tfp'
 
+# TFP recommended target levels for pool chemistry
+# Source: https://www.troublefreepool.com/blog/pool-school/
 TFP_RECOMMENDED_TARGET_LEVELS: dict[str, dict[str, float]] = {
-    'cc': {ATTR_TARGET_MIN: 0, ATTR_TARGET_MAX: 0.1},
+    'fc': {ATTR_TARGET_MIN: 2.0, ATTR_TARGET_MAX: 6.0},  # varies with CYA
+    'cc': {ATTR_TARGET_MIN: 0.0, ATTR_TARGET_MAX: 0.5},
     'ph': {ATTR_TARGET_MIN: 7.2, ATTR_TARGET_MAX: 7.8, 'target': 7.4},
-    'ta': {ATTR_TARGET_MIN: 50, ATTR_TARGET_MAX: 90},
-    'salt': {ATTR_TARGET_MIN: 3000, ATTR_TARGET_MAX: 3200, 'target': 3100},
+    'ta': {ATTR_TARGET_MIN: 50.0, ATTR_TARGET_MAX: 90.0, 'target': 70.0},
+    'ch': {ATTR_TARGET_MIN: 250.0, ATTR_TARGET_MAX: 450.0, 'target': 350.0},
+    'cya': {ATTR_TARGET_MIN: 30.0, ATTR_TARGET_MAX: 50.0, 'target': 40.0},
+    'salt': {ATTR_TARGET_MIN: 3000.0, ATTR_TARGET_MAX: 3500.0, 'target': 3200.0},
+    'bor': {ATTR_TARGET_MIN: 30.0, ATTR_TARGET_MAX: 50.0, 'target': 50.0},
+    'borate': {ATTR_TARGET_MIN: 30.0, ATTR_TARGET_MAX: 50.0, 'target': 50.0},
+    'csi': {ATTR_TARGET_MIN: -0.3, ATTR_TARGET_MAX: 0.3, 'target': 0.0},
 }
+
+# sensors that have meaningful target ranges for binary problem sensors
+CHEMISTRY_SENSORS_WITH_TARGETS: Final[list[str]] = [
+    'fc',
+    'cc',
+    'ph',
+    'ta',
+    'ch',
+    'cya',
+    'salt',
+    'bor',
+    'borate',
+    'csi',
+]
 
 DEFAULT_TARGETS: Final = TFP_TARGET_NAME
 
@@ -193,3 +215,50 @@ def get_sensor_targets(
         target_name,
     )
     return None
+
+
+def get_target_range(
+    sensor_key: str,
+    target_profile: str = DEFAULT_TARGETS,
+    api_data: dict[str, Any] | None = None,
+) -> dict[str, float] | None:
+    """Get target range for a specific sensor.
+
+    Checks API data first for pool-specific targets, falls back to profile targets.
+
+    Args:
+        sensor_key: Sensor key (e.g., 'ph', 'fc')
+        target_profile: Target profile name (default 'tfp')
+        api_data: Optional API response data containing pool-specific targets
+
+    Returns:
+        Dictionary with 'target_min', 'target_max', and optionally 'target' keys,
+        or None if no targets defined for this sensor
+    """
+    result: dict[str, float] = {}
+
+    # check API data for pool-specific targets
+    if api_data:
+        api_min = api_data.get(f'{sensor_key}Min')
+        api_max = api_data.get(f'{sensor_key}Max')
+        api_target = api_data.get(f'{sensor_key}Target')
+
+        if api_min is not None:
+            result[ATTR_TARGET_MIN] = float(api_min)
+        if api_max is not None:
+            result[ATTR_TARGET_MAX] = float(api_max)
+        if api_target is not None:
+            result['target'] = float(api_target)
+
+    # fall back to profile targets if API data missing
+    profile_targets = get_sensor_targets(target_profile)
+    if profile_targets and sensor_key in profile_targets:
+        sensor_targets = profile_targets[sensor_key]
+        if ATTR_TARGET_MIN not in result and ATTR_TARGET_MIN in sensor_targets:
+            result[ATTR_TARGET_MIN] = sensor_targets[ATTR_TARGET_MIN]
+        if ATTR_TARGET_MAX not in result and ATTR_TARGET_MAX in sensor_targets:
+            result[ATTR_TARGET_MAX] = sensor_targets[ATTR_TARGET_MAX]
+        if 'target' not in result and 'target' in sensor_targets:
+            result['target'] = sensor_targets['target']
+
+    return result if result else None

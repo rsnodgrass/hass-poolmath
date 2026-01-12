@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from datetime import UTC, datetime
 from typing import Any
 
 from homeassistant.components.sensor import (
@@ -19,13 +20,19 @@ from homeassistant.const import (
     UnitOfVolumeFlowRate,
 )
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .client import parse_pool
 from .const import (
+    ATTR_IN_RANGE,
+    ATTR_LAST_LOGGED,
     ATTR_LAST_UPDATED,
+    ATTR_TARGET,
+    ATTR_TARGET_MAX,
+    ATTR_TARGET_MIN,
     ATTRIBUTION,
     CONF_POOL_ID,
     CONF_TARGET,
@@ -34,6 +41,7 @@ from .const import (
     DEFAULT_TIMEOUT,
     DOMAIN,
 )
+from .targets import get_target_range
 from .coordinator import PoolMathUpdateCoordinator
 from .models import PoolMathConfig
 
@@ -168,6 +176,30 @@ SENSOR_DESCRIPTIONS: dict[str, SensorEntityDescription] = {
 }
 
 
+async def _migrate_entity_unique_ids(
+    hass: HomeAssistant,
+    config: PoolMathConfig,
+) -> None:
+    """Migrate entity unique IDs from old format to new format.
+
+    Old format: poolmath_{pool_id}_{sensor_key}
+    New format: poolmath_{user_id}_{pool_id}_{sensor_key}
+
+    This ensures backwards compatibility when adding user_id to unique IDs.
+    """
+    ent_reg = er.async_get(hass)
+
+    for sensor_key in SENSOR_DESCRIPTIONS:
+        old_unique_id = f'poolmath_{config.pool_id}_{sensor_key}'
+        new_unique_id = f'poolmath_{config.user_id}_{config.pool_id}_{sensor_key}'
+
+        # check if entity with old unique ID exists
+        entity_id = ent_reg.async_get_entity_id('sensor', DOMAIN, old_unique_id)
+        if entity_id:
+            LOG.info(f'Migrating entity {entity_id} to new unique ID format')
+            ent_reg.async_update_entity(entity_id, new_unique_id=new_unique_id)
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
@@ -185,6 +217,9 @@ async def async_setup_entry(
         timeout=entry.options.get(CONF_TIMEOUT, DEFAULT_TIMEOUT),
         target=entry.options[CONF_TARGET],
     )
+
+    # migrate old unique IDs to new format for backwards compatibility
+    await _migrate_entity_unique_ids(hass, config)
 
     # fetch initial data to determine which sensors to create
     await coordinator.async_config_entry_first_refresh()
@@ -241,7 +276,7 @@ def get_device_info(
         pool_name = pool_data.get('name', config.name)
 
     return DeviceInfo(
-        identifiers={(DOMAIN, config.pool_id)},
+        identifiers={(DOMAIN, f'{config.user_id}_{config.pool_id}')},
         configuration_url=f'https://www.troublefreepool.com/mypool/{config.user_id}/{config.pool_id}',
         entry_type=DeviceEntryType.SERVICE,
         manufacturer='Trouble Free Pool',
@@ -268,9 +303,12 @@ class PoolMathSensor(CoordinatorEntity[PoolMathUpdateCoordinator], SensorEntity)
 
         self._config = config
         self._calculated = calculated
+        self._target_profile = config.target
         self.entity_description = description
 
-        self._attr_unique_id = f'poolmath_{config.pool_id}_{description.key}'
+        self._attr_unique_id = (
+            f'poolmath_{config.user_id}_{config.pool_id}_{description.key}'
+        )
         self._attr_device_info = get_device_info(config)
         self._attr_native_value: float | None = None
         self._attr_extra_state_attributes: dict[str, Any] = {}
@@ -305,10 +343,37 @@ class PoolMathSensor(CoordinatorEntity[PoolMathUpdateCoordinator], SensorEntity)
             if value is not None:
                 self._attr_native_value = value
 
-                # add timestamp if available
+                # build attributes dict
+                attrs: dict[str, Any] = {}
+
+                # add timestamp as ISO format if available
                 timestamp = overview.get(f'{sensor_key}Ts')
                 if timestamp:
-                    self._attr_extra_state_attributes = {ATTR_LAST_UPDATED: timestamp}
+                    attrs[ATTR_LAST_UPDATED] = timestamp
+                    # convert unix epoch to ISO datetime string
+                    try:
+                        dt = datetime.fromtimestamp(timestamp, tz=UTC)
+                        attrs[ATTR_LAST_LOGGED] = dt.isoformat()
+                    except (ValueError, OSError, TypeError):
+                        pass  # skip if timestamp is invalid
+
+                # add target range attributes if available
+                target_range = get_target_range(sensor_key, self._target_profile, pool)
+                if target_range:
+                    if ATTR_TARGET_MIN in target_range:
+                        attrs[ATTR_TARGET_MIN] = target_range[ATTR_TARGET_MIN]
+                    if ATTR_TARGET_MAX in target_range:
+                        attrs[ATTR_TARGET_MAX] = target_range[ATTR_TARGET_MAX]
+                    if 'target' in target_range:
+                        attrs[ATTR_TARGET] = target_range['target']
+
+                    # calculate in_range status
+                    target_min = target_range.get(ATTR_TARGET_MIN)
+                    target_max = target_range.get(ATTR_TARGET_MAX)
+                    if target_min is not None and target_max is not None:
+                        attrs[ATTR_IN_RANGE] = target_min <= value <= target_max
+
+                self._attr_extra_state_attributes = attrs
 
         self.async_write_ha_state()
 

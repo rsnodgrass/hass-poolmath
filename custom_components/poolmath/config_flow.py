@@ -164,23 +164,33 @@ async def _process_share_url(
 
 
 def _initial_form(
-    flow: ConfigFlow | OptionsFlow,
+    flow: ConfigFlow,
 ) -> ConfigFlowResult:
-    """Return flow form for init/user step id."""
-    step_id = 'user' if isinstance(flow, ConfigFlow) else 'init'
+    """Return flow form for user step id (initial config)."""
+    return flow.async_show_form(
+        step_id='user',
+        data_schema=_build_share_url_schema(),
+        data_description={
+            'suggested_values': _build_suggested_values(
+                name=DEFAULT_NAME,
+                target=DEFAULT_TARGET,
+                scan_interval=DEFAULT_UPDATE_INTERVAL,
+            )
+        },
+    )
 
-    name = DEFAULT_NAME
-    target = DEFAULT_TARGET
-    scan_interval = DEFAULT_UPDATE_INTERVAL
 
-    if isinstance(flow, OptionsFlow) and hasattr(flow, 'config_entry'):
-        options = flow.config_entry.options
-        name = options.get(CONF_NAME, DEFAULT_NAME)
-        target = options.get(CONF_TARGET, DEFAULT_TARGET)
-        scan_interval = options.get(CONF_SCAN_INTERVAL, DEFAULT_UPDATE_INTERVAL)
+def _configure_form(
+    flow: OptionsFlow,
+) -> ConfigFlowResult:
+    """Return flow form for configure step (options flow)."""
+    options = flow.config_entry.options
+    name = options.get(CONF_NAME, DEFAULT_NAME)
+    target = options.get(CONF_TARGET, DEFAULT_TARGET)
+    scan_interval = options.get(CONF_SCAN_INTERVAL, DEFAULT_UPDATE_INTERVAL)
 
     return flow.async_show_form(
-        step_id=step_id,
+        step_id='configure',
         data_schema=_build_share_url_schema(),
         data_description={
             'suggested_values': _build_suggested_values(
@@ -198,21 +208,51 @@ class PoolMathOptionsFlow(OptionsFlow):
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
+        """Show menu to choose action."""
+        return self.async_show_menu(
+            step_id='init',
+            menu_options=['configure', 'refresh'],
+        )
+
+    async def async_step_configure(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
         """Manage Pool Math options."""
         if user_input is not None:
             share_url = user_input.get(CONF_SHARE_URL)
 
             if share_url:
-                result = await _process_share_url(self, 'init', share_url, user_input)
+                result = await _process_share_url(
+                    self, 'configure', share_url, user_input
+                )
 
                 if isinstance(result, dict):
+                    # check if pool identity changed - block if so
+                    existing_user_id = self.config_entry.options.get(
+                        CONF_USER_ID, self.config_entry.data.get(CONF_USER_ID)
+                    )
+                    existing_pool_id = self.config_entry.options.get(
+                        CONF_POOL_ID, self.config_entry.data.get(CONF_POOL_ID)
+                    )
+                    new_user_id = result.get(CONF_USER_ID)
+                    new_pool_id = result.get(CONF_POOL_ID)
+
+                    if (new_user_id != existing_user_id) or (
+                        new_pool_id != existing_pool_id
+                    ):
+                        return self.async_abort(reason='pool_changed_delete_required')
+
                     return self.async_create_entry(title=INTEGRATION_NAME, data=result)
                 return result
 
             # no share URL provided, just update the other options
             options = {
-                CONF_USER_ID: self.config_entry.data.get(CONF_USER_ID),
-                CONF_POOL_ID: self.config_entry.data.get(CONF_POOL_ID),
+                CONF_USER_ID: self.config_entry.options.get(
+                    CONF_USER_ID, self.config_entry.data.get(CONF_USER_ID)
+                ),
+                CONF_POOL_ID: self.config_entry.options.get(
+                    CONF_POOL_ID, self.config_entry.data.get(CONF_POOL_ID)
+                ),
                 CONF_NAME: user_input.get(CONF_NAME, DEFAULT_NAME),
                 CONF_TARGET: user_input.get(CONF_TARGET, DEFAULT_TARGET),
                 CONF_SCAN_INTERVAL: int(
@@ -221,7 +261,15 @@ class PoolMathOptionsFlow(OptionsFlow):
             }
             return self.async_create_entry(title=INTEGRATION_NAME, data=options)
 
-        return _initial_form(self)
+        return _configure_form(self)
+
+    async def async_step_refresh(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Force an immediate data refresh."""
+        coordinator = self.hass.data[DOMAIN][self.config_entry.entry_id]['coordinator']
+        await coordinator.async_refresh()
+        return self.async_abort(reason='refresh_successful')
 
 
 class PoolMathFlowHandler(ConfigFlow, domain=DOMAIN):

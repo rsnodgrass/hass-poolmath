@@ -31,6 +31,12 @@
   "options": {
     "step": {
       "init": {
+        "menu_options": {
+          "configure": "Configure Settings",
+          "refresh": "Force Data Refresh"
+        }
+      },
+      "configure": {
         "data": {
           "share_url": "Pool Math Share URL (optional)",
           "name": "Display name",
@@ -48,6 +54,10 @@
     "error": {
       "invalid_share_url": "This doesn't look like a Pool Math share URL. Check that you copied the full URL from Settings > Sharing in the app.",
       "unknown_error": "Unexpected error processing the share URL"
+    },
+    "abort": {
+      "refresh_successful": "Pool Math data has been refreshed successfully.",
+      "pool_changed_delete_required": "Cannot change to a different pool. Please delete this integration and add the new pool separately."
     }
   },
   "issues": {
@@ -125,6 +135,38 @@
       },
       "swg_cell_percent": {
         "name": "SWG Cell Percentage"
+      }
+    },
+    "binary_sensor": {
+      "fc_problem": {
+        "name": "Free Chlorine Problem"
+      },
+      "cc_problem": {
+        "name": "Combined Chlorine Problem"
+      },
+      "ph_problem": {
+        "name": "pH Problem"
+      },
+      "ta_problem": {
+        "name": "Total Alkalinity Problem"
+      },
+      "ch_problem": {
+        "name": "Calcium Hardness Problem"
+      },
+      "cya_problem": {
+        "name": "Cyanuric Acid Problem"
+      },
+      "salt_problem": {
+        "name": "Salt Problem"
+      },
+      "bor_problem": {
+        "name": "Borate Problem"
+      },
+      "borate_problem": {
+        "name": "Borate Problem"
+      },
+      "csi_problem": {
+        "name": "Calcite Saturation Index Problem"
       }
     }
   },
