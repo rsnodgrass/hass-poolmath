@@ -57,7 +57,7 @@ def test_get_device_info(mock_config: PoolMathConfig) -> None:
     """Test device info generation."""
     device_info = get_device_info(mock_config)
 
-    assert device_info['identifiers'] == {('poolmath', 'test-pool-id')}
+    assert device_info['identifiers'] == {('poolmath', 'test-user-id_test-pool-id')}
     assert device_info['manufacturer'] == 'Trouble Free Pool'
     assert device_info['model'] == 'Pool Math'
     assert device_info['name'] == 'Test Pool'
@@ -104,7 +104,7 @@ def test_sensor_unique_id(mock_config: PoolMathConfig) -> None:
         description=SENSOR_DESCRIPTIONS['fc'],
     )
 
-    assert sensor.unique_id == 'poolmath_test-pool-id_fc'
+    assert sensor.unique_id == 'poolmath_test-user-id_test-pool-id_fc'
 
 
 def test_sensor_has_entity_name(mock_config: PoolMathConfig) -> None:
