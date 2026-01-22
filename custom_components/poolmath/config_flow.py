@@ -121,7 +121,7 @@ async def _process_share_url(
             return flow.async_show_form(
                 step_id=step_id,
                 data_schema=_build_share_url_schema(),
-                data_description={
+                description_placeholders={
                     'suggested_values': _build_suggested_values(
                         share_url=share_url,
                         name=user_input.get(CONF_NAME, default_name),
@@ -149,7 +149,7 @@ async def _process_share_url(
         return flow.async_show_form(
             step_id=step_id,
             data_schema=_build_share_url_schema(),
-            data_description={
+            description_placeholders={
                 'suggested_values': _build_suggested_values(
                     share_url=share_url,
                     name=user_input.get(CONF_NAME, default_name),
@@ -170,7 +170,7 @@ def _initial_form(
     return flow.async_show_form(
         step_id='user',
         data_schema=_build_share_url_schema(),
-        data_description={
+        description_placeholders={
             'suggested_values': _build_suggested_values(
                 name=DEFAULT_NAME,
                 target=DEFAULT_TARGET,
@@ -192,7 +192,7 @@ def _configure_form(
     return flow.async_show_form(
         step_id='configure',
         data_schema=_build_share_url_schema(),
-        data_description={
+        description_placeholders={
             'suggested_values': _build_suggested_values(
                 name=name,
                 target=target,
@@ -303,7 +303,7 @@ class PoolMathFlowHandler(ConfigFlow, domain=DOMAIN):
                 return self.async_show_form(
                     step_id='user',
                     data_schema=_build_share_url_schema(),
-                    data_description={
+                    description_placeholders={
                         'suggested_values': _build_suggested_values(
                             share_url=share_url,
                             name=user_input.get(CONF_NAME, DEFAULT_NAME),
