@@ -2,52 +2,64 @@
   "config": {
     "step": {
       "user": {
-        "description": "Pripojiť k Pool Math",
+        "description": "Pridajte údaje o chemickom zložení vody vo vašom bazéne z aplikácie Pool Math. Budete potrebovať URL adresu na zdieľanie z aplikácie.",
         "data": {
-          "share_url": "URL adresa pre zdieľanie aplikácie Pool Math z aplikácie Pool Math (Nastavenia > Zdieľanie)",
-          "name": "Pool názov",
-          "target": "Zdroj cieľových úrovní",
-          "scan_interval": "Ako často sa majú aktualizovať údaje o bazéne (v minútkach)"
+          "share_url": "URL na zdieľanie v Pool Math",
+          "name": "Zobrazený názov",
+          "target": "Pokyny pre chémiu",
+          "scan_interval": "Frekvencia aktualizácií"
+        },
+        "data_description": {
+          "share_url": "Nájdete to v aplikácii Pool Math: Nastavenia > Zdieľanie (vyzerá to takto: troublefreepool.com/mypool/...)",
+          "name": "Priateľský názov pre tento bazén v aplikácii Home Assistant",
+          "target": "Štandardy používané na určenie ideálnych chemických rozsahov",
+          "scan_interval": "Ako často kontrolovať nové hodnoty (minimálne 5 minút)"
         }
       }
     },
     "error": {
-      "cannot_connect": "Nepodarilo sa pripojiť, skúste to znova",
+      "cannot_connect": "Nepodarilo sa spojiť s Pool Math. Skontrolujte internetové pripojenie a skúste to znova.",
       "invalid_auth": "Neplatné overenie",
-      "invalid_share_url": "Zadaná URL adresa nie je platnou URL adresou zdieľania Pool Math alebo sa nám z nej nepodarilo extrahovať informácie o fonde.",
-      "unknown_error": "Pri spracovaní zdieľanej adresy URL sa vyskytla neočakávaná chyba. Ďalšie podrobnosti nájdete v protokoloch.",
+      "invalid_share_url": "Toto nevyzerá ako adresa URL na zdieľanie v aplikácii Pool Math. Skontrolujte, či ste skopírovali celú adresu URL z časti Nastavenia > Zdieľanie v aplikácii.",
+      "unknown_error": "Neočakávaná chyba pri spracovaní adresy URL zdieľania",
       "unknown": "Neočakávaná chyba"
     },
     "abort": {
-      "already_configured": "Zariadenie je už nakonfigurované"
+      "already_configured": "Tento fond je už nastavený. Ak chcete zmeniť nastavenia, použite možnosti integrácie."
     }
   },
   "options": {
     "step": {
       "init": {
         "data": {
-          "share_url": "URL adresa pre zdieľanie aplikácie Pool Math z aplikácie Pool Math (Nastavenia > Zdieľanie)",
-          "name": "Pool názov",
-          "target": "Zdroj cieľových úrovní",
-          "scan_interval": "Interval aktualizácie (minúty; predvolené = 8) – nenastavujte nižšiu hodnotu, aby ste chránili servery Pool Math."
+          "share_url": "Pool Math Share URL (voliteľné)",
+          "name": "Zobrazený názov",
+          "target": "Pokyny pre chémiu",
+          "scan_interval": "Frekvencia aktualizácií"
+        },
+        "data_description": {
+          "share_url": "URL adresu zadajte iba v prípade prepínania do iného bazénu",
+          "name": "Priateľský názov pre tento bazén v aplikácii Home Assistant",
+          "target": "Štandardy používané na určenie ideálnych chemických rozsahov",
+          "scan_interval": "Ako často kontrolovať nové hodnoty (minimálne 5 minút)"
         }
       }
     },
     "error": {
-      "invalid_share_url": "Zadaná URL adresa nie je platnou URL adresou zdieľania Pool Math alebo sa nám z nej nepodarilo extrahovať informácie o fonde.",
-      "unknown_error": "Pri spracovaní zdieľanej adresy URL sa vyskytla neočakávaná chyba. Ďalšie podrobnosti nájdete v protokoloch."
+      "invalid_share_url": "Zadaná URL nie je platná URL zdieľať Pool Math alebo sa nám nepodarilo extrahovať informácie o fonde.",
+      "unknown_error": "Pri spracovaní zdieľanej URL sa vyskytla neočakávaná chyba."
     }
   },
   "issues": {
     "config_migration_needed": {
-      "title": "Matematika bazéna: Vyžaduje sa aktualizácia konfigurácie",
+      "title": "Pool Math: Vyžaduje sa aktualizácia konfigurácie",
       "fix_flow": {
         "step": {
           "share_url": {
-            "title": "Aktualizácia konfigurácie matematických údajov fondu",
-            "description": "Vložte svoju URL adresu na zdieľanie aplikácie Pool Math z aplikácie Pool Math. Nájdete ju v časti Nastavenia > Zdieľanie. URL adresa by mala vyzerať takto: https://api.poolmathapp.com/share/XXXXXXX alebo https://troublefreepool.com/mypool/XXXXXXX.",
+            "title": "Aktualizácia konfigurácie Pool Math",
+            "description": "Zadajte URL adresu na zdieľanie aplikácie Pool Math z aplikácie (Nastavenia > Zdieľanie).",
             "data": {
-              "share_url": "URL adresa pre zdieľanie aplikácie Pool Math z aplikácie Pool Math (Nastavenia > Zdieľanie)"
+              "share_url": "Pool Math Share URL"
             }
           }
         },
@@ -56,11 +68,70 @@
           "already_fixed": "Konfigurácia už bola aktualizovaná"
         },
         "error": {
-          "invalid_url": "Zadaná URL adresa nie je platnou URL adresou zdieľania Pool Math.",
-          "api_error": "Nepodarilo sa pripojiť k službe Pool Math. Skontrolujte URL adresu a skúste to znova.",
+          "invalid_url": "Neplatná URL adresa zdieľania Pool Math.",
+          "api_error": "Nepodarilo sa pripojiť k Pool Math službe",
           "missing_data": "Nepodarilo sa extrahovať požadované údaje z odpovede API.",
-          "unknown": "Vyskytla sa neočakávaná chyba. Ďalšie podrobnosti nájdete v protokoloch."
+          "unknown": "Vyskytla sa neočakávaná chyba."
         }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "fc": {
+        "name": "Voľný chlór"
+      },
+      "cc": {
+        "name": "Kombinovaný chlór"
+      },
+      "tc": {
+        "name": "Celkový chlór"
+      },
+      "ph": {
+        "name": "pH"
+      },
+      "ta": {
+        "name": "Celková zásaditosť"
+      },
+      "ch": {
+        "name": "Tvrdosť vápnika"
+      },
+      "cya": {
+        "name": "Kyselina kyanurová"
+      },
+      "salt": {
+        "name": "Soľ"
+      },
+      "bor": {
+        "name": "Borát"
+      },
+      "borate": {
+        "name": "Borát"
+      },
+      "csi": {
+        "name": "Index nasýtenia kalcitom"
+      },
+      "temp": {
+        "name": "Teplota"
+      },
+      "water_temp": {
+        "name": "Teplota vody"
+      },
+      "pressure": {
+        "name": "Tlak filtra"
+      },
+      "flow_rate": {
+        "name": "Prietok"
+      },
+      "swg_cell_percent": {
+        "name": "Percento buniek SWG"
+      }
+    }
+  },
+  "selector": {
+    "target": {
+      "options": {
+        "tfp": "Bezproblémové bazény"
       }
     }
   }
